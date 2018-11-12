@@ -2,7 +2,7 @@
     "after-scripts": [
         "./scripts/python_setup.sh",
         "./scripts/vim_setup.sh",
-	"./scripts/node_setup.sh",
+        "./scripts/node_setup.sh",
         "brew linkapps"
     ],
     "casks": [
@@ -19,7 +19,14 @@
         "docker",
         "minikube",
         "scroll-reverser",
-        "typora"
+        "typora",
+        "dropbox",
+	"airdroid",
+	"clip-studio-paint",
+	"diffmerge",
+	"filezilla",
+	"steam",
+	"bettertouchtool"
     ],
     "formulas": [
         "bash",
@@ -34,12 +41,14 @@
         "node",
         "pyenv",
         "git",
+	"mackup",
         "wget"
     ],
     "symlinks": {
         "bash/.*": "~",
         "editorconfig/.*": "~",
         "git/.*": "~",
+        "mackup/.*": "~",
         "vim/.*": "~"
     },
     "taps": []
