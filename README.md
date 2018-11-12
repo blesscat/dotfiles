@@ -4,7 +4,7 @@ Run this:
 
 ```sh
 pip install -U cider
-git clone --recursive https://github.com/msanders/dotfiles ~/.cider
+git clone --recursive https://github.com/blesscat/dotfiles.git ~/.cider
 cider restore
 ```
 
