@@ -1,260 +1,152 @@
-set encoding=utf-8
+let mapleader = ' '
 
-" Vim plugins expect a POSIX-compliant shell
-if &shell !~ '/sh$'
-    set shell=/bin/sh
+call plug#begin('~/.vim/plugged')
+" Plug '~/.vim/plugged/before'
+
+Plug 'vim-scripts/BufOnly.vim'
+Plug 'ekalinin/Dockerfile.vim', { 'for': 'dockerfile' }
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer --rust-completer' }
+Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+Plug 'wincent/ferret'
+
+" Asynchronous linting/fixing for Vim and Language Server Protocol (LSP) integration
+Plug 'w0rp/ale'
+" Plug 'skywind3000/asyncrun.vim'
+Plug 'jiangmiao/auto-pairs'
+Plug 'rhysd/devdocs.vim'
+Plug 'editorconfig/editorconfig-vim'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' } | Plug 'junegunn/fzf.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'godlygeek/tabular'
+Plug 'majutsushi/tagbar'
+Plug 'SirVer/ultisnips'
+Plug 'PeterRincker/vim-argumentative'
+Plug 'tpope/vim-abolish'
+Plug 'alvan/vim-closetag', { 'for': ['html', 'javascript,jsx', 'xhtml'] }
+Plug 'hail2u/vim-css3-syntax', { 'for': 'css' }
+Plug 'easymotion/vim-easymotion'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'moll/vim-node', { 'for': 'jsx' }
+Plug 'tpope/vim-obsession', { 'on':  'Obsession' }
+Plug 'sheerun/vim-polyglot'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rhubarb'
+
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+
+Plug 'tpope/vim-sensible'
+" Plug 'vitalk/vim-shebang'
+" Plug 'tpope/vim-sleuth'
+" Plug 'honza/vim-snippets'
+Plug 'tpope/vim-surround'
+" Plug 'pedrohdz/vim-yaml-folds', { 'for': 'yaml' }
+
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'drewtempelmeyer/palenight.vim'
+Plug 'itchyny/lightline.vim'
+
+Plug 'lilydjwg/colorizer'
+
+" Plug 'altercation/vim-colors-solarized'
+" Plug 'flazz/vim-colorschemes'
+
+Plug 'ervandew/supertab'
+
+Plug 'posva/vim-vue'
+Plug 'terryma/vim-multiple-cursors'
+
+" Plug '~/.vim/plugged/after'
+call plug#end()
+
+" make YCM compatible with UltiSnips (using supertab)
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:SuperTabDefaultCompletionType = '<C-n>'
+
+" better key bindings for UltiSnipsExpandTrigger
+let g:UltiSnipsExpandTrigger = "<tab>"
+let g:UltiSnipsJumpForwardTrigger = "<tab>"
+let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_guide_size = 1
+
+let g:lightline = { 'colorscheme': 'palenight' }
+
+" gutentags搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归 "
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+
+" 所生成的数据文件的名称 "
+let g:gutentags_ctags_tagfile = '.tags'
+
+" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录 "
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+" 检测 ~/.cache/tags 不存在就新建 "
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
 endif
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+" 配置 ctags 的参数 "
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+" let g:indent_guides_auto_colors = 0
 
-Plugin 'ElmCast/elm-vim'
-Plugin 'MarcWeber/vim-addon-mw-utils'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'cfdrake/vim-carthage'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'dag/vim-fish'
-Plugin 'editorconfig/editorconfig-vim'
-Plugin 'garbas/vim-snipmate'
-Plugin 'gmarik/Vundle.vim'
-Plugin 'hecal3/vim-leader-guide'
-Plugin 'honza/vim-snippets'
-Plugin 'jimmay5469/vim-spacemacs'
-Plugin 'jnurmine/Zenburn'
-Plugin 'junegunn/fzf.vim'
-Plugin 'keith/investigate.vim'
-Plugin 'keithbsmiley/swift.vim'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'rust-lang/rust.vim'
-Plugin 'scrooloose/nerdtree'
-Plugin 'shemerey/vim-peepopen'
-Plugin 'szw/vim-maximizer'
-Plugin 'thirtythreeforty/lessspace.vim'
-Plugin 'tomtom/tlib_vim'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-repeat'
-Plugin 'tpope/vim-rsi'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-unimpaired'
-Plugin 'vim-syntastic/syntastic'
+if has("gui_running")
+    set go=aAce
+    set transparency=10
+    set guifont=Monaco:h14
+    set showtabline=2
+    set columns=190
+    set lines=46
 
-let g:ctrlp_map = ''
-let g:rust_recommended_style = 1
-
-call vundle#end()
-filetype plugin indent on
-
-" ==============================
-" Settings
-" ==============================
-
-" Autocompletion
-set wildignore+=*.o,*.obj,*.pyc,*.DS_Store,*.db,*.git
-set wildmenu
-
-if exists('+wildignorecase')
-    set wildignorecase
+    noremap <D-1> :tabn 1<CR>
+    noremap <D-2> :tabn 2<CR>
+    noremap <D-3> :tabn 3<CR>
+    noremap <D-4> :tabn 4<CR>
+    noremap <D-5> :tabn 5<CR>
+    noremap <D-6> :tabn 6<CR>
+    noremap <D-7> :tabn 7<CR>
+    noremap <D-8> :tabn 8<CR>
+    noremap <D-9> :tabn 9<CR>
+    " Command-0 goes to the last tab
+    noremap <D-0> :tablast<CR>
 endif
 
-" Backup
-set nobackup
-set noswapfile
-set nowritebackup
-set undodir=/tmp
+" if (has("termguicolors"))
+"   set termguicolors
+" endif
+
 set undofile
+set backup
 
-" Buffers
-set autoread
-set hidden
+set undodir=~/.vim/.undo//
+set backupdir=~/.vim/.backup//
+set directory=~/.vim/.swp//
 
-" Display
-set rulerformat=%l:%c ruler
-set shortmess=atI
-set showcmd
-set titlestring=%f title
-
-" Editing
-set backspace=indent,eol,start
-set nofoldenable
-set pastetoggle=<f2>
-set shiftwidth=4
-set tabstop=4
-set mouse=a
-
-" Search
-set gdefault
-set hlsearch
 set ignorecase
 set smartcase
 
-" Mac options
-if has('mac')
-    function! s:PBCopy()
-        let old = @"
-        normal! gvy
-        call system('pbcopy', @")
-        let @" = old
-    endfunction
+set autoindent
+set number
+set incsearch
+set hlsearch
 
-    vnoremap <silent> Y :<c-u>call<SID>PBCopy()<cr>
-endif
+" syntax enable
+set background=dark
+colorscheme palenight
 
-" GUI options
-if has('gui_running')
-    set columns=101 lines=38 " Default window size
-    set guicursor=a:blinkon0 " Disable blinking cursor
-    set guifont=Menlo\ Regular:h16
-    set guioptions=hae
-endif
+" autocmd vimenter * NERDTree
+autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+autocmd FileType vue syntax sync fromstart
 
-if has('gui_macvim')
-    set macmeta
-endif
+nmap <leader>l :lopen<CR>
+nmap <leader>n :NERDTreeToggle<CR>
+nmap <leader>f :GFiles<CR>
+nmap <leader>g :Rg<CR>
 
-silent! colorscheme zenburn
-
-" Syntax
-set t_Co=16
-if !&diff
-    syntax on
-endif
-
-highlight Normal ctermbg=black guibg=#1f1f1f
-
-" ==============================
-" Macros
-" ==============================
-
-" Typos
-iabbrev !+ !=
-iabbrev ~? ~/
-
-" Escape with fd
-cnoremap fd <c-c>
-inoremap fd <esc>
-vnoremap fd <esc>
-
-" Enter cmdline mode with ;
-noremap ; :
-noremap \ ;
-
-" Paste yanked text (as opposed to cut text)
-noremap gp "0p
-noremap gP "0P
-
-" Make Y to y as D is to d and C is to c
-nnoremap Y y$
-
-let mapleader = "\<space>"
-nnoremap <c-w>D :lcd %:p:h<cr>
-nnoremap j gj
-nnoremap k gk
-
-" Shortcut for switching to/from header files.
-function! s:AlternateFile(...)
-    for extension in a:000
-        let path = expand('%:p:r').'.'.extension
-        if filereadable(path) || bufexists(path)
-            execute 'e'.fnameescape(path)
-            return
-        endif
-    endfor
-
-    echohl ErrorMsg
-    let ext = (a:0 > 1) ? '{'.join(a:000, ',').'}' : a:1
-    echo expand('%:p:r').'.'.ext.' not found.'
-    echohl None
-endfunction
-
-" * and # should search for selected text when used in visual mode.
-function! s:VisualSearch()
-    let old = @"
-    normal! gvy
-    let @/ = '\V'.substitute(escape(@", '\'), '\n', '\\n', 'g')
-    let @" = old
-endfunction
-
-" Shortcut for mimicking <c-l> from Emacs.
-function! s:Redraw()
-    let ln = line('.')
-    let top = line('w0')
-    let bottom = line('w$')
-    let middle = top + (bottom - top) / 2
-    if ln == middle
-        normal! zt
-    elseif ln == top
-        normal! zb
-    else
-        normal! zz
-    end
-endfunction
-
-" Shortcut for mimicking <c-k> from Emacs.
-function! s:KillLine()
-    let [before, after] = s:SplitLineTextAtCursor()
-    if len(after) == 0
-        normal! J
-    else
-        call setline(line('.'), before)
-    endif
-    return ''
-endfunction
-
-function! s:SplitLineTextAtCursor()
-    let text = getline(line('.'))
-    let before = (col('.') > 1) ? text[: col('.') - 2] : ''
-    let after  = text[col('.') - 1 :]
-    return [before, after]
-endfunction
-
-nnoremap <silent> <c-l> :call<SID>Redraw()<cr>
-xnoremap * :<c-u>call<SID>VisualSearch()<cr>/<cr>
-xnoremap # :<c-u>call<SID>VisualSearch()<cr>?<cr>
-
-noremap <c-a> <home>
-noremap <c-e> <end>
-noremap + <c-a>
-noremap - <c-x>
-cnoremap <c-k> <c-\>estrpart(getcmdline(), 0, getcmdpos()-1)<cr>
-
-" Emacs bindings in insert mode
-inoremap <c-/> <c-o>u
-inoremap <c-k> <c-o>:call<SID>KillLine()<cr>
-inoremap <c-l> <c-o>:call<SID>Redraw()<cr>
-inoremap <expr> <down> pumvisible() ? '<c-n>' : '<c-o>j'
-inoremap <expr> <up> pumvisible() ? '<c-p>' : '<c-o>k'
-
-" Terminal registers <c-/> as <c-_> https://stackoverflow.com/a/9051932
-imap <c-_> <c-/>
-
-" Visual mode
-xnoremap v <esc>
-xmap s S
-
-" ==============================
-" Autocommands
-" ==============================
-
-augroup rccommands
-autocmd!
-
-autocmd BufRead,BufNewFile *.h,*.m set filetype=objc
-autocmd BufRead,BufNewFile *.json set filetype=javascript
-autocmd BufRead,BufNewFile *.md set filetype=markdown
-
-autocmd BufRead,BufNewFile *.h nnoremap <buffer> <silent> <leader>fa :call<SID>AlternateFile('c', 'm', 'cpp', 'cc')<cr>
-autocmd BufRead,BufNewFile *.{c\|m\|mm\|cpp\|cc} nnoremap <buffer> <silent> <leader>fa :call<SID>AlternateFile('h')<cr>
-autocmd FileType c,cpp,objc,rust inoremap <buffer> <silent> ;$ <c-o>$;
-autocmd FileType c,cpp,objc,rust inoremap <buffer> ;; ;
-autocmd FileType css,html,objc setlocal nowrap
-autocmd FileType elm,haskell,fish,html,javascript,objc,rust,sh,swift,typescript,vim setlocal softtabstop=4
-autocmd FileType elm,fish,haskell,html,javascript,objc,pyrex,python,ruby,sh,swift,typescript,vim setlocal expandtab
-autocmd FileType elm,fish,haskell,python,pyrex,ruby,sh,scheme setlocal textwidth=80 colorcolumn=81
-autocmd FileType help,vim let&l:keywordprg=':help'
-autocmd FileType javascript,rust,typescript setlocal textwidth=100 colorcolumn=101
-autocmd FileType javascript,typescript setlocal indentexpr=cindent
-autocmd FileType ruby setlocal tabstop=2 shiftwidth=2
-autocmd FileType swift setlocal textwidth=120 colorcolumn=121
-
-augroup END

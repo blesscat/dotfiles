@@ -1,23 +1,13 @@
-# If not running interactively, don't do anything
-if [ -z "$PS1" ]; then
-    return;
-fi
-
-export PS1='\u:\W$ '
+# Alias
+alias vi=/usr/local/bin/vim
+alias la="ls -la"
+alias ll="ls -l"
+alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
 
 # Colors
-export CLICOLOR=1
-export LANG=en_US.UTF-8
-export LANGUAGE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
 export GREP_OPTIONS='--color=auto'
-export LSCOLORS=cxfxexexexegedabagcxcx
-
-# History
-export HISTCONTROL=erasedups,ignorespace
-export HISTSIZE=1000
-
-# Make bash check its window size after a process completes
-shopt -s checkwinsize
-shopt -s histappend
+export LS_OPTIONS='--color=auto'
+export CLICOLOR='true'
+export LSCOLORS="gxfxcxdxcxegedabagacad"
+export PATH="$HOME/.yarn/bin:$PATH"
 

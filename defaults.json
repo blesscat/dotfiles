@@ -1,11 +1,21 @@
 {
     "NSGlobalDomain": {
+	"AppleInterfaceStyle": "Dark",
+	"AppleShowAllExtensions": true,
         "ApplePressAndHoldEnabled": false,
+	"InitialKeyRepeat": 12,
         "KeyRepeat": 1,
+	"com.apple.trackpad.scaling": 1.5,
         "NSScrollAnimationEnabled": false
     },
     "com.apple.notificationcenterui": {
         "bannerTime": 3
+    },
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad": {
+        "Clicking": true,
+        "TrackpadRightClick": true,
+        "TrackpadThreeFingerDrag": true,
+        "TrackpadThreeFingerVertSwipeGesture": 0
     },
     "com.apple.Safari": {
         "FindOnPageMatchesWordStartsOnly": false
