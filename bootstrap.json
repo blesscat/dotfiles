@@ -3,7 +3,7 @@
         "./scripts/python_setup.sh",
         "./scripts/vim_setup.sh",
         "./scripts/node_setup.sh",
-        "brew linkapps"
+	"mackup restore"
     ],
     "casks": [
         "google-chrome",
@@ -26,10 +26,12 @@
 	"diffmerge",
 	"filezilla",
 	"steam",
-	"bettertouchtool"
+	"bettertouchtool",
+	"sourcetree"
     ],
     "formulas": [
         "bash",
+	"zlib",
         "openssl",
         "heroku",
         "cmake",
@@ -40,6 +42,7 @@
         "fzf",
         "node",
         "pyenv",
+	"pyenv-virtualenv",
         "git",
 	"mackup",
         "wget"

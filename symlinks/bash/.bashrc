@@ -1,5 +1,5 @@
 # Alias
-alias vi=/usr/local/bin/vim
+alias vi=/usr/bin/vim
 alias la="ls -la"
 alias ll="ls -l"
 alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
@@ -11,3 +11,5 @@ export CLICOLOR='true'
 export LSCOLORS="gxfxcxdxcxegedabagacad"
 export PATH="$HOME/.yarn/bin:$PATH"
 
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
