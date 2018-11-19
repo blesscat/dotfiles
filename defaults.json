@@ -11,7 +11,7 @@
     "com.apple.notificationcenterui": {
         "bannerTime": 3
     },
-    "com.apple.driver.AppleBluetoothMultitouch.trackpad": {
+    "com.apple.AppleMultitouchTrackpad": {
         "Clicking": true,
         "TrackpadRightClick": true,
         "TrackpadThreeFingerDrag": true,
