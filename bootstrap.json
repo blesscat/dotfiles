@@ -42,7 +42,7 @@
         "fzf",
         "node",
         "pyenv",
-	"pyenv-virtualenv",
+	"pipenv",
         "git",
 	"mackup",
         "wget"
