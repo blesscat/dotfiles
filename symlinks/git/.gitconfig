@@ -12,3 +12,5 @@
 	email = blesscat@gmail.com
 [http]
 	sslVerify = false
+[commit]
+	template = /Users/blesscat/.stCommitMsg

@@ -3,7 +3,7 @@
         "./scripts/python_setup.sh",
         "./scripts/vim_setup.sh",
         "./scripts/node_setup.sh",
-	"mackup restore"
+        "mackup restore"
     ],
     "casks": [
         "google-chrome",
@@ -21,17 +21,17 @@
         "scroll-reverser",
         "typora",
         "dropbox",
-	"airdroid",
-	"clip-studio-paint",
-	"diffmerge",
-	"filezilla",
-	"steam",
-	"bettertouchtool",
-	"sourcetree"
+        "airdroid",
+        "clip-studio-paint",
+        "diffmerge",
+        "filezilla",
+        "steam",
+        "bettertouchtool",
+        "sourcetree"
     ],
     "formulas": [
         "bash",
-	"zlib",
+        "zlib",
         "openssl",
         "heroku",
         "cmake",
@@ -42,9 +42,9 @@
         "fzf",
         "node",
         "pyenv",
-	"pipenv",
+        "pipenv",
         "git",
-	"mackup",
+        "mackup",
         "wget"
     ],
     "symlinks": {
@@ -52,7 +52,8 @@
         "editorconfig/.*": "~",
         "git/.*": "~",
         "mackup/.*": "~",
-        "vim/.*": "~"
+        "vim/.*": "~",
+        "vue/.*": "~"
     },
     "taps": []
 }
