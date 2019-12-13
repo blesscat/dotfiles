@@ -13,7 +13,7 @@ install_dependencies() {
     sudo pip install -U pip setuptools flake8 setuptools-rust autoflake hy yapf virtualenv http-prompt
 }
 
-pyenv global 2.7.15
-install_dependencies
-pyenv global 3.6.5
-install_dependencies
+# pyenv global 2.7.15
+# install_dependencies
+# pyenv global 3.6.5
+# install_dependencies

@@ -58,8 +58,12 @@ Plug 'ervandew/supertab'
 
 Plug 'posva/vim-vue'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'scrooloose/syntastic'
 
+Plug 'codeindulgence/vim-tig'
 " Plug '~/.vim/plugged/after'
+"
+" Plug 'zxqfl/tabnine-vim'
 call plug#end()
 
 " make YCM compatible with UltiSnips (using supertab)
@@ -98,13 +102,18 @@ let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 " let g:indent_guides_auto_colors = 0
 
+let g:syntastic_javascript_checkers = ['eslint']
+
 if has("gui_running")
     set go=aAce
     set transparency=10
-    set guifont=Monaco:h14
+    " set guifont=Monaco:h14
     set showtabline=2
-    set columns=190
-    set lines=46
+    set columns=170
+    set lines=53
+
+    set macligatures
+    set guifont=Fira\ Code\ Medium:h14
 
     noremap <D-1> :tabn 1<CR>
     noremap <D-2> :tabn 2<CR>
@@ -130,7 +139,7 @@ set undodir=~/.vim/.undo//
 set backupdir=~/.vim/.backup//
 set directory=~/.vim/.swp//
 
-set ignorecase
+" set ignorecase
 set smartcase
 
 set autoindent
@@ -144,7 +153,11 @@ colorscheme palenight
 
 " autocmd vimenter * NERDTree
 autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+
+" vim-vue
+let g:vue_disable_pre_processors=1
 autocmd FileType vue syntax sync fromstart
+" autocmd BufRead,BufNewFile *.vue setlocal filetype=vue.html.javascript.css.less.pug
 
 nmap <leader>l :lopen<CR>
 nmap <leader>n :NERDTreeToggle<CR>

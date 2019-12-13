@@ -18,5 +18,7 @@
       "vuex": true,
       "cssPreprocessor": "sass"
     }
-  }
+  },
+  "latestVersion": "4.0.5",
+  "lastChecked": 1571887487197
 }

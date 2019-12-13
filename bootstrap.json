@@ -14,20 +14,15 @@
         "pacifist",
         "macvim",
         "daisydisk",
-        "duet",
         "shrinkit",
         "docker",
         "minikube",
         "scroll-reverser",
         "typora",
         "dropbox",
-        "airdroid",
         "clip-studio-paint",
         "diffmerge",
-        "filezilla",
-        "steam",
-        "bettertouchtool",
-        "sourcetree"
+        "bettertouchtool"
     ],
     "formulas": [
         "bash",
@@ -41,11 +36,11 @@
         "ripgrep",
         "fzf",
         "node",
-        "pyenv",
         "pipenv",
         "git",
         "mackup",
-        "wget"
+        "wget",
+        "tig"
     ],
     "symlinks": {
         "bash/.*": "~",
@@ -53,7 +48,8 @@
         "git/.*": "~",
         "mackup/.*": "~",
         "vim/.*": "~",
-        "vue/.*": "~"
+        "vue/.*": "~",
+        "tig/.*": "~"
     },
     "taps": []
 }

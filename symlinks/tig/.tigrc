@@ -1,0 +1,16 @@
+bind generic g none
+bind generic <Space> none
+bind generic <Space>g view-grep
+bind generic gg move-first-line
+bind generic <Ctrl-f> move-page-down
+bind generic <Ctrl-b> move-page-up
+
+bind main Ta >sh -c "git checkout %(commit) && git tag %(prompt Enter tag name: )"
+bind main Td ?git tag --delete %(tag)
+bind main H @git checkout %(commit)
+
+bind refs Td ?git tag --delete %(tag)
+bind refs B @sh -c "git checkout %(branch) && git checkout -b %(prompt Enter new branch: )"
+bind refs xl ?git branch --delete %(branch)
+bind refs xr ?git push %(remote) --delete %(branch)
+bind refs xt !sh -c "echo %(repo:head) %(repo:remote)"
