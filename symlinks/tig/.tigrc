@@ -6,11 +6,24 @@ bind generic <Ctrl-f> move-page-down
 bind generic <Ctrl-b> move-page-up
 
 bind main Ta >sh -c "git checkout %(commit) && git tag %(prompt Enter tag name: )"
-bind main Td ?git tag --delete %(tag)
+bind main Td ?sh -c "git tag --delete %(tag) && git push --delete origin %(tag)"
+bind main Tu !git push --tags
 bind main H @git checkout %(commit)
 
-bind refs Td ?git tag --delete %(tag)
+bind refs Td ?sh -c "git tag --delete %(tag) && git push --delete origin %(tag)"
+bind refs Tu !git push --tags
+bind refs M ?git merge %(branch)
 bind refs B @sh -c "git checkout %(branch) && git checkout -b %(prompt Enter new branch: )"
 bind refs xl ?git branch --delete %(branch)
 bind refs xr ?git push %(remote) --delete %(branch)
 bind refs xt !sh -c "echo %(repo:head) %(repo:remote)"
+bind refs Gpush !git push --set-upstream origin %(branch)
+bind refs Gpull !git pull
+bind refs u !git remote update --prune
+
+bind diff H !sh -c "tig \"$(git rev-parse --show-toplevel)/%(file)\""
+
+bind status H !sh -c "tig \"$(git rev-parse --show-toplevel)/%(file)\""
+bind status - status-update
+
+bind stage - status-update

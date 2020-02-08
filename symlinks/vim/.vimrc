@@ -139,6 +139,12 @@ set undodir=~/.vim/.undo//
 set backupdir=~/.vim/.backup//
 set directory=~/.vim/.swp//
 
+function! GuiTabLabel()
+    return bufname(winbufnr(1))
+endfunction
+
+set guitablabel=%{GuiTabLabel()}
+
 " set ignorecase
 set smartcase
 
