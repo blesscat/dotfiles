@@ -11,6 +11,7 @@ alias vi=/usr/bin/vim
 alias la="ls -la"
 alias ll="ls -l"
 alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
+eval "$(thefuck --alias)"
 
 # Colors
 export GREP_OPTIONS='--color=auto'

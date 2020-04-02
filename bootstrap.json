@@ -1,6 +1,6 @@
 {
     "after-scripts": [
-        "./scripts/python_setup.sh",
+        "./scripts/brew_setup.sh",
         "./scripts/vim_setup.sh",
         "./scripts/node_setup.sh",
         "mackup restore"
@@ -16,7 +16,6 @@
         "daisydisk",
         "shrinkit",
         "docker",
-        "minikube",
         "scroll-reverser",
         "typora",
         "dropbox",
@@ -28,7 +27,6 @@
         "bash",
         "zlib",
         "openssl",
-        "heroku",
         "cmake",
         "ctags",
         "ssh-copy-id",
@@ -40,7 +38,8 @@
         "git",
         "mackup",
         "wget",
-        "tig"
+        "tig",
+        "thefuck"
     ],
     "symlinks": {
         "bash/.*": "~",
