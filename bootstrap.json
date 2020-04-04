@@ -39,7 +39,8 @@
         "mackup",
         "wget",
         "tig",
-        "thefuck"
+        "thefuck",
+        "neovim"
     ],
     "symlinks": {
         "bash/.*": "~",
