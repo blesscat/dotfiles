@@ -174,3 +174,5 @@ nmap <leader>n :NERDTreeToggle<CR>
 nmap <leader>f :GFiles<CR>
 nmap <leader>g :Rg<CR>
 
+inoremap jk <esc>
+

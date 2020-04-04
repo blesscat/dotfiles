@@ -10,6 +10,8 @@ export LANG=en_US.UTF-8
 alias vi=/usr/bin/vim
 alias la="ls -la"
 alias ll="ls -l"
+alias vi="nvim"
+alias vim="nvim"
 alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
 eval "$(thefuck --alias)"
 
