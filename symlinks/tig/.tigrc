@@ -5,7 +5,7 @@ bind generic gg move-first-line
 bind generic <Ctrl-f> move-page-down
 bind generic <Ctrl-b> move-page-up
 
-bind main Ta >sh -c "git checkout %(commit) && git tag %(prompt Enter tag name: )"
+bind main Ta ?sh -c "git checkout %(commit) && git tag %(prompt Enter tag name: )"
 bind main Td ?sh -c "git tag --delete %(tag) && git push --delete origin %(tag)"
 bind main Tu !git push --tags
 bind main H @git checkout %(commit)
