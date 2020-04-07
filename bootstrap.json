@@ -51,7 +51,7 @@
         "vim/.*": "~",
         "vue/.*": "~",
         "tig/.*": "~",
-        "config/nvim/.*": "~/.config/nvim"
+        ".config/nvim/.*": "~/.config/nvim"
     },
     "taps": []
 }

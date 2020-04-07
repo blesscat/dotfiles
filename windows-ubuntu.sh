@@ -15,7 +15,8 @@ sudo apt install -y mosh
 sudo apt install -y jq
 sudo apt install -y cmake
 sudo apt install -y tig
-# sudo apt install -y python3-dev
+sudo apt install -y python3-dev
+sudo apt install -y build-essential
 
 sudo apt install -y neovim
 # vim-plug
@@ -29,5 +30,6 @@ curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 nvim -c "PlugInstall" -c q -c q
-cd ~/.vim/plugged/YouCompleteMe
-./install.py --clang-completer
+bash -c "cd ~/.vim/plugged/YouCompleteMe && ./install.py --clang-completer"
+
+
