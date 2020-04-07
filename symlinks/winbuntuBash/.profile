@@ -25,3 +25,7 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
+
+if [ -d "/mnt/c/Windows/System32" ] ; then
+    PATH="/mnt/c/Windows/System32:$PATH"
+fi

@@ -1,0 +1,20 @@
+{
+  "after-scripts": [
+    "./scripts/nvim_setup.sh",
+    "./scripts/sshd_setup.sh",
+    "./scripts/node_setup.sh"
+  ],
+  "packages": [
+    "openssh-server",
+    "cmake",
+    "ctags",
+    "mosh",
+    "jq",
+    "tig",
+    "python3-dev"
+  ],
+  "//symlinks": "using same symlinks which are at ../bootstrap.json",
+  "symlinks": {
+    "winbuntuBash/.*": "~"
+  }
+}
