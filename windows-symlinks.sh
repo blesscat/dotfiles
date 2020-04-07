@@ -4,7 +4,7 @@ function genSymlinks () {
 	local SYMLINKS=$1
 	local TARGET_PATH=$2
 
-	# retrun if symlinks is base
+	# bash config is difference between macOS and ubuntu.
 	[[ $SYMLINKS =~ bash ]] && return
 
 	for FILE_PATH in symlinks/${SYMLINKS} ; do
@@ -18,9 +18,9 @@ function genSymlinks () {
 	done
 }
 
-cat ./bootstrap.json | jq -M -r '.symlinks | keys[] as $k | $k, .[$k]' |
+# cat ./bootstrap.json | jq -M -r '.symlinks | keys[] as $k | $k, .[$k]' |
+# while read -r key; read -r val; do
+#    genSymlinks $key $val
+# done
 
-while read -r key; read -r val; do
-   genSymlinks $key $val
-done
-
+[[ -f symlinks/.config/nvim/init.vim ]] && echo found
