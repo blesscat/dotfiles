@@ -8,3 +8,5 @@ if [ ! -d "$VIM_DIR/autoload/plug.vim" ]; then
 fi
 
 vim +PlugInstall +qall
+
+mkdir -p ~/.vim/.undo && mkdir -p ~/.vim/.backup && mkdir -p ~/.vim/.swp

@@ -40,7 +40,8 @@
         "wget",
         "tig",
         "thefuck",
-        "neovim"
+        "neovim",
+        "mosh"
     ],
     "symlinks": {
         "bash/.*": "~",
@@ -49,7 +50,8 @@
         "mackup/.*": "~",
         "vim/.*": "~",
         "vue/.*": "~",
-        "tig/.*": "~"
+        "tig/.*": "~",
+        "config/nvim/.*": "~/.config/nvim"
     },
     "taps": []
 }
