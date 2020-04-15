@@ -9,7 +9,6 @@
     "cmake",
     "ctags",
     "mosh",
-    "jq",
     "tig",
     "python3-dev"
   ],

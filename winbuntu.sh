@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bash -c "cd winbuntu && ./install.sh"
+bash -c "cd winbuntu && source install.sh"
