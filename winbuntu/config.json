@@ -1,8 +1,8 @@
 {
   "after-scripts": [
-    "./scripts/nvim_setup.sh",
     "./scripts/sshd_setup.sh",
-    "./scripts/node_setup.sh"
+    "./scripts/node_setup.sh",
+    "./scripts/nvim_setup.sh"
   ],
   "packages": [
     "openssh-server",
@@ -11,6 +11,10 @@
     "mosh",
     "tig",
     "python3-dev"
+  ],
+  "formulas": [
+    "gcc",
+    "ripgrep"
   ],
   "//symlinks": "using same symlinks which are at ../bootstrap.json",
   "symlinks": {
