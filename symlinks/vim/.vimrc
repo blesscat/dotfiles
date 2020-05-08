@@ -67,8 +67,6 @@ Plug 'codeindulgence/vim-tig'
 call plug#end()
 
 " ale config
-let g:ale_python_flake8_executable = 'flake8'
-let g:ale_python_flake8_options = '--ignore=E501' 
 
 " make YCM compatible with UltiSnips (using supertab)
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
@@ -107,6 +105,11 @@ let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 " let g:indent_guides_auto_colors = 0
 
 let g:syntastic_javascript_checkers = ['eslint']
+
+let g:syntastic_python_checker= ["flake8"]
+let g:syntastic_python_checker_args="--ignore=E501,W601"
+
+let g:ale_python_flake8_options = '--ignore=E501' 
 
 if has("gui_running")
     set go=aAce
