@@ -29,3 +29,5 @@ fi
 if [ -d "/mnt/c/Windows/System32" ] ; then
     PATH="/mnt/c/Windows/System32:$PATH"
 fi
+
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
