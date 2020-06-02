@@ -109,7 +109,7 @@ let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_python_checker= ["flake8"]
 let g:syntastic_python_checker_args="--ignore=E501,W601"
 
-let g:ale_python_flake8_options = '--ignore=E501' 
+" let g:ale_python_flake8_options = '--ignore=E501' 
 
 if has("gui_running")
     set go=aAce

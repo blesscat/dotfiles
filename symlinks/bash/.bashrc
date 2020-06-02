@@ -14,6 +14,7 @@ alias ll="ls -l"
 alias vi="nvim"
 alias vim="nvim"
 alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
+alias clearswp="rm ~/.vim/.swp/*.swp"
 eval "$(thefuck --alias)"
 
 # Colors
