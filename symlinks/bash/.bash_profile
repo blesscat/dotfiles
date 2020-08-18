@@ -3,8 +3,8 @@
 export PATH="$HOME/bin:$PATH"
 
 # pyenv
-# export PYENV_ROOT="$HOME/.pyenv"
-# export PATH="$PYENV_ROOT/bin:$PATH"
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
 
 #pipenv
 export PIPENV_VENV_IN_PROJECT=1
@@ -26,3 +26,7 @@ export CPPFLAGS="-I/usr/local/opt/ruby/include"
 export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
 
 export PATH="/usr/local/opt/sphinx-doc/bin:$PATH"
+
+# flutter
+export PATH="$HOME/doc/flutter/bin:$PATH"
+export PATH=/usr/local/mysql/bin:$PATH

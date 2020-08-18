@@ -8,10 +8,10 @@ Plug 'ekalinin/Dockerfile.vim', { 'for': 'dockerfile' }
 Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer --rust-completer' }
 Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
 Plug 'wincent/ferret'
+Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
 
 " Asynchronous linting/fixing for Vim and Language Server Protocol (LSP) integration
 Plug 'w0rp/ale'
-" Plug 'skywind3000/asyncrun.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'rhysd/devdocs.vim'
 Plug 'editorconfig/editorconfig-vim'
@@ -36,11 +36,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
 Plug 'tpope/vim-sensible'
-" Plug 'vitalk/vim-shebang'
-" Plug 'tpope/vim-sleuth'
-" Plug 'honza/vim-snippets'
 Plug 'tpope/vim-surround'
-" Plug 'pedrohdz/vim-yaml-folds', { 'for': 'yaml' }
 
 Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -51,9 +47,6 @@ Plug 'itchyny/lightline.vim'
 
 Plug 'lilydjwg/colorizer'
 
-" Plug 'altercation/vim-colors-solarized'
-" Plug 'flazz/vim-colorschemes'
-
 Plug 'ervandew/supertab'
 
 Plug 'posva/vim-vue'
@@ -61,9 +54,14 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'scrooloose/syntastic'
 
 Plug 'codeindulgence/vim-tig'
-" Plug '~/.vim/plugged/after'
-"
-" Plug 'zxqfl/tabnine-vim'
+
+Plug 'dart-lang/dart-vim-plugin'
+Plug 'thosakwe/vim-flutter'
+Plug 'natebosch/vim-lsc'
+Plug 'natebosch/vim-lsc-dart'
+
+Plug 'leafgarland/typescript-vim'
+
 call plug#end()
 
 " ale config
@@ -110,6 +108,7 @@ let g:syntastic_python_checker= ["flake8"]
 let g:syntastic_python_checker_args="--ignore=E501,W601"
 
 " let g:ale_python_flake8_options = '--ignore=E501' 
+let g:ycm_path_to_python_interpreter = '/usr/local/bin/python3'
 
 if has("gui_running")
     set go=aAce
@@ -138,6 +137,7 @@ endif
 " if (has("termguicolors"))
 "   set termguicolors
 " endif
+"
 
 set undofile
 set backup
@@ -171,10 +171,48 @@ autocmd FileType css set omnifunc=csscomplete#CompleteCSS
 let g:vue_disable_pre_processors=1
 autocmd FileType vue syntax sync fromstart
 " autocmd BufRead,BufNewFile *.vue setlocal filetype=vue.html.javascript.css.less.pug
+"
+
+" vim-lsc
+let g:lsc_auto_map = v:true
+
+" Yggdroot/LeaderF
+  " don't show the help in normal mode
+"let g:Lf_HideHelp = 1
+let g:Lf_UseCache = 0
+let g:Lf_UseVersionControlTool = 0
+let g:Lf_IgnoreCurrentBufferName = 1
+  " popup mode
+let g:Lf_WindowPosition = 'popup'
+let g:Lf_PreviewInPopup = 1
+" let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
+let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
+
+
+noremap <leader>1 1gt
+noremap <leader>2 2gt
+noremap <leader>3 3gt
+noremap <leader>4 4gt
+noremap <leader>5 5gt
+noremap <leader>6 6gt
+noremap <leader>7 7gt
+noremap <leader>8 8gt
+noremap <leader>9 9gt
+noremap <leader>0 :tablast<cr>
 
 nmap <leader>l :lopen<CR>
 nmap <leader>n :NERDTreeToggle<CR>
 nmap <leader>f :GFiles<CR>
-nmap <leader>g :Rg<CR>
+"nmap <leader>g :Rg<CR>
+nmap <leader>g :Leaderf rg<CR>
+
+
+nnoremap <leader>Fa :FlutterRun<cr>
+nnoremap <leader>Fq :FlutterQuit<cr>
+nnoremap <leader>Fr :FlutterHotReload<cr>
+nnoremap <leader>FR :FlutterHotRestart<cr>
+nnoremap <leader>Fd :FlutterVisualDebug<cr>
+nnoremap <leader>Fo :sp __Flutter_Output__<cr>
+nnoremap <leader>FO :tabe __Flutter_Output__<cr>
 
 imap jk <esc>
