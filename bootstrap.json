@@ -2,19 +2,15 @@
     "after-scripts": [
         "./scripts/brew_setup.sh",
         "./scripts/vim_setup.sh",
-        "./scripts/node_setup.sh",
-        "mackup restore"
+        "./scripts/node_setup.sh"
     ],
     "casks": [
         "google-chrome",
         "spectacle",
-        "mplayerx",
         "hex-fiend",
         "imageoptim",
-        "pacifist",
         "macvim",
         "daisydisk",
-        "shrinkit",
         "docker",
         "scroll-reverser",
         "typora",
@@ -36,7 +32,6 @@
         "node",
         "pipenv",
         "git",
-        "mackup",
         "wget",
         "tig",
         "thefuck",
@@ -51,7 +46,8 @@
         "vim/.*": "~",
         "vue/.*": "~",
         "tig/.*": "~",
-        ".config/nvim/.*": "~/.config/nvim"
+        "coc/.*": "~/.vim/",
+        ".config/nvim/.*": "~/.config/nvim/"
     },
     "taps": []
 }

@@ -30,3 +30,9 @@ export PATH="/usr/local/opt/sphinx-doc/bin:$PATH"
 # flutter
 export PATH="$HOME/doc/flutter/bin:$PATH"
 export PATH=/usr/local/mysql/bin:$PATH
+
+# ruby
+export PATH=/usr/local/lib/ruby/gems/2.7.0/bin:$PATH
+
+# denon
+export PATH="$HOME/.deno/bin:$PATH"
