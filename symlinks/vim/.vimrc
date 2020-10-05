@@ -21,6 +21,7 @@ Plug 'itchyny/lightline.vim'
 
 " highlight
 Plug 'pangloss/vim-javascript' "javascript
+Plug 'mxw/vim-jsx'
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'} " python
 
 call plug#end()
@@ -34,7 +35,7 @@ if has("gui_running")
     set lines=53
 
     set macligatures
-    set guifont=Fira\ Code\ Medium:h14
+    set guifont=FiraCode\ Nerd\ font:h14
 
     noremap <D-1> :tabn 1<CR>
     noremap <D-2> :tabn 2<CR>
@@ -82,6 +83,15 @@ let g:lightline = { 'colorscheme': 'palenight' }
 
 let g:indent_guides_enable_on_vim_startup = 1
 let g:indent_guides_guide_size = 1
+
+" Leader F
+let g:Lf_UseCache = 0                                                                      
+let g:Lf_UseVersionControlTool = 0
+let g:Lf_IgnoreCurrentBufferName = 1
+  " popup mode          
+let g:Lf_WindowPosition = 'popup'     
+let g:Lf_PreviewInPopup = 1          
+let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by

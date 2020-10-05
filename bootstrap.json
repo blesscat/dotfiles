@@ -5,6 +5,7 @@
         "./scripts/node_setup.sh"
     ],
     "casks": [
+        "homebrew/cask-fonts/font-fira-code-nerd-font",
         "google-chrome",
         "spectacle",
         "hex-fiend",
@@ -49,5 +50,7 @@
         "coc/.*": "~/.vim/",
         ".config/nvim/.*": "~/.config/nvim/"
     },
-    "taps": []
+    "taps": [
+      "homebrew/cask-fonts"
+    ]
 }
