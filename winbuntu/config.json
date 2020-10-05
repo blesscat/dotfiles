@@ -14,7 +14,8 @@
   ],
   "formulas": [
     "gcc",
-    "ripgrep"
+    "ripgrep",
+    "neovim"
   ],
   "//symlinks": "using same symlinks which are at ../bootstrap.json",
   "symlinks": {
