@@ -2,6 +2,7 @@
   "after-scripts": [
     "./scripts/sshd_setup.sh",
     "./scripts/node_setup.sh",
+    "./scripts/nvim_setup.sh",
     "./scripts/nvim_setup.sh"
   ],
   "packages": [
@@ -10,7 +11,8 @@
     "ctags",
     "mosh",
     "tig",
-    "python3-dev"
+    "python3-dev",
+    "net-tools"
   ],
   "formulas": [
     "gcc",

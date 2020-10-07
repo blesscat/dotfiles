@@ -47,8 +47,8 @@
         "vim/.*": "~",
         "vue/.*": "~",
         "tig/.*": "~",
-        "coc/.*": "~/.vim/",
-        ".config/nvim/.*": "~/.config/nvim/"
+        "coc/*": "~/.vim/",
+        ".config/nvim/*": "~/.config/nvim/"
     },
     "taps": [
       "homebrew/cask-fonts"
