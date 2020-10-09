@@ -124,3 +124,4 @@ fi
 
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[ -f ~/.cider/winbuntu/scripts/bridge.sh ] && sudo ~/.cider/winbuntu/scripts/bridge.sh

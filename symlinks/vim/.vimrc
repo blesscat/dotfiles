@@ -8,6 +8,8 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat' "使.能重複上次
 
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'} "多光標
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' } "模糊搜尋
@@ -22,7 +24,7 @@ Plug 'itchyny/lightline.vim'
 " highlight
 Plug 'pangloss/vim-javascript' "javascript
 Plug 'mxw/vim-jsx'
-Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'} " python
+Plug 'numirias/semshi', {'do': 'vi +UpdateRemotePlugins'} " python
 
 call plug#end()
 
@@ -120,10 +122,10 @@ noremap <leader>0 :tablast<cr>
 
 nmap <leader>l :lopen<CR>
 nmap <leader>n :CocCommand explorer<CR>
-" nmap <leader>f :GFiles<CR>
-nmap <leader>f :CocList gfiles<CR>
-"nmap <leader>g :Rg<CR>
-nmap <leader>g :Leaderf rg<CR>
+nmap <leader>f :GFiles<CR>
+" nmap <leader>f :CocList gfiles<CR>
+nmap <leader>g :Rg<CR>
+" nmap <leader>g :Leaderf rg<CR>
 
 
 nnoremap <leader>Fa :FlutterRun<cr>

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -o errexit -o pipefail -o nounset
 
+python3 -m pip install --user --upgrade pynvim
+
 mkdir -p ~/.vim/.undo && mkdir -p ~/.vim/.backup && mkdir -p ~/.vim/.swp
 NVIM_DIR="$HOME/.local/share/nvim"
 if [ ! -d "$NVIM_DIR/site/autoload/plug.vim" ]; then
