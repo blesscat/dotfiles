@@ -85,9 +85,11 @@ let g:lightline = { 'colorscheme': 'palenight' }
 
 let g:indent_guides_enable_on_vim_startup = 1
 let g:indent_guides_guide_size = 1
-let g:indent_guides_auto_colors = 0
-hi IndentGuidesEven ctermbg = 238
-hi IndentGuidesOdd ctermbg = 236
+if !has('gui_running')
+	let g:indent_guides_auto_colors = 0
+	hi IndentGuidesEven ctermbg = 238
+	hi IndentGuidesOdd ctermbg = 236
+endif
 
 " Leader F
 let g:Lf_UseCache = 0                                                                      
