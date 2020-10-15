@@ -37,7 +37,8 @@
         "tig",
         "thefuck",
         "neovim",
-        "mosh"
+        "mosh",
+        "unzip"
     ],
     "symlinks": {
         "bash/.*": "~",

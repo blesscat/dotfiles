@@ -124,3 +124,5 @@ fi
 
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+export DENO_INSTALL="/home/blesscat/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
