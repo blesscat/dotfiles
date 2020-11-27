@@ -3,7 +3,9 @@
     "./scripts/sshd_setup.sh",
     "./scripts/node_setup.sh",
     "./scripts/nvim_setup.sh",
-    "./scripts/nvim_setup.sh"
+    "./scripts/vim_setup.sh",
+    "./scripts/deno_setup.sh"
+    
   ],
   "packages": [
     "openssh-server",

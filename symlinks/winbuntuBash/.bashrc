@@ -124,4 +124,5 @@ fi
 
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-[ -f ~/.cider/winbuntu/scripts/bridge.sh ] && sudo ~/.cider/winbuntu/scripts/bridge.sh
+export DENO_INSTALL="/home/blesscat/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
