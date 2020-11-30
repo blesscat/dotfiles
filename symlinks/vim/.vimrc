@@ -16,15 +16,19 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh' } "模糊搜尋
 Plug 'brooth/far.vim' " 批次修改
 Plug 'tpope/vim-abolish' "搜尋替換加強版
 Plug 'nathanaelkane/vim-indent-guides' "縮排顯示
+Plug 'wincent/ferret' "多檔案修改
 
 " theme
 Plug 'drewtempelmeyer/palenight.vim'
-Plug 'itchyny/lightline.vim'
+" Plug 'itchyny/lightline.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 
 " highlight
 Plug 'pangloss/vim-javascript' "javascript
 Plug 'mxw/vim-jsx'
-" Plug 'numirias/semshi', {'do': 'vi +UpdateRemotePlugins'} " python
+Plug 'evanleck/vim-svelte', {'branch': 'main'}
+Plug 'iloginow/vim-stylus'
 
 call plug#end()
 
@@ -95,11 +99,16 @@ endif
 let g:Lf_UseCache = 0                                                                      
 let g:Lf_UseVersionControlTool = 0
 let g:Lf_IgnoreCurrentBufferName = 1
-  " popup mode          
+" popup mode          
 let g:Lf_WindowPosition = 'popup'     
 let g:Lf_PreviewInPopup = 1          
 let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 
+" vim-airline
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+
+" =============================================================
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
