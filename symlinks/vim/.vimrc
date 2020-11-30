@@ -24,7 +24,7 @@ Plug 'itchyny/lightline.vim'
 " highlight
 Plug 'pangloss/vim-javascript' "javascript
 Plug 'mxw/vim-jsx'
-Plug 'numirias/semshi', {'do': 'vi +UpdateRemotePlugins'} " python
+" Plug 'numirias/semshi', {'do': 'vi +UpdateRemotePlugins'} " python
 
 call plug#end()
 
