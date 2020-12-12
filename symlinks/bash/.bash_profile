@@ -36,3 +36,6 @@ export PATH=/usr/local/lib/ruby/gems/2.7.0/bin:$PATH
 
 # denon
 export PATH="$HOME/.deno/bin:$PATH"
+
+# server
+export PATH=$HOME/.serve:$PATH

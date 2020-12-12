@@ -28,8 +28,13 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'pangloss/vim-javascript' "javascript
 Plug 'mxw/vim-jsx'
 " Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'} " python
-Plug 'evanleck/vim-svelte', {'branch': 'main'}
+" Plug 'evanleck/vim-svelte', {'branch': 'main'}
+" Plug 'leafOfTree/vim-svelte-plugin'
+
 Plug 'iloginow/vim-stylus'
+
+Plug 'w0rp/ale'
+Plug 'burner/vim-svelte'
 
 call plug#end()
 
@@ -88,8 +93,11 @@ autocmd FileType css set omnifunc=csscomplete#CompleteCSS
 
 let g:lightline = { 'colorscheme': 'palenight' }
 
+
+" vim-indent-guides
 let g:indent_guides_enable_on_vim_startup = 1
 let g:indent_guides_guide_size = 1
+
 if !has('gui_running')
 	let g:indent_guides_auto_colors = 0
 	hi IndentGuidesEven ctermbg = 238
@@ -109,6 +117,13 @@ let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 
+" vim-svelte-plugin
+let g:vim_svelte_plugin_load_full_syntax = 1
+
+" ale
+let g:ale_linter_aliases = {'svelte': ['css', 'javascript']}
+let g:ale_linters = {'svelte': ['stylelint', 'eslint']}
+
 " =============================================================
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
@@ -123,6 +138,9 @@ function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+
+noremap <leader>y "+y
+noremap <leader>p "+p
 
 noremap <leader>1 1gt
 noremap <leader>2 2gt
