@@ -27,10 +27,6 @@ Plug 'vim-airline/vim-airline-themes'
 " highlight
 Plug 'pangloss/vim-javascript' "javascript
 Plug 'mxw/vim-jsx'
-" Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'} " python
-" Plug 'evanleck/vim-svelte', {'branch': 'main'}
-" Plug 'leafOfTree/vim-svelte-plugin'
-
 Plug 'iloginow/vim-stylus'
 
 Plug 'w0rp/ale'

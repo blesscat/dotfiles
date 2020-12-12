@@ -124,5 +124,6 @@ fi
 
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-export DENO_INSTALL="/home/blesscat/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
+export DENO_INSTALL=~/.deno
+export PATH=$DENO_INSTALL/bin:$PATH
+export PATH=$HOME/.serve:$PATH
