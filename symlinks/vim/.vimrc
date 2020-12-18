@@ -126,7 +126,7 @@ let g:ale_linters = {'svelte': ['stylelint', 'eslint']}
 
 " ======================coc.nvim=================================================
 " 設定 node 路徑
-let g:coc_node_path = "/usr/local/bin/node"
+" let g:coc_node_path = "/usr/local/bin/node"
 " if hidden is not set, TextEdit might fail.
 set hidden
 
