@@ -12,7 +12,7 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'} "多光標
-Plug 'Yggdroot/LeaderF', { 'do': './install.sh' } "模糊搜尋
+Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' } "模糊搜尋
 Plug 'brooth/far.vim' " 批次修改
 Plug 'tpope/vim-abolish' "搜尋替換加強版
 Plug 'nathanaelkane/vim-indent-guides' "縮排顯示
@@ -109,9 +109,9 @@ let g:Lf_UseCache = 0
 let g:Lf_UseVersionControlTool = 0
 let g:Lf_IgnoreCurrentBufferName = 1
 " popup mode          
-let g:Lf_WindowPosition = 'popup'     
+" let g:Lf_WindowPosition = 'popup'     
 let g:Lf_PreviewInPopup = 1          
-let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
+" let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 
 " vim-airline
 let g:airline#extensions#tabline#enabled = 1
@@ -273,10 +273,12 @@ noremap <leader>0 :tablast<cr>
 " nmap <leader>l :lopen<CR>
 nmap <leader>l :CocList<CR>
 nmap <leader>n :CocCommand explorer<CR>
-nmap <leader>f :GFiles<CR>
+" nmap <leader>f :GFiles<CR>
+nmap <leader>f :Leaderf file<CR>
 " nmap <leader>f :CocList gfiles<CR>
-nmap <leader>g :Rg<CR>
-" nmap <leader>g :Leaderf rg<CR>
+" nmap <leader>g :Rg<CR>
+nmap <leader>g :Leaderf rg<CR>
+nmap <leader>m :Leaderf mru<CR>
 
 
 nnoremap <leader>Fa :FlutterRun<cr>
