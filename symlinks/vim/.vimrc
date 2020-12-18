@@ -29,6 +29,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'pangloss/vim-javascript' "javascript
 Plug 'mxw/vim-jsx' "jsx
 Plug 'iloginow/vim-stylus' "stylus
+Plug 'posva/vim-vue' "vue
 Plug 'ap/vim-css-color' "css color
 
 Plug 'w0rp/ale'

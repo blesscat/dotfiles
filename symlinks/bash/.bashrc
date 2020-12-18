@@ -7,17 +7,6 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export PATH="$HOME/.yarn/bin:/usr/local/bin:$PATH"
 
-# Alias
-alias vi=/usr/bin/vim
-alias la="ls -la"
-alias ll="ls -l"
-alias vi="nvim"
-alias vim="nvim"
-alias jstags="ctags -R app config lib src && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
-alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
-alias clearswp="rm ~/.vim/.swp/*.swp"
-eval "$(thefuck --alias)"
-
 # Colors
 export GREP_OPTIONS='--color=auto'
 export LS_OPTIONS='--color=auto'

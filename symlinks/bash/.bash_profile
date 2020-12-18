@@ -39,3 +39,14 @@ export PATH="$HOME/.deno/bin:$PATH"
 
 # server
 export PATH=$HOME/.serve:$PATH
+
+# Alias
+alias vi=/usr/bin/vim
+alias la="ls -la"
+alias ll="ls -l"
+alias vi="nvim"
+alias vim="nvim"
+alias jstags="ctags -R app config lib src && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
+alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
+alias clearswp="rm ~/.vim/.swp/*.swp"
+eval "$(thefuck --alias)"
