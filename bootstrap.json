@@ -48,6 +48,7 @@
         "vim/.*": "~",
         "vue/.*": "~",
         "tig/.*": "~",
+        "ctags/.*": "~",
         "coc/*": "~/.vim/",
         ".config/nvim/*": "~/.config/nvim/"
     },

@@ -5,7 +5,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'editorconfig/editorconfig-vim'
 
-Plug 'tpope/vim-surround'
+Plug 'tpope/vim-surround' "快速操作配對字符 例如ds' 刪除前後的'
 Plug 'tpope/vim-repeat' "使.能重複上次
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -18,16 +18,18 @@ Plug 'tpope/vim-abolish' "搜尋替換加強版
 Plug 'nathanaelkane/vim-indent-guides' "縮排顯示
 Plug 'wincent/ferret' "多檔案修改
 
+Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+
 " theme
 Plug 'drewtempelmeyer/palenight.vim'
-" Plug 'itchyny/lightline.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
 " highlight
 Plug 'pangloss/vim-javascript' "javascript
-Plug 'mxw/vim-jsx'
-Plug 'iloginow/vim-stylus'
+Plug 'mxw/vim-jsx' "jsx
+Plug 'iloginow/vim-stylus' "stylus
+Plug 'ap/vim-css-color' "css color
 
 Plug 'w0rp/ale'
 Plug 'burner/vim-svelte'
@@ -60,11 +62,13 @@ endif
 
 
 set undofile
-set backup
+" set backup
 
 set undodir=~/.vim/.undo//
 set backupdir=~/.vim/.backup//
 set directory=~/.vim/.swp//
+set tags=tags;
+set autochdir
 
 function! GuiTabLabel()
     return bufname(winbufnr(1))
@@ -120,10 +124,30 @@ let g:vim_svelte_plugin_load_full_syntax = 1
 let g:ale_linter_aliases = {'svelte': ['css', 'javascript']}
 let g:ale_linters = {'svelte': ['stylelint', 'eslint']}
 
-" =============================================================
-" Use tab for trigger completion with characters ahead and navigate.
-" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config.
+" ======================coc.nvim=================================================
+" 設定 node 路徑
+let g:coc_node_path = "/usr/local/bin/node"
+" if hidden is not set, TextEdit might fail.
+set hidden
+
+" Some servers have issues with backup files, see #649
+set nobackup
+set nowritebackup
+
+" Better display for messages
+set cmdheight=2
+
+" You will have bad experience for diagnostic messages when it's default 4000.
+set updatetime=300
+
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+
+" always show signcolumns
+set signcolumn=yes
+
+" 使用 tab 觸發帶有幾個字元的補全並導覽
+" 使用指令 ':verbose imap <tab>' 確定 tab 沒有被映射到其他插件
 inoremap <silent><expr> <TAB>
       \ pumvisible() ? "\<C-n>" :
       \ <SID>check_back_space() ? "\<TAB>" :
@@ -134,6 +158,103 @@ function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+
+" 使用 <c-space> 觸發補全
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" 使用 <cr> 確認補全，`<C-g>u` 表示在當前位置斷開撤消鏈
+" Coc 僅在確認時做片段和額外編輯
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" 使用 `[g` 和 `]g` 瀏覽診斷
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" 重新映射Gotos的鍵
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" 使用 K 在預覽窗口中顯示文檔
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" 高亮 symbol 在游標 CursorHold 時
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" 重新映射以重命名當前單詞
+nmap <leader>rn <Plug>(coc-rename)
+
+" 重新映射格式化選定區域
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+augroup mygroup
+  autocmd!
+  " 設置 formatexpr 指定的 filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" 重新映射執行代碼選定區域的操作，例如：當前段落的<leader> aap
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" 重新映射代碼執行當前行的操作
+nmap <leader>ac  <Plug>(coc-codeaction)
+" 修復當前可修復的第一個錯誤修復操作
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" 建立映射給函式文本物件，需要 languageserver 的 document symbols feature
+xmap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap if <Plug>(coc-funcobj-i)
+omap af <Plug>(coc-funcobj-a)
+
+" 使用 <TAB> 用於選擇範圍，必須 server 支援，像: coc-tsserver, coc-python
+nmap <silent> <TAB> <Plug>(coc-range-select)
+xmap <silent> <TAB> <Plug>(coc-range-select)
+
+" 使用 `:Format` 格式化當前緩衝
+command! -nargs=0 Format :call CocAction('format')
+
+" 使用 `:Fold` 折疊當前緩衝
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" 使用 `:OR` 用於組織匯入當前緩衝區
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+
+" 添加狀態行支持，以便與其他插件集成，查看 `:h coc-status`
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+" 使用 CocList
+" 顯示所有診斷
+nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
+" 管理擴充
+nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+" 顯示指令
+nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+" 尋找當前文件的 symbol
+nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+" 尋找 workspace symbols
+nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
+" 對下一項執行默認操作。
+nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+" 對上一項執行默認操作。
+nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+" 恢復最新的 coc list
+nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+"===============end coc.nvim=============================================
 
 noremap <leader>y "+y
 noremap <leader>p "+p
@@ -149,7 +270,8 @@ noremap <leader>8 8gt
 noremap <leader>9 9gt
 noremap <leader>0 :tablast<cr>
 
-nmap <leader>l :lopen<CR>
+" nmap <leader>l :lopen<CR>
+nmap <leader>l :CocList<CR>
 nmap <leader>n :CocCommand explorer<CR>
 nmap <leader>f :GFiles<CR>
 " nmap <leader>f :CocList gfiles<CR>
