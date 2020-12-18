@@ -95,8 +95,8 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-# alias vi='nvim'
 alias vi='nvim'
+alias jstags="ctags -R app config lib src && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
