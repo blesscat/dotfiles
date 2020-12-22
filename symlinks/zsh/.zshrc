@@ -1,3 +1,4 @@
+export PATH=$PATH:/usr/local/bin
 [ -f ~/.bash_profile ] && source ~/.bash_profile
 # Start configuration added by Zim install {{{
 #
@@ -124,3 +125,4 @@ bindkey -M vicmd 'j' history-substring-search-down
 # }}} End configuration added by Zim install
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+eval "$(pyenv init -)"

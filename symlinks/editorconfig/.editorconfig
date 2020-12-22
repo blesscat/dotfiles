@@ -35,3 +35,7 @@ indent_size = 2
 [*.dart]
 indent_style = space
 indent_size = 2
+
+[*.scad]
+indent_style = space
+indent_size = 4
