@@ -1,6 +1,6 @@
 [core]
 	excludesfile = /Users/blesscat/.gitignore_global
-	editor = vim
+	editor = nvim
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 

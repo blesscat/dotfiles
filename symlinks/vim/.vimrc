@@ -18,7 +18,7 @@ Plug 'tpope/vim-abolish' "搜尋替換加強版
 Plug 'nathanaelkane/vim-indent-guides' "縮排顯示
 Plug 'wincent/ferret' "多檔案修改
 
-" Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
 " theme
 Plug 'drewtempelmeyer/palenight.vim'
