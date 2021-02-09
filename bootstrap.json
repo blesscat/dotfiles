@@ -8,16 +8,11 @@
         "homebrew/cask-fonts/font-fira-code-nerd-font",
         "google-chrome",
         "spectacle",
-        "hex-fiend",
-        "imageoptim",
-        "macvim",
         "daisydisk",
         "docker",
         "scroll-reverser",
         "typora",
-        "dropbox",
         "clip-studio-paint",
-        "diffmerge",
         "bettertouchtool"
     ],
     "formulas": [

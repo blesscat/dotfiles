@@ -1,5 +1,3 @@
-export PATH=$PATH:/usr/local/bin
-[ -f ~/.bash_profile ] && source ~/.bash_profile
 # Start configuration added by Zim install {{{
 #
 # User configuration sourced by interactive shells
@@ -93,8 +91,8 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 # Initialize modules
 # ------------------
 
-if [[ ${ZIM_HOME}/init.zsh -ot ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
-  # Update static initialization script if it's outdated, before sourcing it
+if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
+  # Update static initialization script if it does not exist or it's outdated, before sourcing it
   source ${ZIM_HOME}/zimfw.zsh init -q
 fi
 source ${ZIM_HOME}/init.zsh
@@ -123,6 +121,9 @@ bindkey '^N' history-substring-search-down
 bindkey -M vicmd 'k' history-substring-search-up
 bindkey -M vicmd 'j' history-substring-search-down
 # }}} End configuration added by Zim install
+
+export PATH=$PATH:/usr/local/bin
+[ -f ~/.bash_profile ] && source ~/.bash_profile
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(pyenv init -)"
