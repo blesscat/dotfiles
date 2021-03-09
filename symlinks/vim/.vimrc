@@ -33,8 +33,15 @@ Plug 'posva/vim-vue' "vue
 Plug 'ap/vim-css-color' "css color
 Plug 'sirtaj/vim-openscad' "openscad
 
-Plug 'w0rp/ale'
+" Plug 'w0rp/ale'
 Plug 'burner/vim-svelte'
+
+Plug 'neoclide/jsonc.vim' "jsonc
+
+" dart
+" Plug 'natebosch/vim-lsc'
+" Plug 'natebosch/vim-lsc-dart'
+Plug 'dart-lang/dart-vim-plugin'
 
 call plug#end()
 

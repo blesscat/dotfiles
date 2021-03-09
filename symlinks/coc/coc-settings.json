@@ -2,7 +2,9 @@
   "tsserver.enableJavascript": false,
   "explorer.width": 35,
   "explorer.icon.enableNerdfont": true,
-  "explorer.previewAction.onHover": false,
+  // "explorer.previewAction.onHover": false,
+  "explorer.file.showHiddenFiles": true,
+  "explorer.filename.colored.enable": true,
   "explorer.keyMappings.global": {
     "<cr>": ["expandable?", "expand", "open"],
     "v": "open:vsplit",
