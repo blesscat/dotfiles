@@ -32,6 +32,8 @@ Plug 'iloginow/vim-stylus' "stylus
 Plug 'posva/vim-vue' "vue
 Plug 'ap/vim-css-color' "css color
 Plug 'sirtaj/vim-openscad' "openscad
+Plug 'peitalin/vim-jsx-typescript' "react jsx 
+Plug 'leafgarland/typescript-vim' 
 
 " Plug 'w0rp/ale'
 Plug 'burner/vim-svelte'
@@ -83,6 +85,7 @@ function! GuiTabLabel()
     return bufname(winbufnr(1))
 endfunction
 
+
 set guitablabel=%{GuiTabLabel()}
 
 " set ignorecase
@@ -114,7 +117,7 @@ if !has('gui_running')
 endif
 
 " Leader F
-let g:Lf_UseCache = 0                                                                      
+let g:Lf_UseCache = 1
 let g:Lf_UseVersionControlTool = 0
 let g:Lf_IgnoreCurrentBufferName = 1
 " popup mode          
@@ -149,13 +152,22 @@ noremap <leader>9 9gt
 noremap <leader>0 :tablast<cr>
 
 " nmap <leader>l :lopen<CR>
+function! CustomLeaderfFile()
+	let l:path = system('PWD=$(pwd) echo ${PWD%src*}')
+	exec ':Leaderf file ' . path
+endfunction
+
+function! CustomLeaderfRg()
+	let l:path = system('PWD=$(pwd) echo ${PWD%src*}')
+	exec ':Leaderf rg  ' . path
+endfunction
+
 nmap <leader>l :CocList<CR>
 nmap <leader>n :CocCommand explorer<CR>
-" nmap <leader>f :GFiles<CR>
-nmap <leader>f :Leaderf file<CR>
-" nmap <leader>f :CocList gfiles<CR>
-" nmap <leader>g :Rg<CR>
+" nmap <leader>f :Leaderf file<CR>
+nmap <leader>f :call CustomLeaderfFile()<CR>
 nmap <leader>g :Leaderf rg<CR>
+" nmap <leader>g :call CustomLeaderfRg()<CR>
 nmap <leader>m :Leaderf mru<CR>
 
 
