@@ -20,6 +20,12 @@ Plug 'wincent/ferret' "多檔案修改
 
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
+Plug 'w0rp/ale' " 語法檢查?
+
+Plug 'ludovicchabant/vim-gutentags' " 自動更新ctags
+Plug 'kristijanhusak/vim-js-file-import', {'do': 'npm install'} " js ts 追code用??
+" Plug 'Ivo-Donchev/vim-react-goto-definition' " react 追code
+
 " theme
 Plug 'drewtempelmeyer/palenight.vim'
 Plug 'vim-airline/vim-airline'
@@ -35,15 +41,14 @@ Plug 'sirtaj/vim-openscad' "openscad
 Plug 'peitalin/vim-jsx-typescript' "react jsx 
 Plug 'leafgarland/typescript-vim' 
 
-" Plug 'w0rp/ale'
-Plug 'burner/vim-svelte'
+Plug 'burner/vim-svelte' "svelte
 
 Plug 'neoclide/jsonc.vim' "jsonc
 
-" dart
-" Plug 'natebosch/vim-lsc'
-" Plug 'natebosch/vim-lsc-dart'
-Plug 'dart-lang/dart-vim-plugin'
+Plug 'dart-lang/dart-vim-plugin' " dart
+
+
+
 
 call plug#end()
 
@@ -103,6 +108,8 @@ colorscheme palenight
 " autocmd vimenter * NERDTree
 autocmd FileType css set omnifunc=csscomplete#CompleteCSS
 
+au BufNewFile,BufRead *.ejs set filetype=html
+
 let g:lightline = { 'colorscheme': 'palenight' }
 
 
@@ -136,7 +143,11 @@ let g:vim_svelte_plugin_load_full_syntax = 1
 let g:ale_linter_aliases = {'svelte': ['css', 'javascript']}
 let g:ale_linters = {'svelte': ['stylelint', 'eslint']}
 
+" vim-gutentags
+g:gutentags_exclude_filetypes
 
+noremap <Leader>y "*y
+noremap <Leader>p "*p
 noremap <leader>y "+y
 noremap <leader>p "+p
 
@@ -170,7 +181,6 @@ nmap <leader>g :Leaderf rg<CR>
 " nmap <leader>g :call CustomLeaderfRg()<CR>
 nmap <leader>m :Leaderf mru<CR>
 
-
 nnoremap <leader>Fa :FlutterRun<cr>
 nnoremap <leader>Fq :FlutterQuit<cr>
 nnoremap <leader>Fr :FlutterHotReload<cr>
@@ -178,6 +188,8 @@ nnoremap <leader>FR :FlutterHotRestart<cr>
 nnoremap <leader>Fd :FlutterVisualDebug<cr>
 nnoremap <leader>Fo :sp __Flutter_Output__<cr>
 nnoremap <leader>FO :tabe __Flutter_Output__<cr>
+
+" noremap <leader>D :call ReactGotoDef()<CR>
 
 imap jk <esc>
 

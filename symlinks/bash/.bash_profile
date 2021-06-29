@@ -1,5 +1,3 @@
-[ -f ~/.bashrc ] && source ~/.bashrc
-
 export PATH="$HOME/bin:$PATH"
 
 # pyenv
@@ -49,4 +47,6 @@ alias vim="nvim"
 alias jstags="ctags -R app config lib src && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
 alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
 alias clearswp="rm ~/.vim/.swp/*.swp"
+alias ibrew="arch -x86_64 brew"
+alias ipyenv="arch -x86_64 pyenv"
 eval "$(thefuck --alias)"

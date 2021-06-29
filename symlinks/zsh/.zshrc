@@ -72,7 +72,7 @@ WORDCHARS=${WORDCHARS//[\/]}
 
 # Customize the style that the suggestions are shown with.
 # See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
-#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'
+#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
 
 #
 # zsh-syntax-highlighting
@@ -85,7 +85,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 # Customize the main highlighter styles.
 # See https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/main.md#how-to-tweak-it
 #typeset -A ZSH_HIGHLIGHT_STYLES
-#ZSH_HIGHLIGHT_STYLES[comment]='fg=10'
+#ZSH_HIGHLIGHT_STYLES[comment]='fg=242'
 
 # ------------------
 # Initialize modules
@@ -124,6 +124,12 @@ bindkey -M vicmd 'j' history-substring-search-down
 
 export PATH=$PATH:/usr/local/bin
 [ -f ~/.bash_profile ] && source ~/.bash_profile
+
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+export PUPPETEER_EXECUTABLE_PATH=`which chromium`
+
+export LDFLAGS="-L/usr/local/opt/zlib/lib"
+export CPPFLAGS="-I/usr/local/opt/zlib/include"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(pyenv init -)"
