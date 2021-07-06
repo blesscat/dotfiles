@@ -17,6 +17,7 @@ Plug 'brooth/far.vim' " 批次修改
 Plug 'tpope/vim-abolish' "搜尋替換加強版
 Plug 'nathanaelkane/vim-indent-guides' "縮排顯示
 Plug 'wincent/ferret' "多檔案修改
+Plug 'mileszs/ack.vim' "多檔案修改
 
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
@@ -144,10 +145,19 @@ let g:ale_linter_aliases = {'svelte': ['css', 'javascript']}
 let g:ale_linters = {'svelte': ['stylelint', 'eslint']}
 
 " vim-gutentags
-g:gutentags_exclude_filetypes
+" g:gutentags_exclude_filetypes = 1
 
-noremap <Leader>y "*y
-noremap <Leader>p "*p
+" Ack command using ag
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
+
+" Ack Ferret
+cnoreabbrev Ack Ack!
+nnoremap <leader>a :Ack!<space>
+
+noremap <leader>y "*y
+noremap <leader>p "*p
 noremap <leader>y "+y
 noremap <leader>p "+p
 
@@ -192,5 +202,38 @@ nnoremap <leader>FO :tabe __Flutter_Output__<cr>
 " noremap <leader>D :call ReactGotoDef()<CR>
 
 imap jk <esc>
+
+let g:gutentags_add_default_project_roots = 0
+let g:gutentags_project_root  = ['package.json', '.git', '.hg', '.svn']
+let g:gutentags_cache_dir = expand('~/.gutentags_cache')
+let g:gutentags_exclude_filetypes = ['gitcommit', 'gitconfig', 'gitrebase', 'gitsendemail', 'git']
+let g:gutentags_generate_on_new = 1
+let g:gutentags_generate_on_missing = 1
+let g:gutentags_generate_on_write = 1
+let g:gutentags_generate_on_empty_buffer = 0
+let g:gutentags_ctags_extra_args = ['--tag-relative=yes', '--fields=+ailmnS']
+let g:gutentags_ctags_exclude = [
+\  '*.git', '*.svn', '*.hg',
+\  'cache', 'build', 'dist', 'bin', 'node_modules', 'bower_components',
+\  '*-lock.json',  '*.lock',
+\  '*.min.*',
+\  '*.bak',
+\  '*.zip',
+\  '*.pyc',
+\  '*.class',
+\  '*.sln',
+\  '*.csproj', '*.csproj.user',
+\  '*.tmp',
+\  '*.cache',
+\  '*.vscode',
+\  '*.pdb',
+\  '*.exe', '*.dll', '*.bin',
+\  '*.mp3', '*.ogg', '*.flac',
+\  '*.swp', '*.swo',
+\  '.DS_Store', '*.plist',
+\  '*.bmp', '*.gif', '*.ico', '*.jpg', '*.png', '*.svg',
+\  '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2',
+\  '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx', '*.xls',
+\]
 
 source ~/.vimcoc
