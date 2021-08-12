@@ -48,7 +48,8 @@ Plug 'neoclide/jsonc.vim' "jsonc
 
 Plug 'dart-lang/dart-vim-plugin' " dart
 
-
+" tailwindcss
+Plug 'rodrigore/coc-tailwind-intellisense', {'do': 'npm install'}
 
 
 call plug#end()

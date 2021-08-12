@@ -11,4 +11,16 @@ if [ ! -d "$NVIM_DIR/site/autoload/plug.vim" ]; then
 fi
 
 nvim +PlugInstall +qall
-nvim +CocInstall\ coc-json\ coc-tsserver\ coc-yank\ coc-pairs\ coc-highlight\ coc-git\ coc-explorer\ coc-eslint\ coc-deno\ coc-vetur\ coc-python\ coc-flutter
+nvim +CocInstall\
+	coc-json\
+	coc-tsserver\
+	coc-yank\
+	coc-pairs\
+	coc-highlight\
+	coc-git\
+	coc-explorer\
+	coc-eslint\
+	coc-deno\
+	coc-vetur\
+	coc-python\
+	coc-flutter
