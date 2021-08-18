@@ -41,6 +41,8 @@ Plug 'ap/vim-css-color' "css color
 Plug 'sirtaj/vim-openscad' "openscad
 Plug 'peitalin/vim-jsx-typescript' "react jsx 
 Plug 'leafgarland/typescript-vim' 
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'} " 更鮮艷顏色
+Plug 'danilamihailov/beacon.nvim' " 跳轉後高亮2秒
 
 Plug 'burner/vim-svelte' "svelte
 
@@ -58,7 +60,7 @@ if has("gui_running")
     set go=aAce
     set transparency=10
     " set guifont=Monaco:h14
-    set showtabline=2
+    " set showtabline=2
     set columns=170
     set lines=53
 
@@ -136,7 +138,8 @@ let g:Lf_PreviewInPopup = 1
 
 " vim-airline
 let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#tabline#tab_nr_type = 2 " tab number
+let g:airline#extensions#tabline#formatter = 'short_path'
 
 " vim-svelte-plugin
 let g:vim_svelte_plugin_load_full_syntax = 1
