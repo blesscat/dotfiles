@@ -21,7 +21,7 @@ Plug 'mileszs/ack.vim' "多檔案修改
 
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
-Plug 'w0rp/ale' " 語法檢查?
+"Plug 'w0rp/ale' " 語法檢查?
 
 Plug 'ludovicchabant/vim-gutentags' " 自動更新ctags
 Plug 'kristijanhusak/vim-js-file-import', {'do': 'npm install'} " js ts 追code用??
@@ -52,6 +52,8 @@ Plug 'dart-lang/dart-vim-plugin' " dart
 
 " tailwindcss
 Plug 'rodrigore/coc-tailwind-intellisense', {'do': 'npm install'}
+
+Plug 'ryanoasis/vim-devicons' " for testing
 
 
 call plug#end()
@@ -148,6 +150,9 @@ let g:vim_svelte_plugin_load_full_syntax = 1
 let g:ale_linter_aliases = {'svelte': ['css', 'javascript']}
 let g:ale_linters = {'svelte': ['stylelint', 'eslint']}
 
+" implicitCAD using openSCAD highlight
+au BufRead,BufNewFile *.escad    setfiletype openscad
+
 " vim-gutentags
 " g:gutentags_exclude_filetypes = 1
 
@@ -159,6 +164,8 @@ endif
 " Ack Ferret
 cnoreabbrev Ack Ack!
 nnoremap <leader>a :Ack!<space>
+nnoremap <C-j> :bprev<CR>                                                                            
+nnoremap <C-k> :bnext<CR>
 
 noremap <leader>y "*y
 noremap <leader>p "*p
@@ -241,3 +248,21 @@ let g:gutentags_ctags_exclude = [
 \]
 
 source ~/.vimcoc
+
+" nvim-treesitter
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  highlight = {
+    enable = true,
+    custom_captures = {
+      -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
+      ["foo.bar"] = "Identifier",
+    },
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
+  },
+}
+EOF
