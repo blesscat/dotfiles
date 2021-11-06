@@ -6,7 +6,7 @@ opt = vim.opt  -- to set options
 g.mapleader = ' '
 
 function map(mode, lhs, rhs, opts)
-  local options = {noremap = true}
+  local options = {noremap = true, silent = true}
   if opts then options = vim.tbl_extend('force', options, opts) end
   vim.api.nvim_set_keymap(mode, lhs, rhs, options)
 end
@@ -14,6 +14,7 @@ end
 ---------------- OPTIONS -------------------------------------
 -- colorscheme
 cmd 'colorscheme palenight'
+-- cmd 'colorscheme one'
 
 opt.background = 'dark'
 
@@ -22,6 +23,14 @@ if vim.opt.termguicolors == true then
   opt.termguicolors = true
 end
 
+cmd([[
+if !has('gui_running')
+  colorscheme one
+  set guifont=FiraCode\ Nerd\ font:h12
+  let neovide_remember_window_size = v:true
+  let g:neovide_cursor_vfx_mode = "pixiedust"
+endif
+]])
 
 -- opt.completeopt = {'menuone', 'noinsert', 'noselect'}  -- Completion options (for deoplete)
 opt.expandtab = true                -- Use spaces instead of tabs

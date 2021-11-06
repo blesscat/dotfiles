@@ -19,8 +19,8 @@ require('packer').startup(function()
 
   -- surround 快速操作配對字符 例如ds' 刪除前後的'
   use 'tpope/vim-surround'
+
   -- indent guides
-  -- use 'glepnir/indent-guides.nvim'
   use "lukas-reineke/indent-blankline.nvim"
 
   -- fuzzy finder

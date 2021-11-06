@@ -11,7 +11,7 @@ local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
   -- Enable completion triggered by <c-x><c-o>
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-  cmd [[hi LspDiagnosticsVirtualTextError guifg=red ctermfg=Red gui=bold,italic,underline]]
+  cmd [[hi LspDiagnosticsVirtualTextError guifg=#D0312D ctermfg=#D0312D gui=bold,italic,underline]]
   -- cmd [[hi LspDiagnosticsVirtualTextWarning guifg=orange ctermfg=orange gui=bold,italic,underline]]
   cmd [[hi LspDiagnosticsVirtualTextInformation guifg=yellow ctermfg=yellow gui=bold,italic,underline]]
   cmd [[hi LspDiagnosticsVirtualTextHint guifg=green ctermfg=green gui=bold,italic,underline]]
@@ -30,7 +30,7 @@ local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', 'ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
@@ -164,8 +164,8 @@ saga.init_lsp_saga {
 
 map('n', 'gh', '<cmd>Lspsaga lsp_finder<CR>')
 map('i', '<C-k>', '<cmd>Lspsaga signature_help<CR>')
-map('n', 'ca', '<cmd>Lspsaga code_action<CR>')
-map('v', 'ca', '<cmd>Lspsaga range_code_action<CR>')
+-- map('n', 'ca', '<cmd>Lspsaga code_action<CR>')
+-- map('v', 'ca', '<cmd>Lspsaga range_code_action<CR>')
 
 map('n', 'K', '<cmd>lua require("lspsaga.hover").render_hover_doc()<CR>')
 map('n', '<C-f>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>')
@@ -174,5 +174,5 @@ map('n', '<leader>s', '<cmd>Lspsaga signature_help<CR>')
 map('n', '<leader>r', '<cmd>Lspsaga rename<CR>')
 map('n', '<leader>d', '<cmd>Lspsaga preview_definition<CR>')
 map('n', 'fd', '<cmd>Lspsaga open_floaterm<CR>')
-map('t', 'fd', '<C-n>:Lspsaga close_floaterm<CR>')
+map('t', 'fd', '<C-\\><C-n>:Lspsaga close_floaterm<CR>')
 

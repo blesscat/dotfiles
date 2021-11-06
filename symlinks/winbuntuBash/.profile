@@ -31,3 +31,4 @@ if [ -d "/mnt/c/Windows/System32" ] ; then
 fi
 
 eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+. "$HOME/.cargo/env"
