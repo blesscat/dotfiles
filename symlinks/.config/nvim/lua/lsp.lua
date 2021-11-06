@@ -44,6 +44,7 @@ end
 -- map buffer local keybindings when the language server attaches
 local servers = {
   'pyright',
+  'svelte',
   'rust_analyzer',
   'tsserver'
 }
