@@ -24,7 +24,7 @@ if vim.opt.termguicolors == true then
 end
 
 cmd([[
-if !has('gui_running')
+if exists('g:neovide')
   colorscheme one
   set guifont=FiraCode\ Nerd\ font:h12
   let neovide_remember_window_size = v:true
