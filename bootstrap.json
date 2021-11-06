@@ -1,8 +1,7 @@
 {
     "after-scripts": [
-        "./scripts/brew_setup.sh",
-        "./scripts/vim_setup.sh",
-        "./scripts/node_setup.sh"
+        "./scripts/node_setup.sh",
+        "./scripts/nvim_setup.sh"
     ],
     "casks": [
         "homebrew/cask-fonts/font-fira-code-nerd-font",
@@ -30,6 +29,7 @@
         "git",
         "wget",
         "tig",
+        "fd",
         "thefuck",
         "neovim",
         "mosh",
@@ -47,7 +47,7 @@
         "tig/.*": "~",
         "ctags/.*": "~",
         "coc/*": "~/.vim/",
-        ".config/nvim/*": "~/.config/nvim/"
+        ".config/nvim/": "~/.config"
     },
     "taps": [
       "homebrew/cask-fonts"
