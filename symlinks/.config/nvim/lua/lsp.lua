@@ -11,6 +11,11 @@ local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
   -- Enable completion triggered by <c-x><c-o>
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
+  cmd [[hi LspDiagnosticsVirtualTextError guifg=red ctermfg=Red gui=bold,italic,underline]]
+  -- cmd [[hi LspDiagnosticsVirtualTextWarning guifg=orange ctermfg=orange gui=bold,italic,underline]]
+  cmd [[hi LspDiagnosticsVirtualTextInformation guifg=yellow ctermfg=yellow gui=bold,italic,underline]]
+  cmd [[hi LspDiagnosticsVirtualTextHint guifg=green ctermfg=green gui=bold,italic,underline]]
+
   -- Mappings.
   local opts = { noremap=true, silent=true }
 
@@ -159,8 +164,8 @@ saga.init_lsp_saga {
 
 map('n', 'gh', '<cmd>Lspsaga lsp_finder<CR>')
 map('i', '<C-k>', '<cmd>Lspsaga signature_help<CR>')
-map('n', '<leader>ca', '<cmd>Lspsaga code_action<CR>')
-map('v', '<leader>ca', '<cmd>Lspsaga range_code_action<CR>')
+map('n', 'ca', '<cmd>Lspsaga code_action<CR>')
+map('v', 'ca', '<cmd>Lspsaga range_code_action<CR>')
 
 map('n', 'K', '<cmd>lua require("lspsaga.hover").render_hover_doc()<CR>')
 map('n', '<C-f>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>')

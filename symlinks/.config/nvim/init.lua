@@ -1,8 +1,8 @@
-
 require('common')
 require('packages')
+require('indentGuides')
 require('treeSitterSetup')
-require('lsp')
 require('coqSetup')
 require('telescopeSetup')
 require('tabLineTreeSetup')
+require('lsp')

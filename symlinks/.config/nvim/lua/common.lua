@@ -14,6 +14,7 @@ end
 ---------------- OPTIONS -------------------------------------
 -- colorscheme
 cmd 'colorscheme palenight'
+
 opt.background = 'dark'
 
 if vim.opt.termguicolors == true then

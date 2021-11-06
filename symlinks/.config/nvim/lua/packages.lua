@@ -16,6 +16,13 @@ require('packer').startup(function()
   use {'ms-jpq/coq_nvim', branch = 'coq'}
   use {'ms-jpq/coq.artifacts', branch = 'artifacts'}
 
+
+  -- surround 快速操作配對字符 例如ds' 刪除前後的'
+  use 'tpope/vim-surround'
+  -- indent guides
+  -- use 'glepnir/indent-guides.nvim'
+  use "lukas-reineke/indent-blankline.nvim"
+
   -- fuzzy finder
   use {
     'nvim-telescope/telescope.nvim',
@@ -34,21 +41,16 @@ require('packer').startup(function()
 
   use {'akinsho/bufferline.nvim', requires = 'kyazdani42/nvim-web-devicons'}
 
-  -- use {
-  --   'kdheepak/tabline.nvim',
-  --   config = function()
-  --     require'tabline'.setup {enable = false}
-  --   end,
-  --   requires = {'hoob3rt/lualine.nvim', 'kyazdani42/nvim-web-devicons'}
-  -- }
-
   -- icons
   use 'kyazdani42/nvim-web-devicons'
-
 
   -- themes
   use {'drewtempelmeyer/palenight.vim'}
   use {'rakr/vim-one'}
+
+ --css color
+  use 'ap/vim-css-color'
+
 
 end)
 
