@@ -65,6 +65,15 @@ map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
 map('n', '<C-l>', '<cmd>noh<CR>')    -- Clear highlights
 
+-- for auto pairs
+map('i', '(', '()<left>')
+map('i', '{', '{}<left>')
+map('i', '[', '[]<left>')
+map('i', '<', '<><left>')
+map('i', '`', '``<left>')
+map('i', '"', '""<left>')
+map('i', "'", "''<left>")
+
 -- map('n', '<C-j>', '<cmd>:bprev<cr>')
 -- map('n', '<C-k>', '<cmd>:bprev<cr>')
 -- map('n', '<leader>1', '1gt')

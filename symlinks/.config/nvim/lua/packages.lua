@@ -36,13 +36,22 @@ require('packer').startup(function()
   use {
     'kyazdani42/nvim-tree.lua',
     requires = 'kyazdani42/nvim-web-devicons',
+    -- requires = 'yamatsum/nvim-nonicons',
     config = function() require'nvim-tree'.setup {} end
   }
 
-  use {'akinsho/bufferline.nvim', requires = 'kyazdani42/nvim-web-devicons'}
+  use {
+    'akinsho/bufferline.nvim', 
+    requires = 'kyazdani42/nvim-web-devicons'
+    -- requires = 'yamatsum/nvim-nonicons'
+  }
 
   -- icons
   use 'kyazdani42/nvim-web-devicons'
+  -- use {
+  --   'yamatsum/nvim-nonicons',
+  --   requires = {'kyazdani42/nvim-web-devicons'}
+  -- }
 
   -- themes
   use {'drewtempelmeyer/palenight.vim'}
