@@ -59,6 +59,18 @@ map('', '<leader>y', '"+y')       -- Copy to clipboard in normal, visual, select
 map('i', '<C-u>', '<C-g>u<C-u>')  -- Make <C-u> undo-friendly
 map('i', '<C-w>', '<C-g>u<C-w>')  -- Make <C-w> undo-friendly
 
+-- Copy to clipboard
+map('v', '<leader>y', '"+y')
+map('v', '<leader>Y', '"+yg_')
+map('n', '<leader>y', '"+y')
+map('n', '<leader>yy', '"+yy')
+
+-- Paste from clipboard
+map('n', '<leader>p', '"+p')
+map('n', '<leader>P', '"+P')
+map('v', '<leader>p', '"+p')
+map('v', '<leader>P', '"+P')
+
 -- <Tab> to navigate the completion menu
 map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
 map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
