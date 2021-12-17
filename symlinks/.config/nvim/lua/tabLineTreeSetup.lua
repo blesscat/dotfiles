@@ -56,8 +56,10 @@ require'nvim-tree'.setup {
     }
   },
   update_focused_file = {
-    enable      = false,
-    update_cwd  = false,
+    -- enable      = false,
+    enable      = true,
+    -- update_cwd  = false,
+    update_cwd  = true,
     ignore_list = {}
   },
   system_open = {
@@ -82,8 +84,8 @@ require'nvim-tree'.setup {
 }
 
 map('n', '<leader>n', '<cmd>:NvimTreeToggle<cr>')
-map('n', 'nr', '<cmd>:NvimTreeRefresh<cr>')
-map('n', 'nf', '<cmd>:NvimTreeFindFile<cr>')
+map('n', 'tr', '<cmd>:NvimTreeRefresh<cr>')
+map('n', 'tf', '<cmd>:NvimTreeFindFile<cr>')
 
 
 ------------- bufferline ----------------
@@ -101,6 +103,10 @@ require("bufferline").setup {
     tab_size = 30,
     separator_style = 'thin',
 
+    numbers = function(opts)
+      return string.format('%s|%s.)', opts.id, opts.raise(opts.ordinal))
+    end,
+
     offsets = {
       {
         filetype = "NvimTree",
@@ -116,8 +122,12 @@ require("bufferline").setup {
 
 map('n', '<C-j>', '<Cmd>BufferLineCyclePrev<CR>')
 map('n', '<C-k>', '<Cmd>BufferLineCycleNext<CR>')
-map('n', 'be', '<Cmd>BufferLineSortByExtension<CR>')
-map('n', 'bd', '<Cmd>BufferLineSortByDirectory<CR>')
+
+map('n', '{', '<Cmd>BufferLineMovePrev<CR>')
+map('n', '}', '<Cmd>BufferLineMoveNext<CR>')
+
+map('n', '<leader>be', '<Cmd>BufferLineSortByExtension<CR>')
+map('n', '<leader>bd', '<Cmd>BufferLineSortByDirectory<CR>')
 
 map('n', '<leader>1', '<Cmd>BufferLineGoToBuffer 1<CR>')
 map('n', '<leader>2', '<Cmd>BufferLineGoToBuffer 2<CR>')

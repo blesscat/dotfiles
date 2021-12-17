@@ -5,6 +5,12 @@ require('packer').startup(function()
   -- Packer can manage itself
   use 'wbthomason/packer.nvim'
 
+  -- autopairs
+  use 'jiangmiao/auto-pairs'
+
+  -- git-blame
+  use 'f-person/git-blame.nvim'
+
   -- tree-sitter
   use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
 
@@ -14,7 +20,7 @@ require('packer').startup(function()
 
   -- autocomplete
   use {'ms-jpq/coq_nvim', branch = 'coq'}
-  use {'ms-jpq/coq.artifacts', branch = 'artifacts'}
+  -- use {'ms-jpq/coq.artifacts', branch = 'artifacts'}
 
 
   -- surround 快速操作配對字符 例如ds' 刪除前後的'
