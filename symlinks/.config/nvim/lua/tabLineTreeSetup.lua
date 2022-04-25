@@ -56,10 +56,10 @@ require'nvim-tree'.setup {
     }
   },
   update_focused_file = {
-    -- enable      = false,
-    enable      = true,
-    -- update_cwd  = false,
-    update_cwd  = true,
+    enable      = false,
+    -- enable      = true,
+    update_cwd  = false,
+    -- update_cwd  = true,
     ignore_list = {}
   },
   system_open = {
@@ -71,7 +71,7 @@ require'nvim-tree'.setup {
     custom = {}
   },
   view = {
-    width = 30,
+    width = 40,
     height = 30,
     hide_root_folder = false,
     side = 'left',
@@ -84,8 +84,8 @@ require'nvim-tree'.setup {
 }
 
 map('n', '<leader>n', '<cmd>:NvimTreeToggle<cr>')
-map('n', 'tr', '<cmd>:NvimTreeRefresh<cr>')
-map('n', 'tf', '<cmd>:NvimTreeFindFile<cr>')
+-- map('n', 'tr', '<cmd>:NvimTreeRefresh<cr>')
+map('n', '<leader>tf', '<cmd>:NvimTreeFindFile<cr>')
 
 
 ------------- bufferline ----------------

@@ -17,6 +17,7 @@ require('packer').startup(function()
   -- lsp
   use 'neovim/nvim-lspconfig'
   use 'glepnir/lspsaga.nvim'
+  use 'kabouzeid/nvim-lspinstall'
 
   -- autocomplete
   use {'ms-jpq/coq_nvim', branch = 'coq'}

@@ -25,6 +25,7 @@ bind diff H !sh -c "tig \"$(git rev-parse --show-toplevel)/%(file)\""
 
 bind status H !sh -c "tig \"$(git rev-parse --show-toplevel)/%(file)\""
 bind status - status-update
+bind status D !@?rm %(file)
 
 bind stage - status-update
 

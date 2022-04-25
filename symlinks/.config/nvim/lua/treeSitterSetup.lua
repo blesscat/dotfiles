@@ -14,7 +14,7 @@ require'nvim-treesitter.configs'.setup {
       "html",
       "scss",
       "css",
-      "svelte"
+      "svelte",
     },
     -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
     -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
@@ -26,4 +26,9 @@ require'nvim-treesitter.configs'.setup {
 
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
 parser_config.tsx.used_by = { "javascript", "typescript.tsx" }
+
+local ft_to_parser = require('nvim-treesitter.parsers').filetype_to_parsername
+ft_to_parser.astro = "tsx"
+
+cmd 'autocmd BufRead,BufEnter *.astro set filetype=astro'
 

@@ -1,4 +1,11 @@
 
+----------- lspInstalll ------------------------------
+-- require'lspinstall'.setup()
+-- local servers = require'lspinstall'.installed_servers()
+-- for _, server in pairs(servers) do
+--   require'lspconfig'[server].setup{}
+-- end
+
 --------------------- LSP ---------------------------------
 local nvim_lsp = require('lspconfig')
 
@@ -32,7 +39,7 @@ local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', 'ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  -- buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
@@ -46,7 +53,7 @@ local servers = {
   'pyright',
   'svelte',
   'rust_analyzer',
-  'tsserver'
+  'tsserver',
 }
 
 for _, lsp in ipairs(servers) do
@@ -61,8 +68,10 @@ end
 nvim_lsp.tailwindcss.setup {
   cmd = { "tailwindcss-language-server", "--stdio" },
   filetypes = { "elm", "aspnetcorerazor", "astro", "astro-markdown", "blade", "django-html", "edge", "eelixir", "ejs", "erb", "eruby", "gohtml", "haml", "handlebars", "hbs", "html", "html-eex", "jade", "leaf", "liquid", "markdown", "mdx", "mustache", "njk", "nunjucks", "php", "razor", "slim", "twig", "css", "less", "postcss", "sass", "scss", "stylus", "sugarss", "javascript", "javascriptreact", "reason", "rescript", "typescript", "typescriptreact", "vue", "svelte" },
+
   init_options = {
     userLanguages = {
+      svelte = "html",
       eelixir = "html-eex",
       eruby = "erb"
     }
@@ -214,4 +223,5 @@ map('n', '<leader>r', '<cmd>Lspsaga rename<CR>')
 map('n', '<leader>d', '<cmd>Lspsaga preview_definition<CR>')
 map('n', 'fd', '<cmd>Lspsaga open_floaterm<CR>')
 map('t', 'fd', '<C-\\><C-n>:Lspsaga close_floaterm<CR>')
+
 
