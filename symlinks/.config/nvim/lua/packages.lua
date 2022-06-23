@@ -64,8 +64,11 @@ require('packer').startup(function()
   use {'drewtempelmeyer/palenight.vim'}
   use {'rakr/vim-one'}
 
- --css color
+  --css color
   use 'ap/vim-css-color'
+
+  --github-copilot
+  use 'github/copilot.vim'
 
 
 end)

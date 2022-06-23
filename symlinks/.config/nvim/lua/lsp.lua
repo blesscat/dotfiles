@@ -52,6 +52,7 @@ end
 local servers = {
   'pyright',
   'svelte',
+  'vuels',
   'rust_analyzer',
   'tsserver',
 }

@@ -72,8 +72,8 @@ map('v', '<leader>p', '"+p')
 map('v', '<leader>P', '"+P')
 
 -- <Tab> to navigate the completion menu
-map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
-map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
+-- map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
+-- map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
 map('n', '<C-l>', '<cmd>noh<CR>')    -- Clear highlights
 map('n', '<S-b>', '<cmd>:bd<CR>')
@@ -101,4 +101,7 @@ map('n', '<S-b>', '<cmd>:bd<CR>')
 -- map('n', '<leader>0', '<cmd>tablast<cr>')
 
 map('i', 'jk', '<esc>')
+
+vim.g.copilot_no_tab_map = true
+vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
 
