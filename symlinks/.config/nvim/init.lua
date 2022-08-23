@@ -1,8 +1,121 @@
 require('common')
-require('packages')
-require('treeSitterSetup')
-require('tabLineTreeSetup')
-require('lsp')
-require('indentGuides')
-require('coqSetup')
-require('telescopeSetup')
+
+-- vim.cmd [[packadd packer.nvim]]
+
+require('packer').startup(function()
+  -- Packer can manage itself
+  use 'wbthomason/packer.nvim'
+
+  -- autopairs
+  use {
+	  "windwp/nvim-autopairs",
+    config = function() require("nvim-autopairs").setup {} end
+  }
+
+  -- tree-sitter
+  use {
+    'nvim-treesitter/nvim-treesitter',
+    run = ':TSUpdate',
+    config = function() 
+      require('treeSitterSetup')
+    end
+  }
+
+  -- nvim-tree
+  use {
+    'kyazdani42/nvim-tree.lua',
+    requires = 'kyazdani42/nvim-web-devicons',
+    config = function()
+      require('nvimTreeSetup')
+    end
+  }
+
+  -- lsp
+  use {
+    'neovim/nvim-lspconfig',
+    config = function()
+      require('lsp')
+    end
+  }
+
+  -- lsp installer
+  use { 
+    "williamboman/mason.nvim",
+    config = function()
+      require("mason").setup()
+    end
+  }
+
+  -- autocomplete
+  use { 
+    'ms-jpq/coq_nvim', branch = 'coq',
+    config = function()
+      require('coqSetup')
+    end
+  }
+  -- use {'ms-jpq/coq.artifacts', branch = 'artifacts'}
+ 
+ 
+  -- comment
+  use {
+    'numToStr/Comment.nvim',
+    config = function()
+        require('Comment').setup()
+    end
+  }
+
+  -- statusbar
+  use {
+    'nvim-lualine/lualine.nvim',
+    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+    config = function()
+        require('lualineSetup')
+    end
+  }
+
+  -- tabline
+  use {
+    'akinsho/bufferline.nvim',
+    tag = "v2.*",
+    requires = 'kyazdani42/nvim-web-devicons',
+    config = function()
+        require('bufferlineSetup')
+    end
+  }
+ 
+ 
+  -- surround 快速操作配對字符 例如ds' 刪除前後的'
+  use({
+    "kylechui/nvim-surround",
+    tag = "*", -- Use for stability; omit to use `main` branch for the latest features
+    config = function()
+        require("nvim-surround").setup({
+            -- Configuration here, or leave empty to use defaults
+        })
+    end
+  })
+
+  -- fuzzy finder
+  use {
+    'nvim-telescope/telescope.nvim',
+    requires = { {'nvim-lua/plenary.nvim'} },
+    config = function()
+      require('telescopeSetup')
+    end
+
+  }
+ 
+  -- indent guides
+  use {
+    "lukas-reineke/indent-blankline.nvim",
+    config = function()
+      require('indentGuides')
+    end
+
+  }
+
+  -- themes
+  use {'drewtempelmeyer/palenight.vim'}
+  use {'rakr/vim-one'}
+
+end)

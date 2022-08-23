@@ -1,4 +1,3 @@
---------------------- LSP ---------------------------------
 local nvim_lsp = require('lspconfig')
 
 -- Use an on_attach function to only map the following keys
@@ -97,6 +96,3 @@ nvim_lsp.tailwindcss.setup {
     }
   }
 }
-
---------------------- LSP Installer------------------------
-require("mason").setup()
