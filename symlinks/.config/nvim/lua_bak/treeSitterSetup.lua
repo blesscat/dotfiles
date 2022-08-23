@@ -25,10 +25,10 @@ require'nvim-treesitter.configs'.setup {
 }
 
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
+parser_config.tsx.used_by = { "javascript", "typescript.tsx" }
 
--- local ft_to_parser = require('nvim-treesitter.parsers').filetype_to_parsername
--- ft_to_parser.astro = "tsx"
+local ft_to_parser = require('nvim-treesitter.parsers').filetype_to_parsername
+ft_to_parser.astro = "tsx"
 
 cmd 'autocmd BufRead,BufEnter *.astro set filetype=astro'
 
