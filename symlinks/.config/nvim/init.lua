@@ -106,13 +106,14 @@ require('packer').startup(function()
   }
  
   -- indent guides
-  use {
-    "lukas-reineke/indent-blankline.nvim",
-    config = function()
-      require('indentGuides')
-    end
+  use { "lukas-reineke/indent-blankline.nvim", config = function()
+    require('indentGuides')
+  end }
 
-  }
+  -- terminal
+  use {"akinsho/toggleterm.nvim", tag = 'v2.*', config = function()
+      require('toggletermSetup')
+  end}
 
   -- themes
   use {'drewtempelmeyer/palenight.vim'}

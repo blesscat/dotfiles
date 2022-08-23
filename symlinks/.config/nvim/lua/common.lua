@@ -29,6 +29,7 @@ if exists('g:neovide')
   set guifont=FiraCode\ Nerd\ font:h12
   let neovide_remember_window_size = v:true
   let g:neovide_cursor_vfx_mode = "pixiedust"
+  set mouse=a
 endif
 ]])
 

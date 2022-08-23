@@ -10,7 +10,7 @@ require("bufferline").setup {
 
     max_name_length = 30,
     tab_size = 30,
-    separator_style = 'thin',
+    -- separator_style = 'thin',
 
     numbers = function(opts)
       return string.format('%s|%s.)', opts.id, opts.raise(opts.ordinal))
