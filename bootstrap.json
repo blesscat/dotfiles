@@ -10,9 +10,7 @@
         "daisydisk",
         "docker",
         "scroll-reverser",
-        "typora",
-        "clip-studio-paint",
-        "bettertouchtool"
+        "typora"
     ],
     "formulas": [
         "bash",
@@ -33,7 +31,8 @@
         "thefuck",
         "neovim",
         "mosh",
-        "unzip"
+        "unzip",
+        "TheZoraiz/ascii-image-converter/ascii-image-converter"
     ],
     "symlinks": {
         "bash/.*": "~",

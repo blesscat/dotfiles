@@ -7,108 +7,72 @@ require('packer').startup(function()
   use 'wbthomason/packer.nvim'
 
   -- autopairs
-  use {
-	  "windwp/nvim-autopairs",
-    config = function() require("nvim-autopairs").setup {} end
-  }
+  use { "windwp/nvim-autopairs", config = function()
+    require("nvim-autopairs").setup {}
+  end}
 
   -- tree-sitter
-  use {
-    'nvim-treesitter/nvim-treesitter',
-    run = ':TSUpdate',
-    config = function() 
-      require('treeSitterSetup')
-    end
-  }
+  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = function() 
+    require('treeSitterSetup')
+  end}
 
   -- nvim-tree
-  use {
-    'kyazdani42/nvim-tree.lua',
-    requires = 'kyazdani42/nvim-web-devicons',
-    config = function()
-      require('nvimTreeSetup')
-    end
-  }
+  use { 'kyazdani42/nvim-tree.lua', requires = 'kyazdani42/nvim-web-devicons', config = function()
+    require('nvimTreeSetup')
+  end}
 
   -- lsp
-  use {
-    'neovim/nvim-lspconfig',
-    config = function()
-      require('lsp')
-    end
-  }
+  use { 'neovim/nvim-lspconfig', config = function()
+    require('lsp')
+  end}
 
   -- lsp installer
-  use { 
-    "williamboman/mason.nvim",
-    config = function()
-      require("mason").setup()
-    end
-  }
+  use { "williamboman/mason.nvim", config = function()
+    require("mason").setup()
+  end}
 
   -- autocomplete
-  use { 
-    'ms-jpq/coq_nvim', branch = 'coq',
-    config = function()
-      require('coqSetup')
-    end
-  }
+  use { 'ms-jpq/coq_nvim', branch = 'coq', config = function()
+    require('coqSetup')
+  end}
   -- use {'ms-jpq/coq.artifacts', branch = 'artifacts'}
  
- 
   -- comment
-  use {
-    'numToStr/Comment.nvim',
-    config = function()
-        require('Comment').setup()
-    end
-  }
+  use { 'numToStr/Comment.nvim', config = function()
+    require('Comment').setup()
+  end}
 
   -- statusbar
-  use {
-    'nvim-lualine/lualine.nvim',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
-    config = function()
-        require('lualineSetup')
-    end
-  }
+  use { 'nvim-lualine/lualine.nvim', requires = { 'kyazdani42/nvim-web-devicons', opt = true }, config = function()
+      require('lualineSetup')
+  end}
 
   -- tabline
-  use {
-    'akinsho/bufferline.nvim',
-    tag = "v2.*",
-    requires = 'kyazdani42/nvim-web-devicons',
-    config = function()
-        require('bufferlineSetup')
-    end
-  }
- 
+  use { 'akinsho/bufferline.nvim', tag = "v2.*", requires = 'kyazdani42/nvim-web-devicons', config = function()
+    require('bufferlineSetup')
+  end}
  
   -- surround 快速操作配對字符 例如ds' 刪除前後的'
-  use({
-    "kylechui/nvim-surround",
+  use { "kylechui/nvim-surround",
     tag = "*", -- Use for stability; omit to use `main` branch for the latest features
     config = function()
-        require("nvim-surround").setup({
-            -- Configuration here, or leave empty to use defaults
-        })
-    end
-  })
+        require("nvim-surround").setup()
+  end}
 
   -- fuzzy finder
-  use {
-    'nvim-telescope/telescope.nvim',
-    requires = { {'nvim-lua/plenary.nvim'} },
-    config = function()
-      require('telescopeSetup')
-    end
-
-  }
+  use { 'nvim-telescope/telescope.nvim', requires = { {'nvim-lua/plenary.nvim'} }, config = function()
+    require('telescopeSetup')
+  end}
  
   -- indent guides
   use { "lukas-reineke/indent-blankline.nvim", config = function()
     require('indentGuides')
-  end }
+  end}
+
+  -- Image Viewer as ASCII Art for Neovim, written in Lua
+  use { 'samodostal/image.nvim', requires = { 'nvim-lua/plenary.nvim' }, config = function()
+    require('imageSetup')
+  end}
 
   -- terminal
   use {"akinsho/toggleterm.nvim", tag = 'v2.*', config = function()
