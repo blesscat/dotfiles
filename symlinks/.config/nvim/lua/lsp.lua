@@ -57,7 +57,23 @@ for _, lsp in ipairs(servers) do
   }
 end
 
+local on_attach = function(client)
+  if client.server_capabilities.colorProvider then
+    -- Attach document colour support
+    require("document-color").buf_attach(bufnr)
+  end
+end
+
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+-- You are now capable!
+capabilities.textDocument.colorProvider = {
+  dynamicRegistration = true
+}
+
 nvim_lsp.tailwindcss.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
   cmd = { "tailwindcss-language-server", "--stdio" },
   filetypes = { "elm", "aspnetcorerazor", "astro", "astro-markdown", "blade", "django-html", "edge", "eelixir", "ejs", "erb", "eruby", "gohtml", "haml", "handlebars", "hbs", "html", "html-eex", "jade", "leaf", "liquid", "markdown", "mdx", "mustache", "njk", "nunjucks", "php", "razor", "slim", "twig", "css", "less", "postcss", "sass", "scss", "stylus", "sugarss", "javascript", "javascriptreact", "reason", "rescript", "typescript", "typescriptreact", "vue", "svelte" },
 
@@ -68,6 +84,7 @@ nvim_lsp.tailwindcss.setup {
       eruby = "erb"
     }
   },
+
   on_new_config = function(new_config)
     if not new_config.settings then
       new_config.settings = {}

@@ -22,7 +22,7 @@ require('packer').startup(function()
   end}
 
   -- lsp
-  use { 'neovim/nvim-lspconfig', config = function()
+  use { 'neovim/nvim-lspconfig', require= 'mrshmllow/document-color.nvim' config = function()
     require('lsp')
   end}
 
@@ -82,5 +82,14 @@ require('packer').startup(function()
   -- themes
   use {'drewtempelmeyer/palenight.vim'}
   use {'rakr/vim-one'}
+
+  -- tailwindcss color
+  use { 'mrshmllow/document-color.nvim', config = function()
+  require("document-color").setup {
+    -- Default options
+    mode = "background", -- "background" | "foreground" | "single"
+  }
+  end
+}
 
 end)
