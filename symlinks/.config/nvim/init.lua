@@ -22,7 +22,7 @@ require('packer').startup(function()
   end}
 
   -- lsp
-  use { 'neovim/nvim-lspconfig', require= 'mrshmllow/document-color.nvim' config = function()
+  use { 'neovim/nvim-lspconfig', require = 'mrshmllow/document-color.nvim', config = function()
     require('lsp')
   end}
 
