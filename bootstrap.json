@@ -32,7 +32,8 @@
         "neovim",
         "mosh",
         "unzip",
-        "TheZoraiz/ascii-image-converter/ascii-image-converter"
+        "TheZoraiz/ascii-image-converter/ascii-image-converter",
+        "kitty"
     ],
     "symlinks": {
         "bash/.*": "~",
@@ -46,7 +47,8 @@
         "tig/.*": "~",
         "ctags/.*": "~",
         "coc/*": "~/.vim/",
-        ".config/nvim/": "~/.config"
+        ".config/nvim/": "~/.config",
+        ".config/kitty/": "~/.config"
     },
     "taps": [
       "homebrew/cask-fonts"
