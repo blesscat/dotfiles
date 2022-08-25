@@ -16,6 +16,8 @@ require('packer').startup(function()
     require('treeSitterSetup')
   end}
 
+  use 'f-person/git-blame.nvim'
+
   -- nvim-tree
   use { 'kyazdani42/nvim-tree.lua', requires = 'kyazdani42/nvim-web-devicons', config = function()
     require('nvimTreeSetup')
@@ -85,11 +87,34 @@ require('packer').startup(function()
 
   -- tailwindcss color
   use { 'mrshmllow/document-color.nvim', config = function()
-  require("document-color").setup {
-    -- Default options
-    mode = "background", -- "background" | "foreground" | "single"
-  }
-  end
-}
+    require("document-color").setup {
+      -- Default options
+      mode = "background", -- "background" | "foreground" | "single"
+    }
+  end}
+
+  -- Invert text in vim. ex: ture <-> false
+  use { 'nguyenvukhang/nvim-toggler', config = function()
+    require('nvim-toggler').setup({
+      inverses = {
+        ['vim'] = 'emacs'
+      }
+    })
+  end}
+
+  -- markdown筆記
+  use { 'phaazon/mind.nvim', config = function()
+    require('mind').setup()
+  end}
+
+  -- install without yarn or npm
+  use({
+      "iamcco/markdown-preview.nvim",
+      run = function() vim.fn["mkdp#util#install"]() end,
+  })
+
+
+  -- githib copilot
+  use 'github/copilot.vim'
 
 end)

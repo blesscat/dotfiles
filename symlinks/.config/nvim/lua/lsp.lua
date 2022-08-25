@@ -113,3 +113,7 @@ nvim_lsp.tailwindcss.setup {
     }
   }
 }
+
+map('n', '<leader>do', '<cmd>lua vim.diagnostic.open_float()<CR>')
+map('n', '<leader>d[', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
+map('n', '<leader>d]', '<cmd>lua vim.diagnostic.goto_next()<CR>')
