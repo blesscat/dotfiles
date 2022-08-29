@@ -106,4 +106,8 @@ map('i', 'jk', '<esc>')
 
 vim.g.copilot_no_tab_map = true
 vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+vim.api.nvim_create_user_command('PrettyPrintJSON','%!python -m json.tool', { bang = true })
+vim.api.nvim_create_user_command('PrettyPrintXML', '!tidy -mi -xml -wrap 0 %', { bang = true })
+vim.api.nvim_create_user_command('PrettyPrintHTML', '!tidy -mi -html -wrap 0 %', { bang = true })
+
 
