@@ -49,7 +49,6 @@ require'nvim-tree'.setup {
 }
 
 map('n', '<leader>n', '<cmd>:NvimTreeToggle<cr>')
--- map('n', 'tr', '<cmd>:NvimTreeRefresh<cr>')
 map('n', '<leader>tf', '<cmd>:NvimTreeFindFile<cr>')
 
 

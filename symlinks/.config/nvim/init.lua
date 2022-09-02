@@ -12,9 +12,12 @@ require('packer').startup(function()
   end}
 
   -- tree-sitter
-  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = function() 
-    require('treeSitterSetup')
-  end}
+  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate',
+    -- requires = 'p00f/nvim-ts-rainbow',
+    config = function() 
+      require('treeSitterSetup')
+    end
+  }
 
   use 'f-person/git-blame.nvim'
 
@@ -103,15 +106,15 @@ require('packer').startup(function()
   end}
 
   -- markdown筆記
-  use { 'phaazon/mind.nvim', config = function()
-    require('mind').setup()
+  use { 'phaazon/mind.nvim', branch = 'v2.1', config = function()
+    require('mindSetup')
   end}
 
-  -- install without yarn or npm
-  use({
+  -- markdown preview
+  use {
       "iamcco/markdown-preview.nvim",
       run = function() vim.fn["mkdp#util#install"]() end,
-  })
+  }
 
 
   -- githib copilot

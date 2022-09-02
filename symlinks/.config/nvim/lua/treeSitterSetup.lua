@@ -5,6 +5,14 @@ require'nvim-treesitter.configs'.setup {
       -- Highlight the @foo.bar capture group with the "Identifier" highlight group.
       ["foo.bar"] = "Identifier",
     },
+    -- rainbow = {
+    --   enable = true,
+    --   disable = { "svelte" },-- list of languages you want to disable the plugin for
+    --   extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+    --   max_file_lines = nil, -- Do not enable for files with more than n lines, int
+    --   -- colors = {}, -- table of hex strings
+    --   -- termcolors = {} -- table of colour name strings
+    -- },
     ensure_installed = {
       "tsx",
       "json",
@@ -25,8 +33,4 @@ require'nvim-treesitter.configs'.setup {
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
 parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
 
--- local ft_to_parser = require('nvim-treesitter.parsers').filetype_to_parsername
--- ft_to_parser.astro = "tsx"
-
 cmd 'autocmd BufRead,BufEnter *.astro set filetype=astro'
-
