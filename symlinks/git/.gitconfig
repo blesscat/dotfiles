@@ -11,11 +11,11 @@
 
 [alias]
 	lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
-	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(bless)%s%C(reset) %C(dim bless)- %an%C(reset)' --all
 	# list all the commit by current branch.
-	lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)'
+	lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(bless)%s%C(reset) %C(dim bless)- %an%C(reset)%C(bold yellow)%d%C(reset)'
 	# list all the commit since last week by specific author.
-	lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --since=1.weeks --author="blesscat" --all --no-merges
+	lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(bless)%s%C(reset) %C(dim bless)- %an%C(reset)%C(bold yellow)%d%C(reset)' --since=1.weeks --author="blesscat" --all --no-merges
 	# list all the commit since the specific hash/tag. Git with parameters with alias.
-	lg5 = "!f() { git log \"$1\"..HEAD --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %C(bold red)%an%C(reset)%C(bold yellow)%d%C(reset)' --no-merges; }; f"
+	lg5 = "!f() { git log \"$1\"..HEAD --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(bless)%s%C(reset) %C(dim bless)- %C(bold red)%an%C(reset)%C(bold yellow)%d%C(reset)' --no-merges; }; f"
 	lg = !"git lg1"

@@ -118,6 +118,6 @@ require('packer').startup(function()
 
 
   -- githib copilot
-  use 'github/copilot.vim'
+  -- use 'github/copilot.vim'
 
 end)

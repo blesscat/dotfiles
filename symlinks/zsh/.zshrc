@@ -143,4 +143,4 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 # pnpm
 export PNPM_HOME="/Users/blessma/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
-# pnpm end
+# pnpm endexport PATH="/usr/local/opt/qt@5/bin:$PATH"

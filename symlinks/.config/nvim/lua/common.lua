@@ -30,7 +30,6 @@ if exists('g:neovide')
   let neovide_remember_window_size = v:true
   let g:neovide_cursor_vfx_mode = "pixiedust"
   let g:neovide_scroll_animation_length=0.3
-  set mouse=a
 endif
 ]])
 
