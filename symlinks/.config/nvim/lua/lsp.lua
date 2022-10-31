@@ -43,9 +43,9 @@ end
 local servers = {
   'pyright',
   'svelte',
-  'vuels',
   'rust_analyzer',
   'tsserver',
+  'volar'
 }
 
 for _, lsp in ipairs(servers) do
@@ -113,6 +113,7 @@ nvim_lsp.tailwindcss.setup {
     }
   }
 }
+
 
 map('n', '<leader>do', '<cmd>lua vim.diagnostic.open_float()<CR>')
 map('n', '<leader>d[', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
