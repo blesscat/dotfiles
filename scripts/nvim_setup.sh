@@ -13,4 +13,4 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
  $NVIM_DIR/site/pack/packer/start/packer.nvim
 fi
 
-nvim +PackerInstall +qall
+nvim +PackerSync +qall
