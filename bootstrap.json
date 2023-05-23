@@ -48,6 +48,7 @@
         "ctags/.*": "~",
         "coc/*": "~/.vim/",
         ".config/nvim/": "~/.config",
+        ".config/helix/": "~/.config",
         ".config/kitty/": "~/.config"
     },
     "taps": [

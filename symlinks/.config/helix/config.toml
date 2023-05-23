@@ -1,0 +1,11 @@
+theme = "night_owl"
+
+[editor]
+bufferline = "multiple"
+
+[keys.normal]
+D = "kill_to_line_end"
+B = ":buffer-close"
+C-k = ":buffer-next"
+C-j = ":buffer-previous"
+C-o = [":sh open '$val{linenumber}'"]

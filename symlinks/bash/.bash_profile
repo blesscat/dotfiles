@@ -41,6 +41,9 @@ export PATH="$HOME/.serve:$PATH"
 # ImplicitCAD
 export PATH="$HOME/.cabal/bin:$PATH"
 
+# golang
+export PATH="$HOME/go/bin:$PATH"
+
 # Alias
 alias la="ls -la"
 alias ll="ls -l"

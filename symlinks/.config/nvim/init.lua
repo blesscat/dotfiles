@@ -12,8 +12,8 @@ require('packer').startup(function()
   end}
 
   -- tree-sitter
-  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate',
-  -- use { 'nvim-treesitter/nvim-treesitter', commit = '4cccb6f494eb255b32a290d37c35ca12584c74d0',
+  -- use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate',
+  use { 'nvim-treesitter/nvim-treesitter', commit = '4cccb6f494eb255b32a290d37c35ca12584c74d0',
     -- requires = 'p00f/nvim-ts-rainbow',
     config = function() 
       require('treeSitterSetup')
@@ -88,6 +88,7 @@ require('packer').startup(function()
   -- themes
   use {'drewtempelmeyer/palenight.vim'}
   use {'rakr/vim-one'}
+  use {'haishanh/night-owl.vim'}
 
   -- tailwindcss color
   use { 'mrshmllow/document-color.nvim', config = function()
@@ -119,6 +120,6 @@ require('packer').startup(function()
 
 
   -- githib copilot
-  -- use 'github/copilot.vim'
+  use 'github/copilot.vim'
 
 end)

@@ -1,0 +1,9 @@
+[[language]]
+name = "tailwind"
+scope = "source.svelte"
+roots = [".npmrc"]
+file-types = ["svelte"]
+language-server = {
+   command = "/home/yura/.local/share/nvim/lsp_servers/tailwindcss_npm/node_modules/@tailwindcss/language-server/bin/tailwindcss-language-server",
+   args = ["--stdio"]
+}

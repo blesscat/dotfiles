@@ -15,6 +15,7 @@ end
 -- colorscheme
 cmd 'colorscheme palenight'
 -- cmd 'colorscheme one'
+-- cmd 'colorscheme night-owl'
 
 opt.background = 'dark'
 
