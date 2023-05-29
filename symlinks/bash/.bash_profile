@@ -47,6 +47,7 @@ export PATH="$HOME/go/bin:$PATH"
 # Alias
 alias la="ls -la"
 alias ll="ls -l"
+alias lg="lazygit"
 alias vi="nvim"
 alias neovide="neovide --multigrid"
 alias nv="neovide"
