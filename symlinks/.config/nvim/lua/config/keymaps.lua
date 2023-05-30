@@ -17,4 +17,8 @@ map("n", "<leader>mm", "<cmd>MindOpenMain<CR>")
 map("n", "<leader>mr", "<cmd>MindReloadState<CR>")
 map("n", "<leader>o", "<cmd>!open %:p:h<CR>")
 
-map("i", "<C-j>", 'copilot#Accept("<CR>")')
+map("v", "<leader>y", '"hy')
+map("n", "<leader>y", '"hy')
+
+map("n", "<leader>p", '"hp')
+map("v", "<leader>p", '"hp')
