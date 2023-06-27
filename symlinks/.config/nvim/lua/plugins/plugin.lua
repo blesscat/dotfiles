@@ -60,5 +60,12 @@ return {
       table.insert(opts.sources, require("typescript.extensions.null-ls.code-actions"))
     end,
   },
+  {
+    "echasnovski/mini.align",
+    version = "*",
+    config = function()
+      require("mini.align").setup()
+    end,
+  },
 }
 -- markdown preview
