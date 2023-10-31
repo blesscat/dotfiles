@@ -36,15 +36,15 @@ return {
       vim.fn["mkdp#util#install"]()
     end,
   },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    build = ":Copilot auth",
-    opts = {
-      suggestion = { enabled = false },
-      panel = { enabled = false },
-    },
-  },
+  -- {
+  --   "zbirenbaum/copilot.lua",
+  --   cmd = "Copilot",
+  --   build = ":Copilot auth",
+  --   opts = {
+  --     suggestion = { enabled = false },
+  --     panel = { enabled = false },
+  --   },
+  -- },
   {
     "nvim-treesitter/nvim-treesitter",
     opts = function(_, opts)
@@ -53,13 +53,14 @@ return {
       end
     end,
   },
-  { "jose-elias-alvarez/typescript.nvim" },
-  {
-    "jose-elias-alvarez/null-ls.nvim",
-    opts = function(_, opts)
-      table.insert(opts.sources, require("typescript.extensions.null-ls.code-actions"))
-    end,
-  },
+  -- { "jose-elias-alvarez/typescript.nvim" },
+  { "typescript-tools.nvim" },
+  -- {
+  --   "nvimtools/none-ls.nvim",
+  --   opts = function(_, opts)
+  --     table.insert(opts.sources, require("typescript.extensions.null-ls.code-actions"))
+  --   end,
+  -- },
   {
     "echasnovski/mini.align",
     version = "*",
