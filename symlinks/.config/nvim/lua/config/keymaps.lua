@@ -22,3 +22,5 @@ map("n", "<leader>y", '"hy')
 
 map("n", "<leader>p", '"hp')
 map("v", "<leader>p", '"hp')
+
+map("n", "<leader>C", "<cmd>let @+=expand('%:p')<CR>")
