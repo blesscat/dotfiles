@@ -49,6 +49,7 @@ alias la="ls -la"
 alias ll="ls -l"
 alias lg="lazygit"
 alias vi="nvim"
+alias vim="nvim"
 alias neovide="neovide --multigrid"
 alias nv="neovide"
 # alias vim="nvim"
@@ -59,3 +60,11 @@ alias ibrew="arch -x86_64 brew"
 alias ipyenv="arch -x86_64 pyenv"
 eval "$(thefuck --alias)"
 . "$HOME/.cargo/env"
+
+# pnpm
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+# rvm
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+export PATH="/opt/local/lib:/usr/local/lib:$PATH"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
