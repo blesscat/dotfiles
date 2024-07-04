@@ -4,6 +4,7 @@ return {
     dependencies = { "jose-elias-alvarez/typescript.nvim" },
     opts = {
       servers = {
+        dartls = {},
         ---@type lspconfig.options.tsserver
         tsserver = {
           settings = {

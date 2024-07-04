@@ -60,7 +60,6 @@ return {
       end
     end,
   },
-  { "typescript-tools.nvim" },
   {
     "echasnovski/mini.align",
     version = "*",

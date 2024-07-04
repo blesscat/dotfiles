@@ -1,0 +1,12 @@
+color = ''
+project-name = 'default'
+[default]
+account_id = 'acct_1PYLrURx30kv98aN'
+device_name = 'Bless-M2-pro.local'
+live_mode_api_key = 'rk_live_***********************************************************************************************3SWh'
+live_mode_key_expires_at = '2024-10-01'
+live_mode_pub_key = 'pk_live_51PYLrURx30kv98aN1L2zmWkwvzQk7HvWUAjyi3R01T3YScBTQu670DeZQlhkLNHGEjg9tCbSZLiGHAQufBcmkww500iWr2tnlF'
+test_mode_api_key = 'rk_test_51PYLrURx30kv98aNNNDAQAGN7u4mu4vqfAs78BUZuJaDQ3N7s6rSsotylT8MglcJI0YUUYQofg5gp2X70NfhYEI200FFQJk1Ho'
+test_mode_key_expires_at = '2024-10-01'
+test_mode_pub_key = 'pk_test_51PYLrURx30kv98aN4Kl2csZw8yNG0DqLgPPAOH1miApuKAZbzlhkb1PXaato4mwmApWXlPjn8hioRqovoR6VpU6t00wLNMlUUH'
+
