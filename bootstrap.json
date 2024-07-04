@@ -1,57 +1,58 @@
 {
-    "after-scripts": [
-        "./scripts/node_setup.sh",
-        "./scripts/nvim_setup.sh"
-    ],
-    "casks": [
-        "homebrew/cask-fonts/font-fira-code-nerd-font",
-        "google-chrome",
-        "spectacle",
-        "daisydisk",
-        "docker",
-        "scroll-reverser",
-        "typora"
-    ],
-    "formulas": [
-        "bash",
-        "zlib",
-        "openssl",
-        "cmake",
-        "ctags",
-        "ssh-copy-id",
-        "go",
-        "ripgrep",
-        "fzf",
-        "node",
-        "pipenv",
-        "git",
-        "wget",
-        "tig",
-        "fd",
-        "thefuck",
-        "neovim",
-        "mosh",
-        "unzip",
-        "TheZoraiz/ascii-image-converter/ascii-image-converter",
-        "kitty"
-    ],
-    "symlinks": {
-        "bash/.*": "~",
-        "zsh/.*": "~",
-        "zim/.*": "~",
-        "editorconfig/.*": "~",
-        "git/.*": "~",
-        "mackup/.*": "~",
-        "vim/.*": "~",
-        "vue/.*": "~",
-        "tig/.*": "~",
-        "ctags/.*": "~",
-        "coc/*": "~/.vim/",
-        ".config/nvim/": "~/.config",
-        ".config/helix/": "~/.config",
-        ".config/kitty/": "~/.config"
-    },
-    "taps": [
-      "homebrew/cask-fonts"
-    ]
+  "after-scripts": [
+    "./scripts/node_setup.sh",
+    "./scripts/nvim_setup.sh"
+  ],
+  "casks": [
+    "homebrew/cask-fonts/font-fira-code-nerd-font",
+    "google-chrome",
+    "spectacle",
+    "daisydisk",
+    "docker",
+    "scroll-reverser",
+    "typora",
+    "warp"
+  ],
+  "formulas": [
+    "bash",
+    "zlib",
+    "openssl",
+    "cmake",
+    "ctags",
+    "ssh-copy-id",
+    "go",
+    "ripgrep",
+    "fzf",
+    "node",
+    "pipenv",
+    "git",
+    "wget",
+    "tig",
+    "fd",
+    "thefuck",
+    "neovim",
+    "mosh",
+    "unzip",
+    "TheZoraiz/ascii-image-converter/ascii-image-converter"
+  ],
+  "symlinks": {
+    "bash/.*": "~",
+    "zsh/.*": "~",
+    "zim/.*": "~",
+    "editorconfig/.*": "~",
+    "git/.*": "~",
+    "mackup/.*": "~",
+    "vim/.*": "~",
+    "vue/.*": "~",
+    "tig/.*": "~",
+    "ctags/.*": "~",
+    "coc/*": "~/.vim/",
+    ".warp/themes/": "~/.warp",
+    ".config/nvim/": "~/.config",
+    ".config/helix/": "~/.config",
+    ".config/kitty/": "~/.config"
+  },
+  "taps": [
+    "homebrew/cask-fonts"
+  ]
 }
