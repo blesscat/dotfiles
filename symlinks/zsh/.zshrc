@@ -132,9 +132,6 @@ unset key
 export PATH=$PATH:/usr/local/bin
 [ -f ~/.bash_profile ] && source ~/.bash_profile
 
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-export PUPPETEER_EXECUTABLE_PATH=`which chromium`
-
 export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export CPPFLAGS="-I/usr/local/opt/zlib/include"
 
