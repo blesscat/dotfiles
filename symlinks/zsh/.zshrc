@@ -154,3 +154,6 @@ export PATH="/opt/homebrew/opt/ruby@2.7/bin:$PATH"
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+
+# Created by `pipx` on 2025-01-07 09:29:00
+export PATH="$PATH:/Users/bless/.local/bin"

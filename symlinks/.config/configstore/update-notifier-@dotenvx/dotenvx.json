@@ -1,8 +1,8 @@
 {
 	"optOut": false,
-	"lastUpdateCheck": 1727315105379,
+	"lastUpdateCheck": 1736322323617,
 	"update": {
-		"latest": "1.14.1",
+		"latest": "1.32.1",
 		"current": "0.25.1",
 		"type": "major",
 		"name": "@dotenvx/dotenvx"
