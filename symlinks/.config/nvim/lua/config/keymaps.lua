@@ -12,9 +12,6 @@ local function map(mode, lhs, rhs, opts)
 end
 
 map("n", "B", "<cmd>bd<CR>")
-map("n", "<leader>mp", "<cmd>MindOpenProject<CR>")
-map("n", "<leader>mm", "<cmd>MindOpenMain<CR>")
-map("n", "<leader>mr", "<cmd>MindReloadState<CR>")
 map("n", "<leader>o", "<cmd>!open %:p:h<CR>")
 
 map("v", "<leader>y", '"hy')
