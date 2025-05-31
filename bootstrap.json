@@ -24,7 +24,6 @@
     "ripgrep",
     "fzf",
     "node",
-    "pipenv",
     "git",
     "wget",
     "tig",

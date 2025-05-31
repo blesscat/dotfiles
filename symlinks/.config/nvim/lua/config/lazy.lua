@@ -10,6 +10,15 @@ require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+    opts = {
+      colorscheme = "catppuccin-frappe", -- 您的預設主題
+    },
+    -- import any extras modules here
+    -- { import = "lazyvim.plugins.extras.lang.typescript" },
+    -- { import = "lazyvim.plugins.extras.lang.json" },
+    -- { import = "lazyvim.plugins.extras.lang.tailwind" },
+    -- { import = "lazyvim.plugins.extras.dap.core" },
+    -- { import = "lazyvim.plugins.extras.ui.mini-animate" },
     -- import/override with your plugins
     { import = "plugins" },
   },
@@ -39,3 +48,7 @@ require("lazy").setup({
     },
   },
 })
+
+vim.o.guifont = "FiraCode Nerd Font Mono:h14"
+vim.opt.linespace = 6
+vim.g.neovide_opacity = 0.95

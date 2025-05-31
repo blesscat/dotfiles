@@ -1,8 +1,6 @@
 return {
   -- {
-  --   "neovim/nvim-lspconfig",
-  --   opts = {
-  --     inlay_hints = { enabled = false },
-  --   },
+  --   "williamboman/mason-lspconfig.nvim",
+  --   version = "v1.29.0",
   -- },
 }

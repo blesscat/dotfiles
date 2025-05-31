@@ -14,6 +14,25 @@ return {
     "f-person/git-blame.nvim",
     version = "*",
   },
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = { "L3MON4D3/LuaSnip" },
+    opts = function(_, opts)
+      local cmp = require("cmp")
+      opts.snippet = {
+        expand = function(args)
+          require("luasnip").lsp_expand(args.body)
+        end,
+      }
+      opts.sources = cmp.config.sources({
+        { name = "nvim_lsp" },
+        { name = "luasnip" },
+        { name = "buffer" },
+        { name = "path" },
+        { name = "codeium" },
+      })
+    end,
+  },
   -- {
   --   "nvim-treesitter/nvim-treesitter",
   --   opts = function(_, opts)
