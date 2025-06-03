@@ -14,46 +14,23 @@ return {
     "f-person/git-blame.nvim",
     version = "*",
   },
-  {
-    "hrsh7th/nvim-cmp",
-    dependencies = { "L3MON4D3/LuaSnip" },
-    opts = function(_, opts)
-      local cmp = require("cmp")
-      opts.snippet = {
-        expand = function(args)
-          require("luasnip").lsp_expand(args.body)
-        end,
-      }
-      opts.sources = cmp.config.sources({
-        { name = "nvim_lsp" },
-        { name = "luasnip" },
-        { name = "buffer" },
-        { name = "path" },
-        { name = "codeium" },
-      })
-    end,
-  },
   -- {
-  --   "nvim-treesitter/nvim-treesitter",
+  --   "hrsh7th/nvim-cmp",
+  --   dependencies = { "L3MON4D3/LuaSnip" },
   --   opts = function(_, opts)
-  --     if type(opts.ensure_installed) == "table" then
-  --       vim.list_extend(opts.ensure_installed, { "typescript", "tsx" })
-  --     end
+  --     local cmp = require("cmp")
+  --     opts.snippet = {
+  --       expand = function(args)
+  --         require("luasnip").lsp_expand(args.body)
+  --       end,
+  --     }
+  --     opts.sources = cmp.config.sources({
+  --       { name = "nvim_lsp" },
+  --       { name = "luasnip" },
+  --       { name = "buffer" },
+  --       { name = "path" },
+  --       { name = "codeium" },
+  --     })
   --   end,
-  -- },
-  -- {
-  --   "iamcco/markdown-preview.nvim",
-  --   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-  --   ft = { "markdown" },
-  --   build = function()
-  --     vim.fn["mkdp#util#install"]()
-  --   end,
-  -- },
-  -- -- A high-performance color highlighter for Neovim which has no external dependencies! Written in performant Luajit.
-  -- {
-  --   "catgoose/nvim-colorizer.lua",
-  --   event = "BufReadPre",
-  --   opts = { -- set to setup table
-  --   },
   -- },
 }

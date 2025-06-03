@@ -28,12 +28,12 @@ return {
   },
 
   -- Tailwind CSS snippets 套件（用 LuaSnip）
-  {
-    "rafamadriz/friendly-snippets",
-    config = function()
-      require("luasnip.loaders.from_vscode").lazy_load()
-    end,
-  },
+  --{
+  --  "rafamadriz/friendly-snippets",
+  --  config = function()
+  --    require("luasnip.loaders.from_vscode").lazy_load()
+  --  end,
+  --},
 
   -- 確保 cmp 有接上 LuaSnip
   {
