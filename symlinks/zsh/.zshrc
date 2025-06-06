@@ -36,13 +36,6 @@ pyenv() {
     pyenv "$@"
 }
 
-nvm() {
-    unfunction nvm
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && source "/opt/homebrew/opt/nvm/nvm.sh"
-    nvm "$@"
-}
-
 asdf() {
     unfunction asdf  
     source "$HOME/.asdf/asdf.sh"
