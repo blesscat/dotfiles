@@ -1,6 +1,6 @@
-# 快速啟動版 .zshrc
+# Fast startup .zshrc
 
-# Zim framework 最小設定
+# Minimal Zim framework configuration
 ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
 if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
   if (( ${+commands[curl]} )); then
@@ -17,19 +17,25 @@ if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
 fi
 source ${ZIM_HOME}/init.zsh
 
-# 基本 Zsh 設定
+# Basic Zsh configuration
 setopt HIST_IGNORE_ALL_DUPS
 bindkey -e
 WORDCHARS=${WORDCHARS//[\/]}
 
-# 載入 bash profile
+# Load bash profile
 [[ -r ~/.bash_profile ]] && source ~/.bash_profile
 
-# Key bindings (簡化版)
+# Ensure correct Node.js version is used
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    source "$HOME/.nvm/nvm.sh"
+    nvm use default >/dev/null 2>&1
+fi
+
+# Key bindings (simplified)
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-# 延遲載入功能
+# Lazy loading functions
 pyenv() {
     unfunction pyenv
     eval "$(command pyenv init -)"
