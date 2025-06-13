@@ -45,7 +45,7 @@
     "vue/.*": "~",
     "tig/.*": "~",
     "ctags/.*": "~",
-    "coc/*": "~/.vim/",
+    ".claude/*": "~/.claude",
     ".warp/themes/": "~/.warp",
     ".config/nvim/": "~/.config",
     ".config/helix/": "~/.config",

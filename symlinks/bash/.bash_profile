@@ -29,9 +29,6 @@ alias glog="git log --pretty=format:'%h %s %an %cd' --graph"
 # RVM PATH (only set path, don't load functions)
 export PATH="$PATH:$HOME/.rvm/bin"
 
-# Windsurf
-export PATH="/Users/bless/.codeium/windsurf/bin:$PATH"
-
 # NVM
 export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"                                       # This loads nvm
@@ -39,5 +36,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # Auto use nvm default version
 if [ -s "$NVM_DIR/nvm.sh" ]; then
-    nvm use default >/dev/null 2>&1
+	nvm use default >/dev/null 2>&1
 fi
+
+eval $(thefuck --alias)
