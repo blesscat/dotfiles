@@ -1,4 +1,4 @@
-Analyze the current branch commits and create a pull request: $ARGUMENTS (target branch name)
+Analyze the current branch commits and create a pull target: $ARGUMENTS (target branch name)
 
 Add ticket number as hyperlink at the beginning (hyperlink format: [ticket_number](https://taroko.atlassian.net/issues/{ticket_number}))
 
