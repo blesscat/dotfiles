@@ -1,0 +1,21 @@
+description = 'Creates a commit for staged files using a conventional commit message. An optional JIRA ticket can be provided.'
+tools = ["run_shell_command"]
+prompt = '''
+The user wants to create a git commit based on staged files.
+The user wants a detailed commit message with a title and a body.
+The user may have provided an optional JIRA ticket in {{args}}.
+
+Your task is to create a conventional commit message.
+
+1.  Run `git diff --cached` to thoroughly understand the staged changes.
+2.  Run `git log --oneline -5` to observe recent commit message styles.
+3.  **Formulate the message:**
+    a.  **Title:** Create a concise title that follows the Conventional Commits specification (e.g., "feat: Add new login button").
+    b.  **Body:** Write a clear, descriptive body that explains WHAT was changed and WHY. Keep it concise, perhaps 2-3 bullet points or a short paragraph.
+4.  **Handle JIRA Ticket:**
+    - If `{{args}}` is NOT empty, prepend the ticket to the commit **title**, like this: `feat: [{{args}}] Add new login button`.
+    - If `{{args}}` IS empty, use the title as is. DO NOT ask for a ticket.
+5.  **Execute the commit:** Use separate `-m` flags for the title and the body. For example:
+    `git commit -m "Final Title" -m "This is the body of the commit." -m "It explains the changes in more detail."`
+6.  Confirm by running `git log -1`.
+'''

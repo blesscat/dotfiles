@@ -39,4 +39,5 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
 	nvm use default >/dev/null 2>&1
 fi
 
-eval $(thefuck --alias)
+# change temp folder
+export TMPDIR=$HOME/tmp

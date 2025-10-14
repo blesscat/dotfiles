@@ -10,6 +10,16 @@ return {
   --     })
   --   end,
   -- },
+  -- install with yarn or npm
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    build = "cd app && yarn install",
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown" }
+    end,
+    ft = { "markdown" },
+  },
   {
     "f-person/git-blame.nvim",
     version = "*",
@@ -19,18 +29,18 @@ return {
     enabled = vim.fn.has("gui_running") == 0,
     opts = {},
   },
-  {
-    "echasnovski/mini.surround",
-    opts = {
-      mappings = {
-        add = "ys", -- Add surrounding in Normal and Visual modes
-        delete = "ds", -- Delete surrounding
-        replace = "cs", -- Replace surrounding
-        find = "gzf", --  (可自行決定是否修改)
-        find_left = "gzF", -- (可自行決定是否修改)
-        highlight = "gzh", -- (可自行決定是否修改)
-        update_n_lines = "gzn", -- (可自行決定是否修改)
-      },
-    },
-  },
+  -- {
+  --   "mvin.mini/mini.surround",
+  --   opts = {
+  --     mappings = {
+  --       add = "ys", -- Add surrounding in Normal and Visual modes
+  --       delete = "ds", -- Delete surrounding
+  --       replace = "cs", -- Replace surrounding
+  --       find = "gzf", --  (可自行決定是否修改)
+  --       find_left = "gzF", -- (可自行決定是否修改)
+  --       highlight = "gzh", -- (可自行決定是否修改)
+  --       update_n_lines = "gzn", -- (可自行決定是否修改)
+  --     },
+  --   },
+  -- },
 }
