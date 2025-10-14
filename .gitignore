@@ -13,3 +13,6 @@ ehthumbs.db
 
 # Ignore configstore json files
 **/configstore/**/*.json
+
+# Ignore stripe config
+**/stripe/config.toml
