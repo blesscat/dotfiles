@@ -29,6 +29,15 @@ return {
     enabled = vim.fn.has("gui_running") == 0,
     opts = {},
   },
+  {
+    "akinsho/toggleterm.nvim",
+    opts = {
+      size = 20,
+      -- open_mapping = [[<leader>t]],
+      direction = "horizontal",
+    },
+    version = "*",
+  },
   -- {
   --   "mvin.mini/mini.surround",
   --   opts = {
