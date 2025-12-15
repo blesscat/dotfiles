@@ -5,12 +5,8 @@
   ],
   "casks": [
     "homebrew/cask-fonts/font-fira-code-nerd-font",
-    "google-chrome",
-    "spectacle",
     "daisydisk",
-    "docker",
     "scroll-reverser",
-    "typora",
     "warp"
   ],
   "formulas": [
@@ -20,15 +16,11 @@
     "cmake",
     "ctags",
     "ssh-copy-id",
-    "go",
     "ripgrep",
     "fzf",
     "node",
     "git",
     "wget",
-    "tig",
-    "fd",
-    "thefuck",
     "neovim",
     "mosh",
     "unzip",
