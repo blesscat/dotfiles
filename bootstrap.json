@@ -4,7 +4,6 @@
     "./scripts/nvim_setup.sh"
   ],
   "casks": [
-    "homebrew/cask-fonts/font-fira-code-nerd-font",
     "daisydisk",
     "scroll-reverser",
     "warp"
@@ -24,7 +23,8 @@
     "neovim",
     "mosh",
     "unzip",
-    "TheZoraiz/ascii-image-converter/ascii-image-converter"
+    "TheZoraiz/ascii-image-converter/ascii-image-converter",
+    "font-fira-code-nerd-font"
   ],
   "symlinks": {
     "bash/.*": "~",
