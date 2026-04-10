@@ -1,0 +1,4 @@
+# This file contains fish universal variable definitions.
+# VERSION: 3.0
+SETUVAR __fish_initialized:4300
+SETUVAR fish_user_paths:/Users/blesscat/Library/pnpm\x1e/Users/blesscat/\x2elocal/bin
