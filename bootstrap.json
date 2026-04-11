@@ -23,8 +23,10 @@
     "neovim",
     "mosh",
     "unzip",
-    "TheZoraiz/ascii-image-converter/ascii-image-converter",
-    "font-fira-code-nerd-font"
+    "yazi",
+    "ghostty",
+    "fish",
+    
   ],
   "symlinks": {
     "bash/.*": "~",
@@ -41,7 +43,10 @@
     ".warp/themes/": "~/.warp",
     ".config/nvim/": "~/.config",
     ".config/helix/": "~/.config",
-    ".config/kitty/": "~/.config"
+    ".config/kitty/": "~/.config",
+    ".config/fish/": "~/.config",
+    ".config/yazi/": "~/.config"
+    ".config/atuin/": "~/.config"
   },
   "taps": [
     "homebrew/cask-fonts"
