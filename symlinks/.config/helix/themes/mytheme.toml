@@ -1,0 +1,3 @@
+inherits = "night_owl"
+
+"ui.virtual.jump-label" = { fg = "#ff5555", modifiers = ["bold"] }

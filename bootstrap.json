@@ -25,8 +25,7 @@
     "unzip",
     "yazi",
     "ghostty",
-    "fish",
-    
+    "fish"
   ],
   "symlinks": {
     "bash/.*": "~",
@@ -45,7 +44,7 @@
     ".config/helix/": "~/.config",
     ".config/kitty/": "~/.config",
     ".config/fish/": "~/.config",
-    ".config/yazi/": "~/.config"
+    ".config/yazi/": "~/.config",
     ".config/atuin/": "~/.config"
   },
   "taps": [
