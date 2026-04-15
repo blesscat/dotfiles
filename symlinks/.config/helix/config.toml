@@ -7,7 +7,7 @@ gutters = ["diagnostics", "diff", "line-numbers", "spacer"]
 
 [keys.normal]
 D = "kill_to_line_end"
-B = ":buffer-close"
+B = ":sh git blame -L %{cursor_line},+15 %sh{realpath %{buffer_name}}"
 C-k = ":buffer-next"
 C-j = ":buffer-previous"
 "%" = "match_brackets"
