@@ -2,7 +2,7 @@
 fish_add_path ~/.local/bin
 
 # pnpm
-set -gx PNPM_HOME /Users/blesscat/Library/pnpm
+set -gx PNPM_HOME "$HOME/Library/pnpm"
 fish_add_path $PNPM_HOME
 
 # lazygit
@@ -16,7 +16,7 @@ set -gx VISUAL hx
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # OpenClaw completion
-source "/Users/blesscat/.openclaw/completions/openclaw.fish"
+# source "/Users/blesscat/.openclaw/completions/openclaw.fish"
 
 # Hermes aliases
 alias hermes-opus='hermes chat --model claude-opus-4-6'
