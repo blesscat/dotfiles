@@ -8,9 +8,9 @@ gutters = ["diagnostics", "diff", "line-numbers", "spacer"]
 [keys.normal]
 D = "kill_to_line_end"
 B = ":sh git blame -L %{cursor_line},+15 %sh{realpath %{buffer_name}}"
-C-k = ":buffer-next"
-C-j = ":buffer-previous"
-"%" = "match_brackets"
+L = ":buffer-next"
+H = ":buffer-previous"
+# "%" = "match_brackets"
 "*" = ["move_char_right", "move_prev_word_start", "move_next_word_end", "search_selection", "search_next"]
 "#" = ["move_char_right", "move_prev_word_start", "move_next_word_end", "search_selection", "search_prev"]
 "$" = "goto_line_end"
@@ -21,9 +21,9 @@ C-y = ":sh echo %sh{realpath %{buffer_name}} | pbcopy"
 [keys.normal.space]
 o = ":sh open ."
 t = [
-  ':sh rm -f /tmp/unique-file',
-  ':insert-output yazi %{buffer_name} --chooser-file=/tmp/unique-file',
-  ':insert-output echo "\x1b[?1049h\x1b[?2004h" > /dev/tty',
-  ':open %sh{cat /tmp/unique-file}',
+  ':sh rm -f /tmp/helix-yazi-selected',
+  ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/helix-yazi-selected',
+  ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+  ':open %sh{cat /tmp/helix-yazi-selected}',
   ':redraw',
 ]

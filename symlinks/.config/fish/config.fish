@@ -23,9 +23,12 @@ alias hermes-opus='hermes chat --model claude-opus-4-6'
 alias hermes-sonnet='hermes chat --model claude-sonnet-4-6'
 alias hermes-haiku='hermes chat --model claude-haiku-4-5'
 alias hermes-gpt54='hermes chat --model gpt-5.4'
+
 alias vi='nvim'
 alias lg='lazygit'
 alias ls='eza -laah'
+alias claude-ikg='export CLAUDE_CONFIG_DIR=$HOME/.claude-ikg && claude'
+alias claude-def='export CLAUDE_CONFIG_DIR=$HOME/.claude && claude'
 
 if status is-interactive
     # Commands to run in interactive sessions can go here
