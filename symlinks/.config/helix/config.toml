@@ -7,7 +7,7 @@ gutters = ["diagnostics", "diff", "line-numbers", "spacer"]
 
 [keys.normal]
 D = "kill_to_line_end"
-B = ":sh git blame -L %{cursor_line},+15 %sh{realpath %{buffer_name}}"
+B = ":sh git blame --date=short -L %{cursor_line},+15 %sh{realpath %{buffer_name}} | sed -E 's#^([0-9a-f^]+)[[:space:]]+[^[:space:]]+[[:space:]]+[(]#\\1 (#'"
 L = ":buffer-next"
 H = ":buffer-previous"
 # "%" = "match_brackets"
