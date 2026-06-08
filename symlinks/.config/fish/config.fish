@@ -37,3 +37,6 @@ end
 starship init fish | source
 zoxide init fish | source
 atuin init fish | source
+
+# Auto use Node version from .nvmrc
+source ~/.config/fish/load_nvm.fish
