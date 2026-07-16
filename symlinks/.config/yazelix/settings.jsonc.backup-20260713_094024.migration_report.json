@@ -1,0 +1,401 @@
+{
+  "schema_version": 1,
+  "source": "settings_jsonc",
+  "source_path": "/Users/bless.m/.config/yazelix/settings.jsonc",
+  "backup_path": "/Users/bless.m/.config/yazelix/settings.jsonc.backup-20260713_094024",
+  "target_path": "/Users/bless.m/.config/yazelix/config.toml",
+  "entries": [
+    {
+      "source_path": "appearance.mode",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "review Mars appearance and native Yazi theme settings manually"
+    },
+    {
+      "source_path": "core.debug_mode",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova has no replacement; remove this Classic-only override"
+    },
+    {
+      "source_path": "core.game_of_life_cell_style",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova has no replacement; remove this Classic-only override"
+    },
+    {
+      "source_path": "core.show_macchina_on_welcome",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova has no replacement; remove this Classic-only override"
+    },
+    {
+      "source_path": "core.skip_welcome_screen",
+      "disposition": "preserved",
+      "target_paths": [
+        "welcome.enabled"
+      ],
+      "detail": "inverted to Nova welcome.enabled"
+    },
+    {
+      "source_path": "core.welcome_duration_seconds",
+      "disposition": "preserved",
+      "target_paths": [
+        "welcome.duration_seconds"
+      ],
+      "detail": "converted from a whole-number Classic duration"
+    },
+    {
+      "source_path": "core.welcome_style",
+      "disposition": "preserved",
+      "target_paths": [
+        "welcome.style"
+      ],
+      "detail": "mapped to the identical Nova style id"
+    },
+    {
+      "source_path": "editor.command",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova inherits its packaged editor"
+    },
+    {
+      "source_path": "editor.hide_sidebar_on_file_open",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova v1 has no equivalent; remove this Classic override"
+    },
+    {
+      "source_path": "helix.steel_plugins",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "the preserved helix/ tree remains the source for manual Nova configuration"
+    },
+    {
+      "source_path": "shell.default_shell",
+      "disposition": "preserved",
+      "target_paths": [
+        "shell.program"
+      ],
+      "detail": "mapped to Nova shell.program"
+    },
+    {
+      "source_path": "workspace.left_sidebar.args",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns a fixed managed Yazi sidebar; remove this Classic override"
+    },
+    {
+      "source_path": "workspace.left_sidebar.command",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns a fixed managed Yazi sidebar; remove this Classic override"
+    },
+    {
+      "source_path": "workspace.left_sidebar.width_percent",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns a fixed managed Yazi sidebar; remove this Classic override"
+    },
+    {
+      "source_path": "workspace.right_sidebar.args",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova inherits agent.command = auto"
+    },
+    {
+      "source_path": "workspace.right_sidebar.command",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova inherits agent.command = auto"
+    },
+    {
+      "source_path": "workspace.right_sidebar.width_percent",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns agent popup geometry; choose popup cell margins manually if needed"
+    },
+    {
+      "source_path": "yazi.command",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova uses its packaged Yazi commands"
+    },
+    {
+      "source_path": "yazi.keybindings",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "recreate desired bindings in native yazi/keymap.toml"
+    },
+    {
+      "source_path": "yazi.plugins",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted because Nova packages the same required integrations"
+    },
+    {
+      "source_path": "yazi.sort_by",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova inherits its packaged alphabetical sort"
+    },
+    {
+      "source_path": "yazi.theme",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova inherits its packaged Yazi theme"
+    },
+    {
+      "source_path": "yazi.ya_command",
+      "disposition": "preserved",
+      "target_paths": [],
+      "detail": "omitted so Nova uses its packaged Yazi commands"
+    },
+    {
+      "source_path": "zellij.claude_usage_display",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.claude_usage_periods",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.codex_usage_display",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.codex_usage_periods",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.custom_popups.zenith",
+      "disposition": "preserved",
+      "target_paths": [
+        "popups.zenith"
+      ],
+      "detail": "mapped to one Nova custom popup with title yzx_<id>"
+    },
+    {
+      "source_path": "zellij.custom_text",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.default_mode",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "verify this retired native preference in zellij/config.kdl; the root migration never mutates sidecars"
+    },
+    {
+      "source_path": "zellij.disable_tips",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "verify this retired native preference in zellij/config.kdl; the root migration never mutates sidecars"
+    },
+    {
+      "source_path": "zellij.keybindings.bottom_popup",
+      "disposition": "preserved",
+      "target_paths": [
+        "keybindings.git"
+      ],
+      "detail": "mapped the single non-conflicting popup chord"
+    },
+    {
+      "source_path": "zellij.keybindings.config",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.menu",
+      "disposition": "preserved",
+      "target_paths": [
+        "keybindings.menu"
+      ],
+      "detail": "mapped the single non-conflicting popup chord"
+    },
+    {
+      "source_path": "zellij.keybindings.move_focus_left_or_tab",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.move_focus_right_or_tab",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.next_family",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.open_codex_agent_right",
+      "disposition": "preserved",
+      "target_paths": [
+        "keybindings.agent"
+      ],
+      "detail": "mapped the single non-conflicting popup chord"
+    },
+    {
+      "source_path": "zellij.keybindings.open_workspace_terminal",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.previous_family",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.smart_reveal",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.toggle_editor_right_sidebar_focus",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.toggle_editor_sidebar_focus",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.toggle_left_sidebar",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns this behavior in its fixed native keymap"
+    },
+    {
+      "source_path": "zellij.keybindings.top_popup",
+      "disposition": "preserved",
+      "target_paths": [
+        "keybindings.config"
+      ],
+      "detail": "mapped the single non-conflicting popup chord"
+    },
+    {
+      "source_path": "zellij.native_keybindings",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova owns a fixed native keymap; do not copy this map into the semantic root"
+    },
+    {
+      "source_path": "zellij.opencode_go_usage_display",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.opencode_go_usage_periods",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.pane_frames",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "verify this retired native preference in zellij/config.kdl; the root migration never mutates sidecars"
+    },
+    {
+      "source_path": "zellij.popup_commands",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages its built-in popups; recreate other eligible commands under [popups.<id>]"
+    },
+    {
+      "source_path": "zellij.popup_height_percent",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova uses popup cell margins; choose popup.side_margin and popup.vertical_margin manually"
+    },
+    {
+      "source_path": "zellij.popup_width_percent",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova uses popup cell margins; choose popup.side_margin and popup.vertical_margin manually"
+    },
+    {
+      "source_path": "zellij.rounded_corners",
+      "disposition": "manual",
+      "target_paths": [],
+      "detail": "verify this retired native preference in zellij/config.kdl; the root migration never mutates sidecars"
+    },
+    {
+      "source_path": "zellij.screen_saver_enabled",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova has no automatic screen-saver setting; use yzx screen manually"
+    },
+    {
+      "source_path": "zellij.screen_saver_idle_seconds",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova has no automatic screen-saver setting; use yzx screen manually"
+    },
+    {
+      "source_path": "zellij.screen_saver_style",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova has no automatic screen-saver setting; use yzx screen manually"
+    },
+    {
+      "source_path": "zellij.support_kitty_keyboard_protocol",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.tab_label_mode",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.theme",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.widget_frame",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.widget_separator",
+      "disposition": "removed",
+      "target_paths": [],
+      "detail": "Nova packages this Zellij/bar behavior; remove the Classic override"
+    },
+    {
+      "source_path": "zellij.widget_tray",
+      "disposition": "preserved",
+      "target_paths": [
+        "bar.widgets"
+      ],
+      "detail": "mapped shared widget ids in their original order"
+    }
+  ]
+}

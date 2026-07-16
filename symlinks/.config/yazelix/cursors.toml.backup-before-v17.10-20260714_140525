@@ -1,0 +1,135 @@
+enabled_cursors = [
+    "blaze",
+    "snow",
+    "ice",
+    "midnight",
+    "cosmic",
+    "ocean",
+    "forest",
+    "sunset",
+    "eclipse",
+    "dusk",
+    "orchid",
+    "reef",
+    "magma",
+]
+schema_version = 1
+
+[[cursor]]
+accent_color = "#ff550a"
+color = "#ffb929"
+cursor_color = "#ffb929"
+family = "mono"
+name = "blaze"
+
+[[cursor]]
+accent_color = "#cccccc"
+color = "#ffffff"
+cursor_color = "#ffffff"
+family = "mono"
+name = "snow"
+
+[[cursor]]
+accent_color = "#117dd3"
+color = "#38bdf8"
+cursor_color = "#38bdf8"
+family = "mono"
+name = "ice"
+
+[[cursor]]
+accent_color = "#000000"
+color = "#0f172a"
+cursor_color = "#0f172a"
+family = "mono"
+name = "midnight"
+
+[[cursor]]
+accent_color = "#7439e0"
+color = "#c761f5"
+cursor_color = "#c761f5"
+family = "mono"
+name = "cosmic"
+
+[[cursor]]
+accent_color = "#1b62f6"
+color = "#5ea8ff"
+cursor_color = "#5ea8ff"
+family = "mono"
+name = "ocean"
+
+[[cursor]]
+accent_color = "#1c9e5b"
+color = "#3bd17a"
+cursor_color = "#3bd17a"
+family = "mono"
+name = "forest"
+
+[[cursor]]
+accent_color = "#ff3a5b"
+color = "#ff7a59"
+cursor_color = "#ff7a59"
+family = "mono"
+name = "sunset"
+
+[[cursor]]
+colors = [
+    "#2e294e",
+    "#ffd400",
+]
+cursor_color = "#ffd400"
+divider = "vertical"
+family = "split"
+name = "eclipse"
+transition = "soft"
+
+[[cursor]]
+colors = [
+    "#1e1e2f",
+    "#e94560",
+]
+cursor_color = "#e94560"
+divider = "vertical"
+family = "split"
+name = "dusk"
+transition = "soft"
+
+[[cursor]]
+colors = [
+    "#ff6b00",
+    "#206dce",
+]
+cursor_color = "#ff6b00"
+divider = "vertical"
+family = "split"
+name = "orchid"
+transition = "hard"
+
+[[cursor]]
+colors = [
+    "#00e6ff",
+    "#00ff66",
+]
+cursor_color = "#00e6ff"
+divider = "vertical"
+family = "split"
+name = "reef"
+transition = "soft"
+
+[[cursor]]
+colors = [
+    "#ff1600",
+    "#2a3340",
+]
+cursor_color = "#ff1600"
+divider = "horizontal"
+family = "split"
+name = "magma"
+transition = "soft"
+
+[settings]
+duration = 1.0
+glow = "medium"
+kitty_enable_cursor = true
+mode_effect = "random"
+trail = "random"
+trail_effect = "random"

@@ -1,0 +1,28 @@
+[bar]
+widgets = [
+    "session",
+    "editor",
+    "shell",
+    "term",
+    "codex_usage",
+]
+
+[keybindings]
+agent = "Alt Shift L"
+config = "Alt Shift K"
+git = "Alt Shift J"
+menu = "Alt Shift M"
+
+[popups.zenith]
+command = "zenith"
+keep_alive = true
+keybinding = "Alt Shift I"
+title = "yzx_zenith"
+
+[shell]
+program = "nu"
+
+[welcome]
+duration_seconds = 4
+enabled = true
+style = "random"

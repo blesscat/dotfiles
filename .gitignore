@@ -16,3 +16,6 @@ ehthumbs.db
 
 # Ignore stripe config
 **/stripe/config.toml
+
+# Local Git worktrees
+.worktrees/

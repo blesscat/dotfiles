@@ -2,3 +2,4 @@ command = /opt/homebrew/bin/fish
 theme = Solarized Dark Higher Contrast
 font-family = PingFang TC, Menlo
 confirm-close-surface = false
+macos-option-as-alt = true

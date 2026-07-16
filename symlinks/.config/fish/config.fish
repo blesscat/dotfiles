@@ -1,6 +1,9 @@
 # PATH
 fish_add_path ~/.local/bin
 
+# Node.js
+set -g nvm_default_version v24.16.0
+
 # pnpm
 set -gx PNPM_HOME "$HOME/Library/pnpm"
 fish_add_path $PNPM_HOME
@@ -26,7 +29,7 @@ alias hermes-gpt54='hermes chat --model gpt-5.4'
 
 alias vi='nvim'
 alias lg='lazygit'
-alias ls='eza -laah'
+# alias ls='eza -laah'
 alias claude-ikg='export CLAUDE_CONFIG_DIR=$HOME/.claude-ikg && claude'
 alias claude-def='export CLAUDE_CONFIG_DIR=$HOME/.claude && claude'
 

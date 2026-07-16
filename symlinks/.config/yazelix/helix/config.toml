@@ -1,0 +1,29 @@
+theme = "mytheme"
+
+[editor]
+bufferline = "multiple"
+indent-guides.render = true
+gutters = ["diagnostics", "diff", "line-numbers", "spacer"]
+
+[keys.normal]
+D = "kill_to_line_end"
+B = ":sh git blame --date=short -L %{cursor_line},+15 %sh{realpath %{buffer_name}} | sed -E 's#^([0-9a-f^]+)[[:space:]]+[^[:space:]]+[[:space:]]+[(]#\\1 (#'"
+L = ":buffer-next"
+H = ":buffer-previous"
+# "%" = "match_brackets"
+"*" = ["move_char_right", "move_prev_word_start", "move_next_word_end", "search_selection", "search_next"]
+"#" = ["move_char_right", "move_prev_word_start", "move_next_word_end", "search_selection", "search_prev"]
+"$" = "goto_line_end"
+0 = "goto_line_start"
+G = "goto_file_end"
+C-y = ":sh echo %sh{realpath %{buffer_name}} | pbcopy"
+
+[keys.normal.space]
+o = ":sh open ."
+t = [
+  ':sh rm -f /tmp/helix-yazi-selected',
+  ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/helix-yazi-selected',
+  ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+  ':open %sh{cat /tmp/helix-yazi-selected}',
+  ':redraw',
+]
