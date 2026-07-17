@@ -1,0 +1,246 @@
+#!/bin/zsh
+
+set -u
+setopt EXTENDED_GLOB
+
+readonly home_dir="${HOME:-}"
+readonly codex_home="${CODEX_HOME:-${home_dir:+$home_dir/.codex}}"
+readonly jq_bin="${CODEX_ROUTE_JQ:-${commands[jq]-}}"
+readonly osascript_bin="${CODEX_ROUTE_OSASCRIPT:-/usr/bin/osascript}"
+readonly open_bin="${CODEX_ROUTE_OPEN:-/usr/bin/open}"
+readonly route_script="${0:A}"
+readonly log_file="${CODEX_ROUTE_LOG_FILE:-${CODEX_NOTIFY_LOG_FILE:-$codex_home/log/codex-notify.log}}"
+readonly ghostty_bundle_id="${CODEX_ROUTE_GHOSTTY_BUNDLE_ID:-${CODEX_NOTIFY_GHOSTTY_BUNDLE_ID:-com.mitchellh.ghostty}}"
+
+log_failure() {
+  local component="$1"
+  local exit_code="$2"
+  local log_dir="${log_file:h}"
+  local timestamp
+
+  [[ -n "$log_file" ]] || return 0
+  /bin/mkdir -p "$log_dir" 2>/dev/null || return 0
+  timestamp="$(/bin/date '+%Y-%m-%dT%H:%M:%S%z')"
+  /usr/bin/printf '%s component=%s exit=%s\n' \
+    "$timestamp" "$component" "$exit_code" >> "$log_file" 2>/dev/null || true
+}
+
+open_ghostty() {
+  if [[ -x "$open_bin" ]]; then
+    "$open_bin" -b "$ghostty_bundle_id" </dev/null >/dev/null 2>&1
+    open_status=$?
+    if (( open_status != 0 )); then
+      log_failure 'notification-route-open' "$open_status"
+    fi
+  else
+    log_failure 'notification-route-open' 127
+  fi
+
+  return 0
+}
+
+build_route() {
+  local session="${ZELLIJ_SESSION_NAME-}"
+  local pane="${ZELLIJ_PANE_ID-}"
+  local zellij_bin="${CODEX_ROUTE_ZELLIJ_BIN-}"
+  local terminal_id
+  local token
+  local quoted_route_script
+
+  [[ -n "$session" ]] || return 0
+  [[ "$pane" == <-> ]] || return 0
+  [[ -x "$jq_bin" && -x "$osascript_bin" ]] || return 0
+
+  if [[ -z "$zellij_bin" ]]; then
+    zellij_bin="${commands[zellij]-}"
+  fi
+  [[ "$zellij_bin" == /* && -x "$zellij_bin" ]] || return 0
+  zellij_bin="${zellij_bin:A}"
+
+  terminal_id="$(
+    "$osascript_bin" - "$session" 2>/dev/null <<'APPLESCRIPT'
+on run argv
+  set sessionName to item 1 of argv
+  tell application "Ghostty"
+    repeat with candidate in terminals
+      if (name of candidate as text) starts with (sessionName & " |") then
+        return id of candidate as text
+      end if
+    end repeat
+  end tell
+  return ""
+end run
+APPLESCRIPT
+  )"
+  (( $? == 0 )) || return 0
+  (( ${#terminal_id} == 36 )) || return 0
+  [[ "$terminal_id" == [0-9A-Fa-f-]## ]] || return 0
+
+  token="$(
+    "$jq_bin" -cnr \
+      --arg terminal_id "$terminal_id" \
+      --arg session "$session" \
+      --arg pane "$pane" \
+      --arg zellij "$zellij_bin" \
+      --arg tmpdir "${TMPDIR-}" \
+      --arg socket_dir "${ZELLIJ_SOCKET_DIR-}" \
+      '{v: 1, terminal_id: $terminal_id, session: $session, pane: $pane,
+        zellij: $zellij, tmpdir: $tmpdir, socket_dir: $socket_dir}
+       | tojson | @base64' 2>/dev/null
+  )"
+  (( $? == 0 )) || return 0
+  [[ "$token" == [A-Za-z0-9+/=]## ]] || return 0
+
+  quoted_route_script="$(
+    "$jq_bin" -nr \
+      --arg route_script "$route_script" \
+      '$route_script | @sh' 2>/dev/null
+  )"
+  (( $? == 0 )) || return 0
+  [[ -n "$quoted_route_script" && "$quoted_route_script" != *$'\n'* ]] || \
+    return 0
+
+  /usr/bin/printf '%s click %s\n' "$quoted_route_script" "$token"
+  return 0
+}
+
+click_route() {
+  local token="$1"
+  local route_json
+  local terminal_id
+  local session
+  local pane
+  local zellij_bin
+  local tmpdir
+  local socket_dir
+  local expected_zellij="${CODEX_ROUTE_ZELLIJ_BIN-}"
+  local route_failed=0
+  local zellij_status
+  local zellij_error
+  local osascript_status
+  typeset -a route_env
+
+  if [[ ! -x "$jq_bin" ]] || [[ "$token" != [A-Za-z0-9+/=]## ]]; then
+    log_failure 'notification-route-token' 2
+    open_ghostty
+    return 0
+  fi
+
+  route_json="$(
+    "$jq_bin" -Rn --arg token "$token" \
+      '$token | @base64d | fromjson' 2>/dev/null
+  )"
+  if (( $? != 0 )) || ! "$jq_bin" -e \
+    'type == "object"
+     and .v == 1
+     and (.terminal_id | type == "string" and length == 36)
+     and (.session | type == "string" and length > 0)
+     and (.pane | type == "string" and test("^[0-9]+$"))
+     and (.zellij | type == "string" and startswith("/"))
+     and (.tmpdir | type == "string")
+     and (.socket_dir | type == "string")' \
+    <<< "$route_json" >/dev/null 2>&1; then
+    log_failure 'notification-route-token' 2
+    open_ghostty
+    return 0
+  fi
+
+  terminal_id="$("$jq_bin" -r '.terminal_id' <<< "$route_json")"
+  session="$("$jq_bin" -r '.session' <<< "$route_json")"
+  pane="$("$jq_bin" -r '.pane' <<< "$route_json")"
+  zellij_bin="$("$jq_bin" -r '.zellij' <<< "$route_json")"
+  tmpdir="$("$jq_bin" -r '.tmpdir' <<< "$route_json")"
+  socket_dir="$("$jq_bin" -r '.socket_dir' <<< "$route_json")"
+
+  if [[ "$terminal_id" != [0-9A-Fa-f-]## ]] \
+      || [[ "$pane" != <-> ]] \
+      || [[ ! -x "$zellij_bin" ]]; then
+    log_failure 'notification-route-token' 2
+    open_ghostty
+    return 0
+  fi
+
+  if [[ -n "$expected_zellij" ]]; then
+    expected_zellij="${expected_zellij:A}"
+    if [[ "$zellij_bin" != "$expected_zellij" ]]; then
+      log_failure 'notification-route-token' 2
+      open_ghostty
+      return 0
+    fi
+  elif [[ "${zellij_bin:t}" != 'zellij' ]]; then
+    log_failure 'notification-route-token' 2
+    open_ghostty
+    return 0
+  fi
+
+  route_env=()
+  if [[ -n "$tmpdir" ]]; then
+    route_env+=("TMPDIR=$tmpdir")
+  fi
+  if [[ -n "$socket_dir" ]]; then
+    route_env+=("ZELLIJ_SOCKET_DIR=$socket_dir")
+  fi
+
+  zellij_error="$(
+    /usr/bin/env "${route_env[@]}" \
+      "$zellij_bin" --session "$session" action focus-pane-id "$pane" \
+      </dev/null 2>&1 >/dev/null
+  )"
+  zellij_status=$?
+  if (( zellij_status != 0 )) \
+      && ! { (( zellij_status == 2 )) \
+        && [[ "$zellij_error" == "Pane Terminal($pane) is already focused" ]]; }; then
+    log_failure 'notification-route-zellij' "$zellij_status"
+    route_failed=1
+  fi
+
+  if [[ -x "$osascript_bin" ]]; then
+    "$osascript_bin" - "$terminal_id" "$session" \
+      </dev/null >/dev/null 2>&1 <<'APPLESCRIPT'
+on run argv
+  set targetID to item 1 of argv
+  set sessionName to item 2 of argv
+  tell application "Ghostty"
+    repeat with candidate in terminals
+      if (id of candidate as text) is targetID then
+        focus candidate
+        return "id"
+      end if
+    end repeat
+    repeat with candidate in terminals
+      if (name of candidate as text) starts with (sessionName & " |") then
+        focus candidate
+        return "session"
+      end if
+    end repeat
+  end tell
+  error number 1
+end run
+APPLESCRIPT
+    osascript_status=$?
+  else
+    osascript_status=127
+  fi
+
+  if (( osascript_status != 0 )); then
+    log_failure 'notification-route-ghostty' "$osascript_status"
+    route_failed=1
+  fi
+
+  if (( route_failed != 0 )); then
+    open_ghostty
+  fi
+
+  return 0
+}
+
+case "${1-}" in
+  build)
+    build_route
+    ;;
+  click)
+    click_route "${2-}"
+    ;;
+esac
+
+exit 0

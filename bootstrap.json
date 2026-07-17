@@ -1,32 +1,4 @@
 {
-  "after-scripts": [
-    "./scripts/node_setup.sh",
-    "./scripts/nvim_setup.sh"
-  ],
-  "casks": [
-    "daisydisk",
-    "scroll-reverser",
-    "warp"
-  ],
-  "formulas": [
-    "bash",
-    "zlib",
-    "openssl",
-    "cmake",
-    "ctags",
-    "ssh-copy-id",
-    "ripgrep",
-    "fzf",
-    "node",
-    "git",
-    "wget",
-    "neovim",
-    "mosh",
-    "unzip",
-    "yazi",
-    "ghostty",
-    "fish"
-  ],
   "symlinks": {
     "bash/.*": "~",
     "zsh/.*": "~",
@@ -46,8 +18,5 @@
     ".config/fish/": "~/.config",
     ".config/yazi/": "~/.config",
     ".config/atuin/": "~/.config"
-  },
-  "taps": [
-    "homebrew/cask-fonts"
-  ]
+  }
 }

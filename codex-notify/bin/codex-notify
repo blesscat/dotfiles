@@ -1,0 +1,179 @@
+#!/bin/zsh
+
+set -u
+setopt EXTENDED_GLOB
+
+readonly script_dir="${0:A:h}"
+readonly home_dir="${HOME:-}"
+readonly codex_home="${CODEX_HOME:-${home_dir:+$home_dir/.codex}}"
+readonly sky_client="${CODEX_NOTIFY_SKY_CLIENT:-$codex_home/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient}"
+readonly terminal_notifier="${CODEX_NOTIFY_TERMINAL_NOTIFIER:-$home_dir/.local/share/codex-notify/terminal-notifier.app/Contents/MacOS/terminal-notifier}"
+readonly jq_bin="${CODEX_NOTIFY_JQ:-${commands[jq]-}}"
+readonly log_file="${CODEX_NOTIFY_LOG_FILE:-$codex_home/log/codex-notify.log}"
+readonly ghostty_bundle_id="${CODEX_NOTIFY_GHOSTTY_BUNDLE_ID:-com.mitchellh.ghostty}"
+readonly route_helper="${CODEX_NOTIFY_ROUTE_HELPER:-$script_dir/codex-notification-route}"
+readonly tty_path="${CODEX_NOTIFY_TTY:-/dev/tty}"
+readonly default_message_max_chars=160
+readonly default_fallback_message='任務已完成'
+
+message_max_chars="${CODEX_NOTIFY_MAX_MESSAGE_CHARS:-$default_message_max_chars}"
+if [[ "$message_max_chars" != <-> ]]; then
+  message_max_chars="$default_message_max_chars"
+elif (( message_max_chars < 2 )); then
+  message_max_chars="$default_message_max_chars"
+fi
+
+native_only=0
+if [[ "${1-}" == '--native-only' ]]; then
+  native_only=1
+  payload="${2-}"
+else
+  payload="${1-}"
+fi
+
+if [[ -z "$payload" ]]; then
+  payload='{}'
+fi
+
+log_failure() {
+  local component="$1"
+  local exit_code="$2"
+  local log_dir="${log_file:h}"
+  local timestamp
+
+  [[ -n "$log_file" ]] || return 0
+  /bin/mkdir -p "$log_dir" 2>/dev/null || return 0
+  timestamp="$(/bin/date '+%Y-%m-%dT%H:%M:%S%z')"
+  /usr/bin/printf '%s component=%s exit=%s\n' \
+    "$timestamp" "$component" "$exit_code" >> "$log_file" 2>/dev/null || true
+}
+
+is_plain_ghostty() {
+  [[ "${TERM_PROGRAM-}" == 'ghostty' \
+    && -z "${ZELLIJ-}" \
+    && -z "${ZELLIJ_SESSION_NAME-}" \
+    && -z "${ZELLIJ_PANE_ID-}" ]]
+}
+
+send_ghostty_osc9() {
+  local osc_message="$1"
+
+  osc_message="${osc_message//$'\e'/}"
+  osc_message="${osc_message//$'\a'/}"
+  { /usr/bin/printf '\033]9;%s\007' "$osc_message" > "$tty_path"; } 2>/dev/null
+}
+
+normalize_and_limit_message() {
+  local LC_ALL='en_US.UTF-8'
+  local value="$1"
+
+  value="${value//[[:space:]]##/ }"
+  value="${value##[[:space:]]#}"
+  value="${value%%[[:space:]]#}"
+
+  if (( ${#value} > message_max_chars )); then
+    value="${value[1,$(( message_max_chars - 1 ))]}…"
+  fi
+
+  REPLY="$value"
+}
+
+fallback_source="${CODEX_NOTIFY_FALLBACK_MESSAGE-$default_fallback_message}"
+normalize_and_limit_message "$fallback_source"
+fallback_message="$REPLY"
+
+if [[ -z "$fallback_message" ]]; then
+  normalize_and_limit_message "$default_fallback_message"
+  fallback_message="$REPLY"
+fi
+
+message="$fallback_message"
+project=''
+
+if [[ -x "$jq_bin" ]]; then
+  assistant_message="$(
+    "$jq_bin" -r \
+      'if type == "object" and (.["last-assistant-message"] | type) == "string"
+       then .["last-assistant-message"]
+       else empty
+       end' \
+      <<< "$payload" 2>/dev/null
+  )"
+  assistant_status=$?
+  if (( assistant_status == 0 )); then
+    normalize_and_limit_message "$assistant_message"
+    if [[ -n "$REPLY" ]]; then
+      message="$REPLY"
+    fi
+  fi
+
+  cwd="$(
+    "$jq_bin" -r \
+      'if type == "object" and (.cwd | type) == "string" then .cwd else "" end' \
+      <<< "$payload" 2>/dev/null
+  )"
+  if (( $? == 0 )) && [[ -n "$cwd" ]]; then
+    project="${cwd:t}"
+  fi
+fi
+
+native_notification_submitted=0
+if is_plain_ghostty; then
+  send_ghostty_osc9 "$message"
+  osc_status=$?
+  if (( osc_status == 0 )); then
+    native_notification_submitted=1
+  else
+    log_failure 'ghostty-osc9' "$osc_status"
+  fi
+fi
+
+if (( native_notification_submitted == 0 )); then
+  typeset -a click_args notification_args
+  click_args=(-activate "$ghostty_bundle_id")
+
+  if [[ -x "$route_helper" ]]; then
+    route_command="$("$route_helper" build 2>/dev/null)"
+    route_status=$?
+    if (( route_status == 0 )) && [[ -n "$route_command" ]] \
+        && [[ "$route_command" != *$'\n'* ]]; then
+      click_args=(-execute "$route_command")
+    elif (( route_status != 0 )); then
+      log_failure 'notification-route-build' "$route_status"
+    fi
+  fi
+
+  notification_args=(
+    -title 'Codex'
+    -message "$message"
+    -sound 'default'
+    "${click_args[@]}"
+  )
+  if [[ -n "$project" ]]; then
+    notification_args+=(-subtitle "$project")
+  fi
+
+  if [[ -x "$terminal_notifier" ]]; then
+    "$terminal_notifier" "${notification_args[@]}" </dev/null >/dev/null 2>&1
+    backend_status=$?
+    if (( backend_status != 0 )); then
+      log_failure 'terminal-notifier' "$backend_status"
+    fi
+  else
+    log_failure 'terminal-notifier' 127
+  fi
+fi
+
+if (( native_only == 0 )); then
+  if [[ -x "$sky_client" ]]; then
+    "$sky_client" turn-ended "$payload"
+    exit_code=$?
+    if (( exit_code != 0 )); then
+      log_failure 'SkyComputerUseClient' "$exit_code"
+    fi
+  else
+    log_failure 'SkyComputerUseClient' 127
+  fi
+fi
+
+exit 0

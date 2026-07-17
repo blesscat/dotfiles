@@ -1,0 +1,76 @@
+#!/bin/zsh
+
+set -u
+
+readonly script_dir="${0:A:h}"
+readonly home_dir="${HOME:-}"
+readonly codex_home="${CODEX_HOME:-${home_dir:+$home_dir/.codex}}"
+readonly notify_wrapper="${CODEX_PERMISSION_NOTIFY_WRAPPER:-$script_dir/codex-notify}"
+readonly jq_bin="${CODEX_PERMISSION_NOTIFY_JQ:-${commands[jq]-}}"
+readonly log_file="${CODEX_NOTIFY_LOG_FILE:-$codex_home/log/codex-notify.log}"
+readonly fallback_message='等待權限核准'
+
+log_failure() {
+  local component="$1"
+  local exit_code="$2"
+  local log_dir="${log_file:h}"
+  local timestamp
+
+  [[ -n "$log_file" ]] || return 0
+  /bin/mkdir -p "$log_dir" 2>/dev/null || return 0
+  timestamp="$(/bin/date '+%Y-%m-%dT%H:%M:%S%z')"
+  /usr/bin/printf '%s component=%s exit=%s\n' \
+    "$timestamp" "$component" "$exit_code" >> "$log_file" 2>/dev/null || true
+}
+
+hook_payload="$(/bin/cat 2>/dev/null)"
+if [[ -z "$hook_payload" ]]; then
+  hook_payload='{}'
+fi
+
+notification_payload='{"type":"approval-requested","last-assistant-message":"等待權限核准"}'
+
+if [[ -x "$jq_bin" ]]; then
+  parsed_payload="$(
+    "$jq_bin" -c --arg fallback "$fallback_message" '
+      def clean_text:
+        (if type == "string" then .
+         elif type == "array" then map(if type == "string" then . else tostring end) | join(" ")
+         else ""
+         end)
+        | gsub("\\s+"; " ")
+        | sub("^ +"; "")
+        | sub(" +$"; "");
+
+      if type != "object" then error("permission payload must be an object")
+      else
+        (.cwd | if type == "string" then . else "" end) as $cwd
+        | (.tool_name | clean_text) as $tool_name
+        | (.tool_input.command | clean_text) as $command
+        | (if ($command | length) > 0 then $command else $tool_name end) as $detail
+        | {
+            type: "approval-requested",
+            cwd: $cwd,
+            "last-assistant-message": (
+              $fallback + if ($detail | length) > 0 then "：" + $detail else "" end
+            )
+          }
+      end
+    ' <<< "$hook_payload" 2>/dev/null
+  )"
+  if (( $? == 0 )) && [[ -n "$parsed_payload" ]]; then
+    notification_payload="$parsed_payload"
+  fi
+fi
+
+if [[ -x "$notify_wrapper" ]]; then
+  "$notify_wrapper" --native-only "$notification_payload" </dev/null >/dev/null 2>&1
+  wrapper_status=$?
+  if (( wrapper_status != 0 )); then
+    log_failure 'permission-notify-wrapper' "$wrapper_status"
+  fi
+else
+  log_failure 'permission-notify-wrapper' 127
+fi
+
+exit 0

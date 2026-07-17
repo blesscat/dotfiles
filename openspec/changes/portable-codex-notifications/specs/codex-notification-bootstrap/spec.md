@@ -12,15 +12,15 @@ The `.cider` repository SHALL contain the maintained notification scripts, tests
 - **THEN** they contain no `auth.json`, sessions, logs, caches, project trust, plugin state, hook trust hashes, backup data, or Terminal Notifier app bundle
 
 ### Requirement: Brewfile is the macOS Homebrew source of truth
-The repository SHALL declare all macOS Homebrew formulas and casks in a root `Brewfile`, including `jq` and `terminal-notifier` as formulas and Ghostty as a cask. `bootstrap.json` SHALL retain symlink and after-script metadata but contain no Homebrew package lists. The macOS bootstrap SHALL run the Brewfile with upgrades disabled, then invoke the notification installer only after bundle installation succeeds, without enabling the generic symlink or after-script runners.
+The repository SHALL declare all macOS Homebrew formulas and casks in a root `Brewfile`, including the approved shell and workspace tools, `jq`, and `terminal-notifier` as formulas and Ghostty as a cask. `bootstrap.json` SHALL retain only generic symlink metadata and contain no Homebrew package lists or obsolete after-script metadata. The macOS bootstrap SHALL run the Brewfile with upgrades disabled, then invoke the notification installer and Yazelix setup only after bundle installation succeeds, without enabling the generic symlink runner.
 
 #### Scenario: macOS bootstrap runs on a prepared machine
 - **WHEN** `macos.sh` completes Homebrew setup
-- **THEN** it runs `brew bundle install` against the repository Brewfile with `--no-upgrade`, `jq` and `terminal-notifier` become available, and `codex-notify/install.zsh` executes afterward
+- **THEN** it runs `brew bundle install` against the repository Brewfile with `--no-upgrade`, the declared tools become available, `codex-notify/install.zsh` executes afterward, and Yazelix setup runs last
 
 #### Scenario: Brewfile preserves and corrects the declared dependency set
 - **WHEN** the Brewfile is inspected through `brew bundle list`
-- **THEN** its formulas are exactly `bash`, `zlib`, `openssl`, `cmake`, `ctags`, `ssh-copy-id`, `ripgrep`, `fzf`, `node`, `git`, `wget`, `neovim`, `mosh`, `unzip`, `yazi`, `fish`, `jq`, and `terminal-notifier`; its casks are exactly `daisydisk`, `scroll-reverser`, `warp`, and `ghostty`; and it declares no taps
+- **THEN** its formulas are exactly `bash`, `zlib`, `openssl`, `cmake`, `ctags`, `ssh-copy-id`, `ripgrep`, `fzf`, `node`, `git`, `lazygit`, `wget`, `neovim`, `helix`, `mosh`, `unzip`, `yazi`, `fish`, `starship`, `zoxide`, `atuin`, `pnpm`, `zellij`, `jq`, and `terminal-notifier`; its casks are exactly `daisydisk`, `scroll-reverser`, `warp`, and `ghostty`; and it declares no taps
 
 #### Scenario: Homebrew was just installed on a new Mac
 - **WHEN** Homebrew setup succeeds but `brew` is not yet available through the inherited `PATH`
@@ -32,15 +32,85 @@ The repository SHALL declare all macOS Homebrew formulas and casks in a root `Br
 
 #### Scenario: Bundle installation fails
 - **WHEN** `brew bundle install` exits unsuccessfully
-- **THEN** `macos.sh` exits unsuccessfully without invoking `codex-notify/install.zsh`
+- **THEN** `macos.sh` exits unsuccessfully without invoking `codex-notify/install.zsh` or Yazelix setup
 
-#### Scenario: Dotfile metadata remains separate
+#### Scenario: Dotfile symlink metadata remains separate
 - **WHEN** Homebrew declarations move to the Brewfile
-- **THEN** the existing `symlinks` and `after-scripts` values remain in `bootstrap.json` for their current consumers and no Homebrew formula, cask, or tap list remains there
+- **THEN** the existing `symlinks` values remain in `bootstrap.json`, no Homebrew formula, cask, tap, or after-script list remains there, and the obsolete after-script runner is absent
 
-#### Scenario: Existing after-scripts remain disabled
+#### Scenario: Generic symlink setup remains opt-in
 - **WHEN** notification bootstrap integration is added
-- **THEN** the generic symlink runner and currently commented general after-script runner are not enabled, and no dotfile replacement or Node/Neovim setup is triggered as a side effect
+- **THEN** the generic symlink runner is not enabled and no dotfile replacement is triggered as a side effect
+
+### Requirement: Determinate Nix installation is explicit and provenance-checked
+Before Homebrew setup, the macOS bootstrap SHALL preserve an existing Nix installation or, when Nix is missing, explain the system changes and ask for explicit confirmation before installing Determinate Nix. A declined or unavailable response SHALL continue without privileged changes, while an approved installation SHALL use a provenance-checked signed package and SHALL fail before Homebrew if any required step fails.
+
+#### Scenario: Nix is already available
+- **WHEN** `nix` is executable on the inherited `PATH`
+- **THEN** setup reports its version without prompting, downloading a package, invoking `sudo`, reinstalling Nix, migrating its distribution, or changing its configuration
+
+#### Scenario: Missing Nix is explained before Homebrew
+- **WHEN** `nix` is unavailable at the start of `macos.sh`
+- **THEN** setup explains that Determinate Nix creates `/nix`, installs a daemon, and requires administrator authorization before prompting `Install Determinate Nix now? [y/N]` and before any Homebrew step
+
+#### Scenario: User approves installation
+- **WHEN** the user enters case-insensitive `y` or `yes`
+- **THEN** setup begins the verified Determinate Nix installation
+
+#### Scenario: User enters an invalid interactive response
+- **WHEN** the response is neither an accepted yes value, an accepted no value, nor empty
+- **THEN** setup rejects the response without installing and prompts again
+
+#### Scenario: User declines installation
+- **WHEN** the user enters case-insensitive `n` or `no`, submits an empty response, or standard input reaches end-of-file
+- **THEN** setup performs no download or privileged installation, exits successfully, and allows Homebrew and notification setup to continue while Yazelix remains deferrable
+
+#### Scenario: Determinate package is downloaded
+- **WHEN** the user approves and Nix is missing
+- **THEN** setup downloads `https://install.determinate.systems/determinate-pkg/stable/Universal` into a private temporary directory with HTTPS-only curl settings and does not pipe remote content into a shell
+
+#### Scenario: Package provenance is accepted
+- **WHEN** macOS package assessment reports Apple Developer Team ID `X3JQ4VPJZ6`
+- **THEN** setup invokes the macOS system package installer through `sudo` and removes the staged package afterward
+
+#### Scenario: Inherited environment attempts to replace Nix setup paths
+- **WHEN** `macos.sh` inherits values that name an alternate Nix setup script, system command root, or daemon profile
+- **THEN** production setup ignores those values and uses only its repository-owned helper plus the fixed macOS system and standard `/nix` paths
+
+#### Scenario: Package provenance is missing or different
+- **WHEN** package assessment fails, is unparsable, or reports any other Team ID
+- **THEN** setup exits unsuccessfully before `sudo installer` or Homebrew executes and removes the staged package
+
+#### Scenario: Approved installation completes
+- **WHEN** the signed package installs successfully
+- **THEN** setup activates the standard Nix daemon environment in the current bootstrap, verifies an executable Nix command, its version, and flake support, then continues to Homebrew
+
+#### Scenario: Approved installation fails
+- **WHEN** download, assessment, package installation, environment activation, version verification, or flakes verification fails after approval
+- **THEN** `macos.sh` exits unsuccessfully before Homebrew, notification, or Yazelix setup
+
+#### Scenario: Bootstrap is repeated after installation
+- **WHEN** a later `macos.sh` run finds the installed `nix` command
+- **THEN** Nix setup is prompt-free and performs no package installation
+
+### Requirement: Yazelix setup is idempotent and deferrable
+The macOS bootstrap SHALL attempt Yazelix setup after notification installation without the Yazelix step itself installing Nix or launching Yazelix. The setup SHALL converge through the official Nix profile reference when possible and SHALL defer cleanly when Nix installation was declined and Nix remains unavailable.
+
+#### Scenario: Yazelix is already installed
+- **WHEN** `yzx` is already available on `PATH`
+- **THEN** Yazelix setup exits successfully without invoking Nix
+
+#### Scenario: Nix is available and Yazelix is absent
+- **WHEN** `nix` is executable and `yzx` is unavailable
+- **THEN** setup runs `nix profile add --refresh github:luccahuguet/yazelix`, reports success, and does not launch Yazelix
+
+#### Scenario: Nix is not installed
+- **WHEN** the user declined the earlier Determinate Nix offer and `nix` remains unavailable on `PATH`
+- **THEN** setup reports that Yazelix is deferred, exits successfully, and leaves the completed Homebrew and notification setup intact
+
+#### Scenario: User completes new-Mac setup
+- **WHEN** `macos.sh` and the separate generic `symlinks.sh` flow have completed
+- **THEN** the documented explicit next command is `yzx launch`
 
 ### Requirement: Installation discovers account and tool paths
 The installer and runtime scripts SHALL derive the home directory, Codex state directory, module siblings, JSON parser, Homebrew formula prefix, app destination, and Zellij executable without fixed user or architecture-specific paths.
@@ -98,6 +168,10 @@ The installer SHALL manage only top-level `notify` and `[tui].notifications`, pr
 - **WHEN** the installer encounters a multiline or otherwise unsupported owned value
 - **THEN** it aborts before replacing the real config and reports a manual remediation path
 
+#### Scenario: Config contains an unrelated multiline string
+- **WHEN** a line-oriented merge cannot safely distinguish key-like text inside a TOML multiline string
+- **THEN** the installer rejects the unsupported config before mutation and preserves the original bytes
+
 #### Scenario: Candidate config fails strict loading
 - **WHEN** Codex doctor does not report `config.load` with status `ok` for the staged candidate
 - **THEN** the original config remains active and the installer reports validation failure
@@ -132,6 +206,10 @@ Before replacing any existing script, app bundle, config, or hooks file, the ins
 - **WHEN** the latest backup is selected for rollback
 - **THEN** the previous scripts, app bundle, config, and hook files can be restored without requiring Git to contain generated state
 
+#### Scenario: Managed state changed after installation
+- **WHEN** any managed target no longer matches the selected run's recorded post-install fingerprint
+- **THEN** rollback refuses the entire operation before changing any target and preserves the later state
+
 ### Requirement: Installer is idempotent and supports deferred activation
 Repeated successful installation SHALL converge to the same filesystem and configuration state without duplicate hooks, duplicate settings, or unnecessary backups. Missing Codex or Sky prerequisites during general macOS bootstrap SHALL defer Codex activation without writing a broken notifier command.
 
@@ -156,4 +234,8 @@ The repository SHALL provide automated tests that exercise the installer in isol
 
 #### Scenario: Runtime regression suite runs
 - **WHEN** the module's notification tests execute after path refactoring
-- **THEN** completion, permission, OSC bytes, content limits, sound, exact routing, failure isolation, and signed-helper requirements retain their established behavior
+- **THEN** completion, permission, OSC bytes, content limits, sound, exact routing, and failure isolation retain their established behavior without requiring a live installation
+
+#### Scenario: Live installation suite runs
+- **WHEN** the module is installed for the current account
+- **THEN** its three executable links target the module and the active Terminal Notifier helper passes strict deep signature verification
