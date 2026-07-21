@@ -26,6 +26,19 @@ Homebrew dependencies belong to `Brewfile`. The generic symlink metadata
 remains in `bootstrap.json`; `macos.sh` does not automatically run the
 symlink runner.
 
+### Install Codex notifications separately
+
+After the Homebrew dependencies are available, install only the Codex
+notification integration with:
+
+```sh
+cd ~/.cider
+./codex-notify/install.zsh
+```
+
+See the [Codex notification installation guide](codex-notify/README.md#prerequisites-and-installation)
+for prerequisites, deferred activation, verification, backups, and rollback.
+
 ### New Mac setup flow
 
 After cloning the repository on a new Mac, run:
