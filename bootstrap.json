@@ -10,6 +10,7 @@
     "vue/.*": "~",
     "tig/.*": "~",
     "ctags/.*": "~",
+    ".hammerspoon/": "~",
     ".claude/*": "~/.claude",
     ".warp/themes/": "~/.warp",
     ".config/nvim/": "~/.config",

@@ -12,7 +12,7 @@ cd ~/.cider
 
 Run `./macos.sh` on macOS. It first offers to install Determinate Nix when Nix
 is missing, installs the repository `Brewfile`, including the declared formulas
-and four casks, then installs the portable Codex notification module and
+and five casks, then installs the portable Codex notification module and
 attempts to install Yazelix through Nix. See
 [codex-notify/README.md](codex-notify/README.md) for notification prerequisites,
 deferred activation, verification, backups, and rollback.
@@ -59,8 +59,8 @@ yzx launch
 2. Installs or discovers Homebrew.
 3. Applies Homebrew's `shellenv` when necessary.
 4. Runs `brew bundle install --file=./Brewfile --no-upgrade`, installing the
-   declared formulas and the DaisyDisk, Scroll Reverser, Warp, and Ghostty
-   casks.
+   declared formulas and the DaisyDisk, Scroll Reverser, Warp, Ghostty, and
+   Hammerspoon casks.
 5. Runs `codex-notify/install.zsh`, which installs the notification runtime
    links and signed Terminal Notifier helper. Codex configuration and hooks
    are activated when Codex and Sky Computer Use are available; otherwise that

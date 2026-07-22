@@ -52,6 +52,7 @@ trap '/bin/rm -rf "$tmp_dir"' EXIT HUP INT TERM
   scroll-reverser \
   warp \
   ghostty \
+  hammerspoon \
   | /usr/bin/sort > "$tmp_dir/expected-casks"
 
 /usr/bin/env HOMEBREW_NO_AUTO_UPDATE=1 \
