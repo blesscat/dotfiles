@@ -75,7 +75,7 @@ Codex PermissionRequest hook
 
 ## 精準點擊路由
 
-`codex-notification-route build` 只在判斷為 Zellij 且下列條件都成立時產生 `-execute` command：`ZELLIJ_SESSION_NAME` 與數字型 `ZELLIJ_PANE_ID` 存在、可從當下 `PATH` 解析出可執行的 Zellij 絕對路徑、JSON parser 可用，而且 Ghostty AppleScript API 能依 `${session} |` terminal 標題找到穩定 UUID。若任一條件不成立，`codex-notify` 保留 `-activate com.mitchellh.ghostty` 行為。純 Ghostty 成功提交 OSC 9 時不執行 route build。
+`codex-notification-route build` 只在判斷為 Zellij 且下列條件都成立時產生 `-execute` command：`ZELLIJ_SESSION_NAME` 與數字型 `ZELLIJ_PANE_ID` 存在、可依序從顯式 `CODEX_ROUTE_ZELLIJ_BIN` override、Yazelix Nova 的 `YZX_ZELLIJ` 或當下 `PATH` 解析出可執行的 Zellij 絕對路徑、JSON parser 可用，而且 Ghostty AppleScript API 能依 `${session} |` terminal 標題找到穩定 UUID。若任一條件不成立，`codex-notify` 保留 `-activate com.mitchellh.ghostty` 行為。純 Ghostty 成功提交 OSC 9 時不執行 route build。
 
 opaque token 的版本 1 欄位為：
 

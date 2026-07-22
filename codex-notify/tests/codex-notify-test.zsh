@@ -790,6 +790,31 @@ else
     "$(argument_after_flag "$route_build_osascript_args" '-')" \
     'route build asks Ghostty for the matching session title'
 
+  # Nova exposes its packaged Zellij client through YZX_ZELLIJ rather than
+  # adding it to PATH. The route must still be exact in that environment.
+  nova_route_build_osascript_args="$tmp_dir/nova-route-build-osascript.args"
+  nova_route_command="$({
+    /usr/bin/env -u CODEX_ROUTE_ZELLIJ_BIN \
+      PATH=/usr/bin:/bin \
+      YZX_ZELLIJ="$recording_zellij" \
+      ZELLIJ_SESSION_NAME="$route_session" \
+      ZELLIJ_PANE_ID="$route_pane" \
+      CODEX_ROUTE_JQ="$jq_bin" \
+      CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
+      CODEX_ROUTE_TERMINAL_ID="$route_terminal_id" \
+      CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$nova_route_build_osascript_args" \
+        "$route_helper" build
+  } 2>"$tmp_dir/nova-route-build.stderr")"
+  exit_status=$?
+
+  assert_equal 0 "$exit_status" \
+    'Nova route build remains non-blocking without Zellij on PATH'
+  assert_contains "$nova_route_command" ' click ' \
+    'Nova packaged Zellij path builds an exact click route'
+  assert_equal "$route_session" \
+    "$(argument_after_flag "$nova_route_build_osascript_args" '-')" \
+    'Nova route build resolves the originating Ghostty terminal'
+
   route_zellij_args="$tmp_dir/route-click-zellij.args"
   route_focus_args="$tmp_dir/route-click-osascript.args"
   route_open_args="$tmp_dir/route-click-open.args"

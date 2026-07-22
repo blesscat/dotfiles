@@ -52,6 +52,9 @@ build_route() {
   [[ -x "$jq_bin" && -x "$osascript_bin" ]] || return 0
 
   if [[ -z "$zellij_bin" ]]; then
+    zellij_bin="${YZX_ZELLIJ-}"
+  fi
+  if [[ -z "$zellij_bin" ]]; then
     zellij_bin="${commands[zellij]-}"
   fi
   [[ "$zellij_bin" == /* && -x "$zellij_bin" ]] || return 0
