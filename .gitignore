@@ -19,3 +19,6 @@ ehthumbs.db
 
 # Local Git worktrees
 .worktrees/
+
+# Yazelix upgrade backups
+/symlinks/.config/yazelix/**/*backup*

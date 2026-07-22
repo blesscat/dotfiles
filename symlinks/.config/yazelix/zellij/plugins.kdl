@@ -1,6 +1,0 @@
-// Extra third-party Zellij plugins
-plugins {
-}
-
-load_plugins {
-}
