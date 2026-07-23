@@ -186,15 +186,11 @@ def query_panes(candidate, servers, pane_cache):
     return panes
 
 
-def focused_terminal_pane(panes):
+def focused_pane(panes):
     focused = [
         pane
         for pane in panes
-        if (
-            not pane.get("is_plugin")
-            and pane.get("is_focused")
-            and not pane.get("exited")
-        )
+        if pane.get("is_focused") and not pane.get("exited")
     ]
     floating = [pane for pane in focused if pane.get("is_floating")]
 
@@ -202,6 +198,10 @@ def focused_terminal_pane(panes):
         return floating[-1]
 
     return focused[-1] if focused else None
+
+
+def focused_terminal_pane(panes):
+    return focused_pane([pane for pane in panes if not pane.get("is_plugin")])
 
 
 def text_matches(title, value):
@@ -314,6 +314,16 @@ def should_keep_english(role, mode):
     return role == "sidebar" or (role == "editor" and mode in {"normal", "select"})
 
 
+def pane_context(candidate, panes):
+    pane = focused_pane(panes)
+    if pane is None:
+        return None
+
+    role = pane_role(candidate, pane)
+    mode = candidate["_context"].get("mode") if role == "editor" else None
+    return candidate, role, mode
+
+
 def active_tab_context(candidates, active_tab_title):
     if "|" not in active_tab_title:
         return None
@@ -341,7 +351,13 @@ def active_tab_context(candidates, active_tab_title):
         role = "other"
 
     mode = candidate["_context"].get("mode") if role == "editor" else None
-    return candidate, role, mode
+    title_context = candidate, role, mode
+
+    if not should_keep_english(role, mode):
+        return title_context
+
+    panes = query_panes(candidate, zellij_servers(), {})
+    return pane_context(candidate, panes) or title_context
 
 
 def print_state(candidate, role, mode):
@@ -384,10 +400,10 @@ def main():
         print(json.dumps({"status": "unavailable"}))
         return 0
 
-    pane = focused_terminal_pane(panes)
-    role = pane_role(candidate, pane)
-    mode = candidate["_context"].get("mode") if role == "editor" else None
-    print_state(candidate, role, mode)
+    resolved_context = pane_context(candidate, panes)
+    if resolved_context is None:
+        resolved_context = candidate, "other", None
+    print_state(*resolved_context)
     return 0
 
 
