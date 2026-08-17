@@ -7,6 +7,8 @@ function genSymlinks () {
   # bash config is difference between macOS and ubuntu.
   [[ $SYMLINKS =~ bash ]] && return
 
+  bash -c "mkdir -p ${TARGET_PATH}"
+
   for FILE_PATH in ~/.cider/symlinks/${SYMLINKS} ; do
     [[ ! -e ${FILE_PATH} ]] && continue
     local ARRAY=($(echo ${FILE_PATH} | tr "/" "\n"))

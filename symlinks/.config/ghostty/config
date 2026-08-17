@@ -3,3 +3,7 @@ theme = Solarized Dark Higher Contrast
 font-family = PingFang TC, Menlo
 confirm-close-surface = false
 macos-option-as-alt = true
+keybind = shift+alt+h=esc:H
+keybind = shift+alt+j=esc:J
+keybind = shift+alt+k=esc:K
+keybind = shift+alt+l=esc:L
