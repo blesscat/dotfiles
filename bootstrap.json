@@ -13,14 +13,23 @@
     ".hammerspoon/": "~",
     ".claude/*": "~/.claude",
     ".warp/themes/": "~/.warp",
+    ".config/ghostty/": "~/.config",
+    ".config/lazygit/": "~/.config",
     ".config/nvim/": "~/.config",
     ".config/helix/": "~/.config",
     ".config/yazelix/config.toml": "~/.config/yazelix",
+    ".config/yazelix/cursors.toml": "~/.config/yazelix",
     ".config/yazelix/helix/config.toml": "~/.config/yazelix/helix",
+    ".config/yazelix/helix/steel_plugins/README.md": "~/.config/yazelix/helix/steel_plugins",
     ".config/yazelix/helix/themes/": "~/.config/yazelix/helix",
     ".config/kitty/": "~/.config",
     ".config/fish/": "~/.config",
     ".config/yazi/": "~/.config",
-    ".config/atuin/": "~/.config"
+    ".config/atuin/": "~/.config",
+    ".config/gh/config.yml": "~/.config/gh",
+    ".config/git/ignore": "~/.config/git",
+    ".config/glow/glow.yml": "~/.config/glow",
+    ".config/htop/htoprc": "~/.config/htop",
+    ".config/zellij/config.kdl": "~/.config/zellij"
   }
 }
