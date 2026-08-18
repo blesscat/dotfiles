@@ -76,5 +76,9 @@ if (( brew_was_on_path == 0 )); then
 fi
 
 "$brew_bin" bundle install "--file=$brewfile" --no-upgrade
+/usr/bin/printf 'macos bootstrap: running notification installer: %s\n' \
+  "$notification_installer"
 "$notification_installer"
+/usr/bin/printf 'macos bootstrap: running Yazelix installer: %s\n' \
+  "$yazelix_installer"
 "$yazelix_installer"
