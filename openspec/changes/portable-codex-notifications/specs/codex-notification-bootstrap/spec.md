@@ -94,7 +94,7 @@ Before Homebrew setup, the macOS bootstrap SHALL preserve an existing Nix instal
 - **THEN** Nix setup is prompt-free and performs no package installation
 
 ### Requirement: Yazelix setup is idempotent and deferrable
-The macOS bootstrap SHALL attempt Yazelix setup after notification installation without the Yazelix step itself installing Nix or launching Yazelix. The setup SHALL converge through the official Nix profile reference when possible and SHALL defer cleanly when Nix installation was declined and Nix remains unavailable.
+The macOS bootstrap SHALL attempt Yazelix setup after notification installation without the Yazelix step itself installing Nix or launching Yazelix. The setup SHALL converge through the stable Nova channel, SHALL retry one failed profile attempt once, and SHALL defer cleanly when Nix installation was declined and Nix remains unavailable.
 
 #### Scenario: Yazelix is already installed
 - **WHEN** `yzx` is already available on `PATH`
@@ -102,7 +102,23 @@ The macOS bootstrap SHALL attempt Yazelix setup after notification installation 
 
 #### Scenario: Nix is available and Yazelix is absent
 - **WHEN** `nix` is executable and `yzx` is unavailable
-- **THEN** setup runs `nix profile add --refresh github:luccahuguet/yazelix`, reports success, and does not launch Yazelix
+- **THEN** setup runs `nix profile add --refresh github:Yazelix/nova/stable`, reports success, and does not launch Yazelix
+
+#### Scenario: Yazelix profile installation fails transiently
+- **WHEN** the first Nix profile attempt fails and the second identical attempt succeeds
+- **THEN** setup reports the bounded retry, reports success afterward, and invokes Nix exactly twice
+
+#### Scenario: Yazelix profile installation keeps failing
+- **WHEN** both Nix profile attempts fail
+- **THEN** setup stops after the second attempt, returns that failure status, explains how to handle GitHub HTTP 429 output, and does not report success
+
+#### Scenario: Nix download backoff is bounded
+- **WHEN** a Yazelix profile attempt encounters a persistent download failure
+- **THEN** each of the two profile invocations allows one Nix download attempt so internal HTTP retries do not multiply the bounded outer retry
+
+#### Scenario: Bootstrap identifies adjacent installer output
+- **WHEN** notification setup completes and Yazelix setup begins
+- **THEN** the bootstrap prints each resolved installer path immediately before invoking it so subsequent Yazelix output is not attributed to the notification installer
 
 #### Scenario: Nix is not installed
 - **WHEN** the user declined the earlier Determinate Nix offer and `nix` remains unavailable on `PATH`

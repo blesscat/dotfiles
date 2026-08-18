@@ -8,7 +8,7 @@ The Codex notification feature currently lives across unversioned files under on
 - Replace user-specific and Apple-Silicon-specific paths with runtime discovery based on `$HOME`, `CODEX_HOME`, script-relative paths, `command -v`, and `brew --prefix`.
 - Replace the JSON-driven macOS Homebrew lists with a repository-root `Brewfile` that declares the approved formulas and casks, including the shell and workspace tools used by this repository, then run an idempotent notification installer after `brew bundle` succeeds.
 - Add an interactive Determinate Nix setup step before Homebrew: reuse existing Nix, explain privileged system changes when Nix is missing, install only after explicit confirmation from a signed package, and preserve a default-no deferral path.
-- Add an idempotent Yazelix setup step that uses the official Nix profile command when Nix is available, defers when Nix installation is declined, and leaves first launch explicit.
+- Add an idempotent Yazelix setup step that uses the stable Nova channel when Nix is available, retains one transient profile retry, defers cleanly when Nix installation is declined, and leaves first launch explicit.
 - Install runtime scripts as symlinks, reconstruct and ad-hoc sign the Terminal Notifier app from Homebrew, and verify the result before activation.
 - Merge only the owned Codex notification keys and permission hook into user-level configuration while preserving unrelated settings, hooks, and local state.
 - Back up replaced files, use staged writes, and restore or leave the previous installation intact when validation fails.

@@ -67,8 +67,13 @@ yzx launch
    part is deferred for a later installer run.
 6. Runs `scripts/yazelix_setup.sh`. If `yzx` is already available, the step is
    a no-op. If Nix with flakes is available, it installs Yazelix with
-   `nix profile add --refresh github:luccahuguet/yazelix`. If Nix is missing,
-   Yazelix setup is deferred without failing the rest of the Mac bootstrap.
+   `nix profile add --refresh github:Yazelix/nova/stable`. A failed profile
+   attempt is retried once for transient upstream build failures, with Nix's
+   per-command download attempts bounded so a GitHub HTTP 429 does not trigger
+   two long internal retry cycles. If GitHub rate-limits anonymous downloads,
+   wait for the limit to reset or configure Nix `access-tokens`, then rerun
+   `./scripts/yazelix_setup.sh`. If Nix is missing, Yazelix setup is deferred
+   without failing the rest of the Mac bootstrap.
 
 The Nix prompt defaults to No. Entering `n`, `no`, pressing Enter, or running
 without interactive input skips Nix without failing Homebrew or notification

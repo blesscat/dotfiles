@@ -89,6 +89,13 @@ run_bootstrap "$case_dir" "$case_bin:/usr/bin:/bin" \
   CODEX_TEST_NIX_EXPORT=1
 path_status=$?
 assert_equal 0 "$path_status" 'bootstrap with brew on PATH succeeds'
+path_stdout="$(/bin/cat "$case_dir/stdout")"
+assert_contains "$path_stdout" \
+  'macos bootstrap: running notification installer:' \
+  'bootstrap labels notification setup before its output'
+assert_contains "$path_stdout" \
+  'macos bootstrap: running Yazelix installer:' \
+  'bootstrap labels Yazelix setup before its output'
 expected_path_steps="$(/usr/bin/printf '%s\n' \
   'STEP=nix' \
   'END' \
