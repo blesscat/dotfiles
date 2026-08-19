@@ -20,5 +20,8 @@ ehthumbs.db
 # Local Git worktrees
 .worktrees/
 
+# Archived OpenSpec changes
+/openspec/changes/archive/
+
 # Yazelix upgrade backups
 /symlinks/.config/yazelix/**/*backup*
