@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenSpec to Main PR"
+  short_description: "OpenSpec to main PR with sync and archive"
+  default_prompt: "Use $openspec-to-main-pr to carry a completed OpenSpec exploration through proposal, explicit $openspec-sync-specs, archive, review, and a PR to main."
