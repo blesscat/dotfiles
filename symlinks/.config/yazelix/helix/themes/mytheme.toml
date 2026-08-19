@@ -1,3 +1,35 @@
 inherits = "night_owl"
 
 "ui.virtual.jump-label" = { fg = "#ff5555", modifiers = ["bold"] }
+
+# Softer popup and completion colors
+# "ui.popup" = { fg = "foreground", bg = "background2" }
+# "ui.popup.info" = { fg = "paleblue", bg = "background2" }
+# "ui.help" = { fg = "foreground", bg = "background2" }
+# "ui.menu" = { fg = "foreground", bg = "background2" }
+# "ui.menu.selected" = { fg = "foreground", bg = "selection" }
+# "ui.menu.scroll" = { fg = "paleblue", bg = "background2" }
+
+# Astro / TypeScript syntax
+"tag" = { fg = "paleblue", modifiers = ["bold"] }
+"tag.builtin" = { fg = "blue", modifiers = ["bold"] }
+"attribute" = { fg = "pink" }
+"type" = { fg = "gold" }
+"type.builtin" = { fg = "peach" }
+"constructor" = { fg = "blue" }
+"function" = { fg = "blue" }
+"function.method" = { fg = "paleblue" }
+"variable" = { fg = "green" }
+"variable.other.member" = { fg = "paleblue" }
+"keyword" = { fg = "pink", modifiers = ["bold"] }
+"keyword.control.import" = { fg = "green", modifiers = ["italic"] }
+"keyword.control.return" = { fg = "pink", modifiers = ["italic"] }
+"operator" = { fg = "peach" }
+"string" = { fg = "gold" }
+"string.special.url" = { fg = "paleblue", modifiers = ["underlined"] }
+"constant.numeric" = { fg = "gold" }
+"constant.builtin.boolean" = { fg = "peach", modifiers = ["bold"] }
+"punctuation.bracket" = { fg = "paleblue" }
+"punctuation.delimiter" = { fg = "grey7" }
+"markup.link.label" = { fg = "blue", modifiers = ["underlined"] }
+"markup.link.url" = { fg = "paleblue", modifiers = ["underlined"] }
