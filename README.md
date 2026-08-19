@@ -114,6 +114,26 @@ the Bash templates. Bash environments need a copy or mount of `~/.cider`; set
 `CIDER_HOME` when the repository is available at a different path, such as an
 OrbStack VM mount.
 
+### Manage user-level agent skills
+
+The maintained user-level skills are stored in `.agents/skills` and are activated
+explicitly with:
+
+```sh
+cd ~/.cider
+./scripts/agents_skills_setup.sh
+```
+
+The command links `~/.agents/skills` to the repository source while leaving
+`~/.agents/.skill-lock.json` as local installation state. If an existing skill
+directory or another link is found, it is moved to a timestamped
+`~/.agents/skills.backup-*` path before activation. A failed activation restores
+the previous path; to roll back a successful activation, remove the managed link
+and move the selected backup back to `~/.agents/skills`.
+
+This migration is intentionally not run by `macos.sh` or the generic
+`symlinks.sh` runner.
+
 Yazelix is not launched automatically because its first launch is interactive
 and may update editor configuration. After applying the repository symlinks,
 run `yzx launch` when you are ready. If installation was deferred, install Nix
