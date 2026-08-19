@@ -128,3 +128,10 @@ export DENO_INSTALL=~/.deno
 export PATH=$DENO_INSTALL/bin:$PATH
 export PATH=$HOME/.serve:$PATH
 . "$HOME/.cargo/env"
+
+# Cider terminal background shortcuts.
+terminal_bg_file="${CIDER_HOME:-$HOME/.cider}/shell/terminal-bg.bash"
+if [ -r "$terminal_bg_file" ]; then
+    . "$terminal_bg_file"
+fi
+unset terminal_bg_file

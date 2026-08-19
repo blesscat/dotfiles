@@ -94,6 +94,26 @@ symlink mappings from `bootstrap.json`. It is intentionally not invoked by
 `macos.sh`, and the notification-specific links are managed by the notification
 installer instead.
 
+### Terminal background shortcuts
+
+After the Fish configuration is linked, these commands change the background of
+the current terminal surface without changing the terminal's saved theme:
+
+```sh
+bg-night
+bg-ocean
+bg-slate
+bg-forest
+bg-plum
+bg-alert
+bg-reset
+```
+
+The shared command lives at `scripts/terminal-bg` and is also exposed through
+the Bash templates. Bash environments need a copy or mount of `~/.cider`; set
+`CIDER_HOME` when the repository is available at a different path, such as an
+OrbStack VM mount.
+
 Yazelix is not launched automatically because its first launch is interactive
 and may update editor configuration. After applying the repository symlinks,
 run `yzx launch` when you are ready. If installation was deferred, install Nix

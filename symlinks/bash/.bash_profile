@@ -39,5 +39,12 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
 	nvm use default >/dev/null 2>&1
 fi
 
+# Cider terminal background shortcuts.
+terminal_bg_file="${CIDER_HOME:-$HOME/.cider}/shell/terminal-bg.bash"
+if [ -r "$terminal_bg_file" ]; then
+	. "$terminal_bg_file"
+fi
+unset terminal_bg_file
+
 # change temp folder
 export TMPDIR=$HOME/tmp

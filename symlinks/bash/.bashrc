@@ -15,3 +15,10 @@ export LSCOLORS="gxfxcxdxcxegedabagacad"
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+
+# Cider terminal background shortcuts.
+terminal_bg_file="${CIDER_HOME:-$HOME/.cider}/shell/terminal-bg.bash"
+if [ -r "$terminal_bg_file" ]; then
+  . "$terminal_bg_file"
+fi
+unset terminal_bg_file

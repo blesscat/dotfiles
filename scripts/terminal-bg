@@ -1,0 +1,46 @@
+#!/bin/sh
+
+usage() {
+  printf '%s\n' \
+    'Usage: terminal-bg {night|ocean|slate|forest|plum|alert|reset}' >&2
+}
+
+if [ ! -t 1 ] || [ "${TERM-}" = dumb ]; then
+  exit 0
+fi
+
+if [ "$#" -ne 1 ]; then
+  usage
+  exit 2
+fi
+
+case "$1" in
+  night)
+    color='#101418'
+    ;;
+  ocean)
+    color='#1e2a3a'
+    ;;
+  slate)
+    color='#263238'
+    ;;
+  forest)
+    color='#172a24'
+    ;;
+  plum)
+    color='#2b2133'
+    ;;
+  alert)
+    color='#3a2020'
+    ;;
+  reset)
+    printf '\033]111\033\\'
+    exit 0
+    ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac
+
+printf '\033]11;%s\033\\' "$color"
