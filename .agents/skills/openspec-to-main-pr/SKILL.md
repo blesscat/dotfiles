@@ -47,6 +47,14 @@ Never merge the pull request or push directly to `main`.
   end of the phase and continue. Stop for actual blockers.
 - Preserve unrelated user changes. Never use `git add -A` when ownership or scope
   is unclear.
+- Treat the repository's `.gitignore` files as a hard publication boundary. Read
+  the root `.gitignore` and any relevant nested ignore files before staging, and
+  use `git status --short --ignored` plus `git check-ignore -v --no-index <path>`
+  when evaluating candidate files.
+- Never use `git add -f`, `git add --force`, an equivalent force-add option, or a
+  connector tree/blob operation to publish a path matched by `.gitignore`. If a
+  required artifact is ignored, keep it local and report it; ask the user before
+  changing ignore policy in a separate, explicit decision.
 - Record the final OpenSpec status, review verdict, changed-file scope, and exact
   validation results before publishing.
 
@@ -153,8 +161,9 @@ archive phase must:
 - validate the synchronized main spec and completed change artifacts;
 - move the complete change directory, including `.openspec.yaml` when present, to
   the dated archive location; and
-- verify that the active-change path is gone, the archive is complete, and all sync
-  and archive files are in the intended changed-file scope.
+- verify that the active-change path is gone and the archive is complete. The
+  archive's on-disk existence is separate from PR scope: if the archive path is
+  ignored, leave it untracked and local rather than publishing it.
 
 If an unsynchronized delta remains, synchronization conflicts, the archive target
 already exists, or the archive cannot be verified, stop before publishing and report
@@ -168,8 +177,13 @@ and archive are complete.
 Recheck:
 
 - `git status -sb`
+- `git status --short --ignored`
 - `git diff --stat`
 - `git diff --name-only`
+
+Before staging, check every candidate path against the applicable `.gitignore`
+rules. Do not treat an OpenSpec archive as automatically publishable merely
+because the archive phase created it.
 
 Resolve the repository from `origin`. Confirm that the remote has a `main` branch;
 the PR target is always `main`, even if the repository has another default branch.
@@ -184,16 +198,22 @@ available, stop and report the missing capability.
 1. If the current branch is `main` or the repository's default branch, create a
    focused working branch such as `agent/<description>`. Keep an existing focused
    feature branch when its scope is clear.
-2. Stage only files belonging to this OpenSpec change, including synchronized main
-   specs and archive files. Group the in-scope files into one or more coherent
-   commits when that makes different features or purposes easier to review. Keep
-   each commit focused, and do not mix unrelated changes; if unrelated changes
-   cannot be separated safely, stop and ask the user to identify the scope.
+2. Stage only intended, non-ignored files belonging to this OpenSpec change,
+   including synchronized main specs when applicable. Never stage a path matched
+   by `.gitignore`, and never use a force-add option. An ignored OpenSpec archive
+   remains local-only and must not enter the commit or PR. If publishing an
+   ignored artifact appears necessary, stop and ask the user before changing the
+   ignore policy. Group the in-scope files into one or more coherent commits when
+   that makes different features or purposes easier to review. Keep each commit
+   focused, and do not mix unrelated changes; if unrelated changes cannot be
+   separated safely, stop and ask the user to identify the scope.
 3. Rerun relevant checks if implementation or review fixes changed files after the
    earlier validation.
 4. Create the intentional commit or commits with terse, purpose-specific
-   descriptions. Review the staged diff before each commit, and ensure the
-   complete ordered commit series represents the OpenSpec change.
+   descriptions. Review `git diff --cached --name-only`,
+   `git diff --cached --check`, and the staged diff before each commit. Confirm
+   that no ignored path was staged and that the complete ordered commit series
+   represents the publishable portion of the OpenSpec change.
 5. Push the current branch with tracking to `origin` after all intended commits
    are created.
 6. Create a draft PR with base `main`, the pushed source branch, and a body covering
@@ -207,7 +227,9 @@ equivalent remote operation without modifying `main`:
 
 1. Resolve the repository, the `main` commit, and its base tree.
 2. Create a focused source branch from the `main` commit.
-3. Create blobs and trees for the changed text files, then create one or more
+3. Apply the same `.gitignore` boundary to the connector file list; do not create
+   blobs or tree entries for ignored paths. Create blobs and trees only for the
+   remaining changed text files, then create one or more
    focused commits in logical order when different features or purposes should
    be separated. Base each later commit on the preceding commit and move the
    source branch to the latest commit.
@@ -228,7 +250,8 @@ Report one concise handoff containing:
 - main-spec synchronization and archive path/status;
 - implementation and independent-review verdict;
 - validation commands and results;
-- source branch, commit, and PR URL/number; and
+- source branch, commit, and PR URL/number;
+- which archived artifacts remained local-only because `.gitignore` excluded them;
 - residual risk or follow-up needed before merge.
 
 If the workflow stops, report the last completed phase, the exact blocker, and the
