@@ -13,6 +13,27 @@ sync, and archive are complete.
 The final operation creates a pull request from the working branch into `main`.
 Never merge the pull request or push directly to `main`.
 
+## Worktree isolation (must happen first)
+
+Before doing any other workflow work—including reading or writing OpenSpec
+artifacts, selecting a store, or creating a branch—inspect the current repository:
+
+1. Run `git status --short --branch` and identify the current branch.
+2. If the current branch is `main`, or `git status --porcelain` returns any output
+   (staged, unstaged, or untracked changes), create a new worktree before
+   continuing.
+3. Create the worktree from the current `HEAD` on a new focused branch, such as
+   `codex/<description>`, then change the working directory to that worktree.
+4. Run the remaining phases entirely from the new worktree. Leave the original
+   worktree and any uncommitted changes untouched; do not stash, reset, or commit
+   them as part of this workflow.
+5. If the worktree or branch cannot be created safely, stop and report the exact
+   blocker.
+
+If the current worktree is already on a focused non-`main` branch and is clean,
+continue there. Never begin the OpenSpec workflow from `main` or from a dirty
+worktree.
+
 ## Portability and prerequisites
 
 - Run from the current Git repository. Do not assume a repository path, framework,
@@ -181,22 +202,24 @@ available, stop and report the missing capability.
 
 ### Source branch and local CLI path
 
-1. If the current branch is `main` or the repository's default branch, create a
-   focused working branch such as `agent/<description>`. Keep an existing focused
-   feature branch when its scope is clear.
-2. Stage only files belonging to this OpenSpec change, including synchronized main
+1. Confirm that the worktree-isolation rule has been satisfied. If the current
+   worktree is still `main` or contains uncommitted changes, stop and establish the
+   isolated worktree before staging.
+2. Keep an existing focused feature branch when its scope is clear; otherwise use
+   the focused branch created by the isolation rule.
+3. Stage only files belonging to this OpenSpec change, including synchronized main
    specs and archive files. Group the in-scope files into one or more coherent
    commits when that makes different features or purposes easier to review. Keep
    each commit focused, and do not mix unrelated changes; if unrelated changes
    cannot be separated safely, stop and ask the user to identify the scope.
-3. Rerun relevant checks if implementation or review fixes changed files after the
+4. Rerun relevant checks if implementation or review fixes changed files after the
    earlier validation.
-4. Create the intentional commit or commits with terse, purpose-specific
+5. Create the intentional commit or commits with terse, purpose-specific
    descriptions. Review the staged diff before each commit, and ensure the
    complete ordered commit series represents the OpenSpec change.
-5. Push the current branch with tracking to `origin` after all intended commits
+6. Push the current branch with tracking to `origin` after all intended commits
    are created.
-6. Create a draft PR with base `main`, the pushed source branch, and a body covering
+7. Create a draft PR with base `main`, the pushed source branch, and a body covering
    what changed, why, user/developer impact, the OpenSpec change name, review
    verdict, validation commands/results, and residual risk.
 
