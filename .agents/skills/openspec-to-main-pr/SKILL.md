@@ -13,6 +13,25 @@ sync, and archive are complete.
 The final operation creates a pull request from the working branch into `main`.
 Never merge the pull request or push directly to `main`.
 
+## Codex Worktree and Environment (must happen first)
+
+When this skill is started in the Codex desktop app, use this setup before any
+OpenSpec or repository workflow work:
+
+Use Codex's built-in Worktree to create an isolated work environment for this
+task from `main`.
+
+After creating it, confirm the following before continuing:
+
+1. The current working directory is the new worktree.
+2. The environment and terminal are attached to this worktree.
+3. Do not run `git worktree add` only from the original `main` checkout.
+
+Report the following results before starting work:
+pwd
+git status --short --branch
+git worktree list --porcelain
+
 ## Worktree isolation (must happen first)
 
 Before doing any other workflow work—including reading or writing OpenSpec
@@ -68,6 +87,9 @@ worktree.
   end of the phase and continue. Stop for actual blockers.
 - Preserve unrelated user changes. Never use `git add -A` when ownership or scope
   is unclear.
+- Read the repository's `.gitignore` before staging and use it as the source of
+  truth for ignored generated or archive artifacts. Do not override an ignored
+  path with `git add -f` unless the user explicitly requests that exception.
 - Record the final OpenSpec status, review verdict, changed-file scope, and exact
   validation results before publishing.
 
@@ -174,8 +196,8 @@ archive phase must:
 - validate the synchronized main spec and completed change artifacts;
 - move the complete change directory, including `.openspec.yaml` when present, to
   the dated archive location; and
-- verify that the active-change path is gone, the archive is complete, and all sync
-  and archive files are in the intended changed-file scope.
+- verify that the active-change path is gone, the archive is complete, and the
+  archive path's tracked/ignored status follows the repository's `.gitignore`.
 
 If an unsynchronized delta remains, synchronization conflicts, the archive target
 already exists, or the archive cannot be verified, stop before publishing and report
@@ -191,6 +213,8 @@ Recheck:
 - `git status -sb`
 - `git diff --stat`
 - `git diff --name-only`
+- the repository's `.gitignore` and `git check-ignore` for generated or archived
+  paths that may be present after the archive phase
 
 Resolve the repository from `origin`. Confirm that the remote has a `main` branch;
 the PR target is always `main`, even if the repository has another default branch.
@@ -208,10 +232,12 @@ available, stop and report the missing capability.
 2. Keep an existing focused feature branch when its scope is clear; otherwise use
    the focused branch created by the isolation rule.
 3. Stage only files belonging to this OpenSpec change, including synchronized main
-   specs and archive files. Group the in-scope files into one or more coherent
-   commits when that makes different features or purposes easier to review. Keep
-   each commit focused, and do not mix unrelated changes; if unrelated changes
-   cannot be separated safely, stop and ask the user to identify the scope.
+   specs and any archive files permitted by the repository's `.gitignore`. Do not
+   force-add ignored paths unless the user explicitly requests it. Group the
+   in-scope files into one or more coherent commits when that makes different
+   features or purposes easier to review. Keep each commit focused, and do not
+   mix unrelated changes; if unrelated changes cannot be separated safely, stop
+   and ask the user to identify the scope.
 4. Rerun relevant checks if implementation or review fixes changed files after the
    earlier validation.
 5. Create the intentional commit or commits with terse, purpose-specific
@@ -248,7 +274,8 @@ Never merge the PR, resolve reviews, or update `main` directly.
 Report one concise handoff containing:
 
 - OpenSpec change name and final artifact/apply status;
-- main-spec synchronization and archive path/status;
+- main-spec synchronization and archive path/status, including the `.gitignore`
+  decision for whether archive files are publishable;
 - implementation and independent-review verdict;
 - validation commands and results;
 - source branch, commit, and PR URL/number; and
