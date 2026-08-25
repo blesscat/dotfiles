@@ -13,45 +13,33 @@ sync, and archive are complete.
 The final operation creates a pull request from the working branch into `main`.
 Never merge the pull request or push directly to `main`.
 
-## Codex Worktree and Environment (must happen first)
-
-When this skill is started in the Codex desktop app, use this setup before any
-OpenSpec or repository workflow work:
-
-Use Codex's built-in Worktree to create an isolated work environment for this
-task from `main`.
-
-After creating it, confirm the following before continuing:
-
-1. The current working directory is the new worktree.
-2. The environment and terminal are attached to this worktree.
-3. Do not run `git worktree add` only from the original `main` checkout.
-
-Report the following results before starting work:
-pwd
-git status --short --branch
-git worktree list --porcelain
-
 ## Worktree isolation (must happen first)
 
-Before doing any other workflow work—including reading or writing OpenSpec
-artifacts, selecting a store, or creating a branch—inspect the current repository:
+Before any OpenSpec or repository workflow work—including reading or writing
+artifacts, selecting a store, or creating a branch—inspect the current repository.
 
-1. Run `git status --short --branch` and identify the current branch.
-2. If the current branch is `main`, or `git status --porcelain` returns any output
-   (staged, unstaged, or untracked changes), create a new worktree before
-   continuing.
-3. Create the worktree from the current `HEAD` on a new focused branch, such as
-   `codex/<description>`, then change the working directory to that worktree.
-4. Run the remaining phases entirely from the new worktree. Leave the original
-   worktree and any uncommitted changes untouched; do not stash, reset, or commit
-   them as part of this workflow.
-5. If the worktree or branch cannot be created safely, stop and report the exact
-   blocker.
+1. Report the current environment and worktree state:
 
-If the current worktree is already on a focused non-`main` branch and is clean,
-continue there. Never begin the OpenSpec workflow from `main` or from a dirty
-worktree.
+   ```sh
+   pwd
+   git status --short --branch
+   git worktree list --porcelain
+   ```
+
+2. Work only from a focused, non-`main` branch in a clean worktree. If the
+   current branch is `main` or `git status --porcelain` returns any output,
+   create or use an isolated worktree from the current `HEAD` on a focused branch
+   such as `codex/<description>`.
+3. When running in Codex Desktop, prefer its built-in Worktree when available.
+   Otherwise use the worktree operation supported by the environment. Before
+   continuing, confirm that the current directory and terminal are attached to
+   the isolated worktree.
+4. Run the remaining phases entirely from the isolated worktree. Leave the
+   original worktree and any uncommitted changes untouched; do not stash, reset,
+   or commit them as part of this workflow.
+5. If the current worktree is already on a focused non-`main` branch and is clean,
+   continue there. If the worktree or branch cannot be created safely, stop and
+   report the exact blocker.
 
 ## Portability and prerequisites
 
@@ -87,9 +75,14 @@ worktree.
   end of the phase and continue. Stop for actual blockers.
 - Preserve unrelated user changes. Never use `git add -A` when ownership or scope
   is unclear.
-- Read the repository's `.gitignore` before staging and use it as the source of
-  truth for ignored generated or archive artifacts. Do not override an ignored
-  path with `git add -f` unless the user explicitly requests that exception.
+- Treat the repository's `.gitignore` files as a hard publication boundary. Read
+  the root `.gitignore` and any relevant nested ignore files before staging, and
+  use `git status --short --ignored` plus `git check-ignore -v --no-index <path>`
+  when evaluating candidate files.
+- Never use `git add -f`, `git add --force`, an equivalent force-add option, or a
+  connector tree/blob operation to publish a path matched by `.gitignore`. If a
+  required artifact is ignored, keep it local and report it; ask the user before
+  changing ignore policy in a separate, explicit decision.
 - Record the final OpenSpec status, review verdict, changed-file scope, and exact
   validation results before publishing.
 
@@ -196,8 +189,9 @@ archive phase must:
 - validate the synchronized main spec and completed change artifacts;
 - move the complete change directory, including `.openspec.yaml` when present, to
   the dated archive location; and
-- verify that the active-change path is gone, the archive is complete, and the
-  archive path's tracked/ignored status follows the repository's `.gitignore`.
+- verify that the active-change path is gone and the archive is complete. The
+  archive's on-disk existence is separate from PR scope: if the archive path is
+  ignored, leave it untracked and local rather than publishing it.
 
 If an unsynchronized delta remains, synchronization conflicts, the archive target
 already exists, or the archive cannot be verified, stop before publishing and report
@@ -211,10 +205,13 @@ and archive are complete.
 Recheck:
 
 - `git status -sb`
+- `git status --short --ignored`
 - `git diff --stat`
 - `git diff --name-only`
-- the repository's `.gitignore` and `git check-ignore` for generated or archived
-  paths that may be present after the archive phase
+
+Before staging, check every candidate path against the applicable `.gitignore`
+rules. Do not treat an OpenSpec archive as automatically publishable merely
+because the archive phase created it.
 
 Resolve the repository from `origin`. Confirm that the remote has a `main` branch;
 the PR target is always `main`, even if the repository has another default branch.
@@ -231,18 +228,22 @@ available, stop and report the missing capability.
    isolated worktree before staging.
 2. Keep an existing focused feature branch when its scope is clear; otherwise use
    the focused branch created by the isolation rule.
-3. Stage only files belonging to this OpenSpec change, including synchronized main
-   specs and any archive files permitted by the repository's `.gitignore`. Do not
-   force-add ignored paths unless the user explicitly requests it. Group the
-   in-scope files into one or more coherent commits when that makes different
-   features or purposes easier to review. Keep each commit focused, and do not
-   mix unrelated changes; if unrelated changes cannot be separated safely, stop
-   and ask the user to identify the scope.
+3. Stage only intended, non-ignored files belonging to this OpenSpec change,
+   including synchronized main specs when applicable. Never stage a path matched
+   by `.gitignore`, and never use a force-add option. An ignored OpenSpec archive
+   remains local-only and must not enter the commit or PR. If publishing an
+   ignored artifact appears necessary, stop and ask the user before changing the
+   ignore policy. Group the in-scope files into one or more coherent commits when
+   that makes different features or purposes easier to review. Keep each commit
+   focused, and do not mix unrelated changes; if unrelated changes cannot be
+   separated safely, stop and ask the user to identify the scope.
 4. Rerun relevant checks if implementation or review fixes changed files after the
    earlier validation.
 5. Create the intentional commit or commits with terse, purpose-specific
-   descriptions. Review the staged diff before each commit, and ensure the
-   complete ordered commit series represents the OpenSpec change.
+   descriptions. Review `git diff --cached --name-only`,
+   `git diff --cached --check`, and the staged diff before each commit. Confirm
+   that no ignored path was staged and that the complete ordered commit series
+   represents the publishable portion of the OpenSpec change.
 6. Push the current branch with tracking to `origin` after all intended commits
    are created.
 7. Create a draft PR with base `main`, the pushed source branch, and a body covering
@@ -256,7 +257,9 @@ equivalent remote operation without modifying `main`:
 
 1. Resolve the repository, the `main` commit, and its base tree.
 2. Create a focused source branch from the `main` commit.
-3. Create blobs and trees for the changed text files, then create one or more
+3. Apply the same `.gitignore` boundary to the connector file list; do not create
+   blobs or tree entries for ignored paths. Create blobs and trees only for the
+   remaining changed text files, then create one or more
    focused commits in logical order when different features or purposes should
    be separated. Base each later commit on the preceding commit and move the
    source branch to the latest commit.
@@ -278,7 +281,8 @@ Report one concise handoff containing:
   decision for whether archive files are publishable;
 - implementation and independent-review verdict;
 - validation commands and results;
-- source branch, commit, and PR URL/number; and
+- source branch, commit, and PR URL/number;
+- which archived artifacts remained local-only because `.gitignore` excluded them; and
 - residual risk or follow-up needed before merge.
 
 If the workflow stops, report the last completed phase, the exact blocker, and the
