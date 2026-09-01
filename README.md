@@ -35,15 +35,15 @@ cd ~/.cider
 ./scripts/lima_docker_context.sh dev
 ```
 
-The `dev` VM mounts macOS `~/Projects` at `/workspace/Projects` and forwards
-the documented development and Supabase ports. Project repositories continue
-to own their `docker compose` files. Select the named context before using
-Docker:
+The `dev` VM mounts macOS `~/doc` at the guest's `~/doc` and macOS `~/.cider`
+at the guest's `~/.cider`. It forwards the documented development and Supabase
+ports. Project repositories continue to own their `docker compose` files.
+Select the named context before using Docker:
 
 ```sh
 docker context use lima-dev
 docker info
-cd ~/Projects/autoIQ
+cd ~/doc/autoIQ
 docker compose up -d
 ```
 
@@ -61,17 +61,19 @@ Destroying a VM deletes its guest-side Docker volumes. Back up an important
 volume first, with the Lima Docker context selected:
 
 ```sh
-mkdir -p ~/Projects/autoIQ/.cider-lima-backups
+guest_home="$(limactl shell dev -- printenv HOME)"
+mkdir -p ~/doc/autoIQ/.cider-lima-backups
 docker run --rm -v autoiq_postgres_data:/volume \
-  -v /workspace/Projects/autoIQ/.cider-lima-backups:/backup alpine \
+  -v "$guest_home/doc/autoIQ/.cider-lima-backups:/backup" alpine \
   tar czf /backup/autoiq_postgres_data.tgz -C /volume .
 ```
 
 Restore into an existing empty volume with:
 
 ```sh
+guest_home="$(limactl shell dev -- printenv HOME)"
 docker run --rm -v autoiq_postgres_data:/volume \
-  -v /workspace/Projects/autoIQ/.cider-lima-backups:/backup alpine \
+  -v "$guest_home/doc/autoIQ/.cider-lima-backups:/backup" alpine \
   tar xzf /backup/autoiq_postgres_data.tgz -C /volume
 ```
 
@@ -84,7 +86,7 @@ For an isolated AI-agent workflow, create the mount-free VM:
 
 ```sh
 ./scripts/lima_create.sh agent
-cd ~/Projects/autoIQ
+cd ~/doc/autoIQ
 limactl shell --sync "$PWD" agent -- codex
 ```
 

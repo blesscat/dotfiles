@@ -14,8 +14,11 @@ containerd:
 
 # Source is shared; Docker and database data remain on the Lima virtual disk.
 mounts:
-  - location: "~/Projects"
-    mountPoint: "/workspace/Projects"
+  - location: "~/doc"
+    mountPoint: "{{.Home}}/doc"
+    writable: true
+  - location: "~/.cider"
+    mountPoint: "{{.Home}}/.cider"
     writable: true
 
 portForwards:
