@@ -58,6 +58,17 @@ the VM explicitly:
 ./scripts/lima_lifecycle.sh start dev
 ```
 
+`lima_lifecycle.sh` accepts an action and an optional instance name
+(`dev` or `agent`). If both are omitted, it shows the status of `dev`:
+
+- `start`: creates the VM from its repository configuration when missing, or starts the existing VM.
+- `stop`: stops the selected VM without deleting it or its data.
+- `status`: shows the selected VM status.
+- `destroy`: asks for the exact instance name, then deletes the VM and its guest-side Docker volumes.
+
+Use `destroy` only after backing up any important Docker volumes. It does not
+modify the macOS source mounts or OrbStack.
+
 Destroying a VM deletes its guest-side Docker volumes. Back up an important
 volume first, with the Lima Docker context selected:
 
