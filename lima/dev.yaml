@@ -5,6 +5,9 @@ cpus: 6
 memory: "12GiB"
 disk: "100GiB"
 
+ssh:
+  localPort: 62180
+
 base:
   - template:_images/ubuntu
 
