@@ -25,8 +25,10 @@ existing generic workflow. Everything is configured and tweaked within
 ### Optional Lima Docker environment
 
 Cider can provision Lima as an opt-in Docker Engine environment without
-starting or modifying OrbStack. Install the host prerequisites, then create
-the normal development VM:
+starting or modifying OrbStack. The checked-in Lima configurations require
+Lima 2.2.0 or newer. This also provides the current `limactl autostart`
+command for optional macOS startup registration. Install the host prerequisites,
+then create the normal development VM:
 
 ```sh
 cd ~/.cider

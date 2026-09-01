@@ -6,6 +6,8 @@ for file in "$repo_dir/lima/dev.yaml" "$repo_dir/lima/agent.yaml" "$repo_dir/scr
   [[ -r "$file" ]] || { printf 'Missing required file: %s\n' "$file" >&2; exit 1; }
 done
 bash -n "$repo_dir/scripts/lima_install.sh" "$repo_dir/scripts/lima_create.sh" "$repo_dir/scripts/lima_docker_context.sh" "$repo_dir/scripts/lima_lifecycle.sh"
+grep -Fq 'minimumLimaVersion: 2.2.0' "$repo_dir/lima/dev.yaml"
+grep -Fq 'minimumLimaVersion: 2.2.0' "$repo_dir/lima/agent.yaml"
 grep -Fq 'location: "~/doc"' "$repo_dir/lima/dev.yaml"
 grep -Fq 'mountPoint: "{{.Home}}/doc"' "$repo_dir/lima/dev.yaml"
 grep -Fq 'location: "~/.cider"' "$repo_dir/lima/dev.yaml"

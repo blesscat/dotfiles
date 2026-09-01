@@ -1,4 +1,4 @@
-minimumLimaVersion: 2.0.0
+minimumLimaVersion: 2.2.0
 vmType: vz
 arch: aarch64
 cpus: 6
