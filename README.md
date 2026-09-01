@@ -22,6 +22,102 @@ symlinks. Other dotfile symlinks remain available through the repository's
 existing generic workflow. Everything is configured and tweaked within
 `~/.cider`.
 
+### Optional Lima Docker environment
+
+Cider can provision Lima as an opt-in Docker Engine environment without
+starting or modifying OrbStack. The checked-in Lima configurations require
+Lima 2.2.0 or newer. This also provides the current `limactl autostart`
+command for optional macOS startup registration. Install the host prerequisites,
+then create the normal development VM:
+
+```sh
+cd ~/.cider
+./scripts/lima_install.sh
+./scripts/lima_create.sh dev
+./scripts/lima_docker_context.sh dev
+```
+
+The `dev` VM mounts macOS `~/doc` at the guest's `~/doc` and macOS `~/.cider`
+at the guest's `~/.cider`. Lima dynamically forwards guest localhost service
+ports to the same macOS localhost port, so the common development and Supabase
+ports work without listing each one here. Project repositories continue to own
+their `docker compose` files. Select the named context before using Docker:
+
+```sh
+docker context use lima-dev
+docker info
+cd ~/doc/autoIQ
+docker compose up -d
+```
+
+Docker named volumes, including database data, stay on the Lima virtual disk;
+do not bind-mount a macOS directory as a live database data directory. Manage
+the VM explicitly:
+
+```sh
+./scripts/lima_lifecycle.sh status dev
+./scripts/lima_lifecycle.sh stop dev
+./scripts/lima_lifecycle.sh start dev
+./scripts/lima_lifecycle.sh autostart dev
+```
+
+`lima_lifecycle.sh` accepts an action and an optional instance name
+(`dev` or `agent`). If both are omitted, it shows the status of `dev`:
+
+- `start`: creates the VM from its repository configuration when missing, or starts the existing VM.
+- `stop`: stops the selected VM without deleting it or its data.
+- `status`: shows the selected VM status.
+- `autostart`: registers the selected VM to start automatically when the macOS user logs in.
+- `destroy`: asks for the exact instance name, then deletes the VM and its guest-side Docker volumes.
+
+Use `destroy` only after backing up any important Docker volumes. It does not
+modify the macOS source mounts or OrbStack.
+
+Remove the login registration with `limactl autostart disable dev`. The
+selected VM must already exist before enabling autostart.
+
+Destroying a VM deletes its guest-side Docker volumes. Back up an important
+volume first, with the Lima Docker context selected:
+
+```sh
+guest_home="$(limactl shell dev -- printenv HOME)"
+mkdir -p ~/doc/autoIQ/.cider-lima-backups
+docker run --rm -v autoiq_postgres_data:/volume \
+  -v "$guest_home/doc/autoIQ/.cider-lima-backups:/backup" alpine \
+  tar czf /backup/autoiq_postgres_data.tgz -C /volume .
+```
+
+Restore into an existing empty volume with:
+
+```sh
+guest_home="$(limactl shell dev -- printenv HOME)"
+docker run --rm -v autoiq_postgres_data:/volume \
+  -v "$guest_home/doc/autoIQ/.cider-lima-backups:/backup" alpine \
+  tar xzf /backup/autoiq_postgres_data.tgz -C /volume
+```
+
+Only after verifying the backup, explicitly run
+`./scripts/lima_lifecycle.sh destroy dev` and type `dev` when prompted. Create
+the VM again with `./scripts/lima_lifecycle.sh start dev`; project Compose
+commands then recreate the named volumes and services.
+
+For an isolated AI-agent workflow, create the mount-free VM:
+
+```sh
+./scripts/lima_create.sh agent
+cd ~/doc/autoIQ
+limactl shell --sync "$PWD" agent -- codex
+```
+
+`--sync` copies the project into the guest and asks before syncing changes back
+to macOS. It is not continuous synchronization, and it cannot be used with a
+VM that has host mounts. Keep the sync directory limited to a project rather
+than a home directory or large dependency/build tree.
+
+The Lima VM is separate from OrbStack. During migration, keep OrbStack
+available and switch Docker contexts explicitly; this repository does not
+migrate, delete, or overwrite OrbStack data.
+
 Homebrew dependencies belong to `Brewfile`. The generic symlink metadata
 remains in `bootstrap.json`; `macos.sh` does not automatically run the
 symlink runner.

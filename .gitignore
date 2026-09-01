@@ -20,6 +20,21 @@ ehthumbs.db
 # Local Git worktrees
 .worktrees/
 
+# Lima local overrides and generated state
+.lima/
+lima/*.local.yaml
+.cider-lima-backups/
+
+# Local credentials and environment overrides
+.env
+.env.*
+.env.local
+.env.*.local
+!.env.example
+!.env.*.example
+*.key
+*.pem
+
 # Archived OpenSpec changes
 /openspec/changes/archive/
 
