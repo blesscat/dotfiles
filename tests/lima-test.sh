@@ -23,6 +23,7 @@ if grep -Eq '^[[:space:]]+- guestPort' "$repo_dir/lima/dev.yaml"; then
 fi
 grep -Fq 'docker_host=' "$repo_dir/scripts/lima_docker_context.sh"
 grep -Fq 'limactl delete' "$repo_dir/scripts/lima_lifecycle.sh"
+grep -Fq 'limactl autostart enable --condition=login' "$repo_dir/scripts/lima_lifecycle.sh"
 grep -Fq 'docker context update' "$repo_dir/scripts/lima_docker_context.sh"
 grep -Fq '.env.*' "$repo_dir/.gitignore"
 grep -Fq '"$guest_home/doc/autoIQ/.cider-lima-backups:/backup"' "$repo_dir/README.md"
