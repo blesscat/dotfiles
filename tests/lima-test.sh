@@ -15,6 +15,10 @@ grep -Fq 'writable: true' "$repo_dir/lima/dev.yaml"
 grep -Fq 'system: false' "$repo_dir/lima/dev.yaml"
 grep -Fq 'hostSocket: "{{.Dir}}/sock/docker.sock"' "$repo_dir/lima/dev.yaml"
 grep -Fq 'hostSocket: "{{.Dir}}/sock/docker.sock"' "$repo_dir/lima/agent.yaml"
+if grep -Eq '^[[:space:]]+- guestPort' "$repo_dir/lima/dev.yaml"; then
+  printf '%s\n' 'Development TCP ports should use Lima dynamic forwarding.' >&2
+  exit 1
+fi
 grep -Fq 'docker_host=' "$repo_dir/scripts/lima_docker_context.sh"
 grep -Fq 'limactl delete' "$repo_dir/scripts/lima_lifecycle.sh"
 grep -Fq 'docker context update' "$repo_dir/scripts/lima_docker_context.sh"

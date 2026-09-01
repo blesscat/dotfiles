@@ -36,9 +36,10 @@ cd ~/.cider
 ```
 
 The `dev` VM mounts macOS `~/doc` at the guest's `~/doc` and macOS `~/.cider`
-at the guest's `~/.cider`. It forwards the documented development and Supabase
-ports. Project repositories continue to own their `docker compose` files.
-Select the named context before using Docker:
+at the guest's `~/.cider`. Lima dynamically forwards guest localhost service
+ports to the same macOS localhost port, so the common development and Supabase
+ports work without listing each one here. Project repositories continue to own
+their `docker compose` files. Select the named context before using Docker:
 
 ```sh
 docker context use lima-dev

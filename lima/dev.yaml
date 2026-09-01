@@ -24,20 +24,6 @@ mounts:
 portForwards:
   - guestSocket: "/var/run/docker.sock"
     hostSocket: "{{.Dir}}/sock/docker.sock"
-  - guestPort: 3000
-    hostPort: 3000
-  - guestPort: 4321
-    hostPort: 4321
-  - guestPort: 5432
-    hostPort: 5432
-  - guestPort: 8000
-    hostPort: 8000
-  - guestPort: 54321
-    hostPort: 54321
-  - guestPort: 54322
-    hostPort: 54322
-  - guestPort: 54323
-    hostPort: 54323
 
 provision:
   - mode: system
