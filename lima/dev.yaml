@@ -16,12 +16,12 @@ containerd:
   user: false
 
 # Source is shared; Docker and database data remain on the Lima virtual disk.
+# No custom mountPoint: Lima mounts at the same absolute path as macOS so git
+# worktrees and absolute paths stay valid on both sides.
 mounts:
   - location: "~/doc"
-    mountPoint: "{{.Home}}/doc"
     writable: true
   - location: "~/.cider"
-    mountPoint: "{{.Home}}/.cider"
     writable: true
 
 portForwards:
@@ -44,3 +44,13 @@ provision:
       apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
       systemctl enable --now docker
       usermod -aG docker "{{.User}}"
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -u
+      # ~/doc was the old mountPoint of the macOS ~/doc share; clear the
+      # leftover empty dir so it can be replaced by a symlink to the mount.
+      if [ -d "{{.Home}}/doc" ] && [ ! -L "{{.Home}}/doc" ]; then
+        rmdir "{{.Home}}/doc" >/dev/null 2>&1 || true
+      fi
+      ln -sfn /Users/blesscat/doc "{{.Home}}/doc"
