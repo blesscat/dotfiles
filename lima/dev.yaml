@@ -23,6 +23,13 @@ mounts:
     writable: true
   - location: "~/.cider"
     writable: true
+  - location: "~/.codex"
+    writable: true
+
+# Keep Codex on the shared canonical path instead of the guest HOME alias.
+env:
+  CODEX_HOME: "/Users/blesscat/.codex"
+  TMPDIR: "{{.Home}}/.local/state/codex-tmp"
 
 portForwards:
   - guestSocket: "/var/run/docker.sock"
@@ -44,6 +51,11 @@ provision:
       apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
       systemctl enable --now docker
       usermod -aG docker "{{.User}}"
+      install -m 0755 /Users/blesscat/.cider/scripts/lima_codex_overlay.sh /usr/local/sbin/codex-lima-overlay
+      install -m 0644 /Users/blesscat/.cider/lima/codex-overlay.service /etc/systemd/system/codex-lima-overlay.service
+      install -m 0644 /Users/blesscat/.cider/lima/codex-app-server.service /etc/systemd/system/codex-app-server.service
+      systemctl daemon-reload
+      systemctl enable codex-lima-overlay.service codex-app-server.service
   - mode: user
     script: |
       #!/bin/bash
@@ -54,3 +66,15 @@ provision:
         rmdir "{{.Home}}/doc" >/dev/null 2>&1 || true
       fi
       ln -sfn /Users/blesscat/doc "{{.Home}}/doc"
+      mkdir -p "{{.Home}}/.local/state/codex-tmp"
+      chmod 700 "{{.Home}}/.local/state/codex-tmp"
+      # Keep Codex's guest-home alias aligned with the shared canonical path.
+      if [ -e "{{.Home}}/.codex" ] && [ ! -L "{{.Home}}/.codex" ]; then
+        rmdir "{{.Home}}/.codex" >/dev/null 2>&1 || {
+          printf '%s\n' 'Refusing to replace a non-empty guest Codex directory.' >&2
+          exit 1
+        }
+      fi
+      ln -sfn /Users/blesscat/.codex "{{.Home}}/.codex"
+      sudo systemctl start codex-lima-overlay.service || printf '%s\n' 'Codex Lima overlay is waiting for a guest Linux Codex release.'
+      sudo systemctl start codex-app-server.service || printf '%s\n' 'Codex Lima app-server is waiting for the guest overlay.'

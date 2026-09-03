@@ -38,14 +38,33 @@ cd ~/.cider
 starts the existing `dev` VM when needed, refreshes the `lima-dev` Docker
 context, and keeps autostart enabled.
 
-The `dev` VM shares macOS `~/doc` and macOS `~/.cider` into the guest at the
-same absolute paths as macOS, so absolute paths and git worktrees created on
-one side resolve on the other. The guest also provides `~/doc` as a symlink
-to the shared `~/doc` mount. Its SSH endpoint is fixed at `127.0.0.1:62180`,
+The `dev` VM shares macOS `~/doc`, `~/.cider`, and `~/.codex` into the guest at
+the same absolute paths as macOS, so absolute paths and git worktrees created
+on one side resolve on the other. `CODEX_HOME` is explicitly set to
+`/Users/blesscat/.codex`, and the guest provides `~/doc` and `~/.codex` as
+symlinks to the shared mounts. Lima overlays the platform-specific Codex
+standalone runtime, app-server socket, and daemon state inside the guest, so
+the macOS binary is never executed by Linux and the Unix socket is not stored
+on the shared mount. The guest also starts its Linux app-server daemon after
+the overlay is mounted. Its SSH endpoint is fixed at `127.0.0.1:62180`,
 while Lima dynamically forwards guest localhost service ports to the same macOS
 localhost port, so the common development and Supabase ports work without
 listing each one here. Project repositories continue to own their `docker
-compose` files. Select the named context before using Docker:
+compose` files.
+
+Update the Linux Codex runtime and restart its app-server daemon in one command:
+
+```sh
+cd ~/.cider
+./scripts/lima_codex_update.sh
+```
+
+The updater starts `dev` when needed and runs the official Codex installer
+inside Lima. Linux releases remain on the VM disk behind the shared
+`CODEX_HOME` overlay, while the macOS Codex runtime remains unchanged. The
+remote connection can disconnect briefly while the app-server daemon restarts.
+
+Select the named context before using Docker:
 
 ```sh
 docker context use lima-dev
