@@ -2,7 +2,6 @@
 set -euo pipefail
 
 readonly instance='dev'
-readonly codex_home='/Users/blesscat/.codex'
 readonly installer_url='https://chatgpt.com/codex/install.sh'
 
 run_on_macos() {
@@ -27,6 +26,7 @@ run_on_macos() {
 }
 
 find_current_codex() {
+  local codex_home="$1"
   local candidate
 
   for candidate in \
@@ -42,6 +42,8 @@ find_current_codex() {
 }
 
 run_in_guest() {
+  local bootstrap_output
+  local codex_home
   local installer_path
   local codex_binary
   local current_release
@@ -59,31 +61,14 @@ run_in_guest() {
     exit 1
   }
 
-  export CODEX_HOME="$codex_home"
+  # Codex state is intentionally guest-local. Clear the legacy value that used
+  # to redirect Linux sessions into the macOS-mounted ~/.codex directory.
+  unset CODEX_HOME
+  codex_home="$(cd -- "$HOME" && pwd -P)/.codex"
   export CODEX_INSTALL_DIR="$HOME/.local/bin"
   export CODEX_NON_INTERACTIVE=1
   export TMPDIR="$HOME/.local/state/codex-tmp"
   install -d -m 0700 "$TMPDIR"
-
-  # Refresh the durable overlay definition before writing through the shared
-  # CODEX_HOME path. The bind mount keeps Linux releases off the macOS volume.
-  sudo install -m 0755 \
-    /Users/blesscat/.cider/scripts/lima_codex_overlay.sh \
-    /usr/local/sbin/codex-lima-overlay
-  sudo install -m 0644 \
-    /Users/blesscat/.cider/lima/codex-overlay.service \
-    /etc/systemd/system/codex-lima-overlay.service
-  sudo install -m 0644 \
-    /Users/blesscat/.cider/lima/codex-app-server.service \
-    /etc/systemd/system/codex-app-server.service
-  sudo systemctl daemon-reload
-  sudo systemctl enable codex-lima-overlay.service codex-app-server.service >/dev/null
-  sudo systemctl restart codex-lima-overlay.service
-
-  if ! mountpoint -q "$codex_home/packages/standalone"; then
-    printf '%s\n' 'Refusing to update: the Lima Codex standalone overlay is not mounted.' >&2
-    exit 1
-  fi
 
   installer_path="$(mktemp "$TMPDIR/codex-install.XXXXXX")"
   trap 'rm -f "${installer_path:-}"' EXIT
@@ -93,7 +78,7 @@ run_in_guest() {
   rm -f "$installer_path"
   trap - EXIT
 
-  codex_binary="$(find_current_codex)" || {
+  codex_binary="$(find_current_codex "$codex_home")" || {
     printf '%s\n' 'The installer completed, but no runnable Linux Codex binary was found.' >&2
     exit 1
   }
@@ -106,10 +91,15 @@ run_in_guest() {
       ;;
   esac
 
-  # A plain systemd restart only calls `daemon start`, which may leave an old
-  # process alive. Restart explicitly with the newly selected CLI first.
-  "$codex_binary" app-server daemon restart
-  sudo systemctl restart codex-app-server.service
+  if bootstrap_output="$("$codex_binary" app-server daemon bootstrap --remote-control 2>&1)"; then
+    [[ -z "$bootstrap_output" ]] || printf '%s\n' "$bootstrap_output"
+  elif [[ "$bootstrap_output" == *'app server is running but is not managed by codex app-server daemon'* ]]; then
+    printf '%s\n' \
+      'Codex app-server is already active for an SSH session; leaving that session in control.'
+  else
+    printf '%s\n' "$bootstrap_output" >&2
+    exit 1
+  fi
 
   printf '\n%s\n' 'Lima Codex update complete.'
   "$codex_binary" --version

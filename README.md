@@ -38,19 +38,42 @@ cd ~/.cider
 starts the existing `dev` VM when needed, refreshes the `lima-dev` Docker
 context, and keeps autostart enabled.
 
-The `dev` VM shares macOS `~/doc`, `~/.cider`, and `~/.codex` into the guest at
-the same absolute paths as macOS, so absolute paths and git worktrees created
-on one side resolve on the other. `CODEX_HOME` is explicitly set to
-`/Users/blesscat/.codex`, and the guest provides `~/doc` and `~/.codex` as
-symlinks to the shared mounts. Lima overlays the platform-specific Codex
-standalone runtime, app-server socket, and daemon state inside the guest, so
-the macOS binary is never executed by Linux and the Unix socket is not stored
-on the shared mount. The guest also starts its Linux app-server daemon after
-the overlay is mounted. Its SSH endpoint is fixed at `127.0.0.1:62180`,
-while Lima dynamically forwards guest localhost service ports to the same macOS
-localhost port, so the common development and Supabase ports work without
-listing each one here. Project repositories continue to own their `docker
-compose` files.
+The `dev` VM mounts only macOS `~/.cider`, using Lima's default guest mount
+location `/Users/blesscat/.cider`. Guest `~/.cider` is a symlink to that mount.
+Guest `~/doc` and `~/.codex` are real directories on the Linux VM disk, so
+project dependencies, Codex releases, sessions, sockets, and other
+platform-specific state are never shared with macOS. The configuration does
+not override `CODEX_HOME`; Codex therefore uses the guest's normal
+`~/.codex`.
+
+Lima forwards the macOS SSH agent into the trusted `dev` VM, so guest-native
+repositories can use GitHub without copying another host private key into the
+VM. Ensure the required key is loaded on macOS, then verify it from the guest:
+
+```sh
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+limactl shell dev -- ssh-add -l
+```
+
+The VM's SSH endpoint is fixed at `127.0.0.1:62180`. Lima dynamically forwards
+guest localhost service ports to the same macOS localhost port, so common
+development and Supabase ports work without listing each one here. Project
+repositories continue to own their Compose definitions.
+
+For a `dev` VM created with the older shared `~/doc` and `~/.codex` layout,
+back up important Docker volumes and run the one-time in-place migration:
+
+```sh
+cd ~/.cider
+./scripts/lima_guest_native_migrate.sh
+```
+
+The migration backs up the live Lima configuration, preserves the VM disk and
+Docker volumes, keeps only the Cider mount, creates the guest-local directories,
+installs Linux Codex into guest `~/.codex`, and refreshes the macOS
+`lima-dev` Docker context. It does not copy macOS projects into the VM; clone or
+copy only the projects and local environment files that the Linux workspace
+needs.
 
 Update the Linux Codex runtime and restart its app-server daemon in one command:
 
@@ -59,23 +82,33 @@ cd ~/.cider
 ./scripts/lima_codex_update.sh
 ```
 
-The updater starts `dev` when needed and runs the official Codex installer
-inside Lima. Linux releases remain on the VM disk behind the shared
-`CODEX_HOME` overlay, while the macOS Codex runtime remains unchanged. The
-remote connection can disconnect briefly while the app-server daemon restarts.
+The updater starts `dev` when needed, runs the official Codex installer inside
+Lima with `CODEX_HOME` unset, and bootstraps Codex's built-in remote-control
+daemon. Linux releases and daemon state remain under the guest's `~/.codex`,
+while the macOS Codex runtime remains unchanged. The remote connection can
+disconnect briefly while the daemon restarts.
 
 Select the named context before using Docker:
 
 ```sh
 docker context use lima-dev
 docker info
-cd ~/doc/autoIQ
-docker compose up -d
 ```
 
-Docker named volumes, including database data, stay on the Lima virtual disk;
-do not bind-mount a macOS directory as a live database data directory. Manage
-the VM explicitly:
+The macOS Docker CLI can inspect images, containers, networks, and volumes
+through this context. Commands that resolve project bind mounts must run from
+the guest-native checkout, because the Docker daemon interprets source paths in
+the Lima filesystem:
+
+```sh
+limactl shell --workdir /home/blesscat.guest/doc/autoIQ dev -- mise run db:start
+```
+
+Do not run a project Compose or Supabase command from the macOS copy of the
+repository and pass its macOS path to the Lima Docker daemon. Docker named
+volumes, including database data, stay on the Lima virtual disk; do not
+bind-mount a macOS directory as a live database data directory. Manage the VM
+explicitly:
 
 ```sh
 ./scripts/lima_lifecycle.sh status dev
@@ -94,29 +127,33 @@ the VM explicitly:
 - `destroy`: asks for the exact instance name, then deletes the VM and its guest-side Docker volumes.
 
 Use `destroy` only after backing up any important Docker volumes. It does not
-modify the macOS source mounts or OrbStack.
+modify macOS files or OrbStack.
 
 Remove the login registration with `limactl autostart disable dev`. The
 selected VM must already exist before enabling autostart.
 
-Destroying a VM deletes its guest-side Docker volumes. Back up an important
-volume first, with the Lima Docker context selected:
+Destroying a VM deletes its guest-side Docker volumes. Stop the service first,
+then back up an important volume with the Lima Docker context selected:
 
 ```sh
-guest_home="$(limactl shell dev -- printenv HOME)"
-mkdir -p ~/doc/autoIQ/.cider-lima-backups
-docker run --rm -v autoiq_postgres_data:/volume \
-  -v "$guest_home/doc/autoIQ/.cider-lima-backups:/backup" alpine \
-  tar czf /backup/autoiq_postgres_data.tgz -C /volume .
+limactl shell dev -- sh -lc '
+  backup="$HOME/lima-volume-backups"
+  install -d -m 0700 "$backup"
+  source="$(docker volume inspect supabase_db_autoIQ --format "{{.Mountpoint}}")"
+  sudo tar --numeric-owner -czf "$backup/supabase_db_autoIQ.tgz" -C "$source" .
+  sudo chown "$USER":"$(id -gn)" "$backup/supabase_db_autoIQ.tgz"
+'
+limactl copy dev:/home/blesscat.guest/lima-volume-backups/supabase_db_autoIQ.tgz ./
 ```
 
 Restore into an existing empty volume with:
 
 ```sh
-guest_home="$(limactl shell dev -- printenv HOME)"
-docker run --rm -v autoiq_postgres_data:/volume \
-  -v "$guest_home/doc/autoIQ/.cider-lima-backups:/backup" alpine \
-  tar xzf /backup/autoiq_postgres_data.tgz -C /volume
+limactl copy ./supabase_db_autoIQ.tgz dev:/home/blesscat.guest/lima-volume-backups/
+limactl shell dev -- sh -lc '
+  source="$(docker volume inspect supabase_db_autoIQ --format "{{.Mountpoint}}")"
+  sudo tar --numeric-owner -xzf "$HOME/lima-volume-backups/supabase_db_autoIQ.tgz" -C "$source"
+'
 ```
 
 Only after verifying the backup, explicitly run

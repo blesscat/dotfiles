@@ -8,6 +8,11 @@ readonly real_limactl="${LIMA_TEST_LIMACTL:-$(command -v limactl 2>/dev/null || 
 readonly tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
+/usr/bin/ruby "$test_dir/lima-config-contract-test.rb"
+/bin/bash "$test_dir/lima-guest-layout-test.sh"
+/bin/bash "$test_dir/lima-codex-update-test.sh"
+/bin/bash "$test_dir/lima-guest-native-migrate-test.sh"
+
 failures=0
 
 fail_assertion() {

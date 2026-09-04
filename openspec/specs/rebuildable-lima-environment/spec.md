@@ -20,14 +20,20 @@ The repository SHALL provide declarative Lima configuration that defines the dev
 - **THEN** the documented create flow SHALL recreate the VM and reinstall the declared guest dependencies
 - **AND** the repository SHALL not require a checked-in VM disk or database data directory
 
-### Requirement: Explicit source sharing and service access
+### Requirement: Explicit Cider sharing and guest-native development state
 
-The normal development VM SHALL expose only the declared host source directories and declared service ports; persistent database storage SHALL remain in the guest-side Docker storage.
+The normal development VM SHALL mount only the declared Cider host directory. Project workspaces, Codex state, platform-specific dependencies, and persistent database storage SHALL remain on the guest disk.
 
-#### Scenario: Use a mounted project directory
+#### Scenario: Use the mounted Cider directory
 - **WHEN** the normal development VM is running
-- **THEN** the configured host project directory SHALL be available at its declared guest mount point
+- **THEN** the configured host Cider directory SHALL be available at Lima's default guest mount point
 - **AND** its write policy SHALL match the configuration
+- **AND** guest `~/.cider` SHALL resolve to that mount
+
+#### Scenario: Keep projects and Codex state guest-native
+- **WHEN** the normal development VM is running
+- **THEN** guest `~/doc` and `~/.codex` SHALL be real guest-side directories rather than host mounts or symlinks to macOS state
+- **AND** the VM SHALL not override `CODEX_HOME` to a macOS path
 
 #### Scenario: Connect to a forwarded service
 - **WHEN** a container binds a declared guest port
@@ -48,9 +54,10 @@ The setup SHALL provide an explicit named Docker context that connects the macOS
 - **AND** `docker info` SHALL identify the Lima-hosted engine after the context is selected
 
 #### Scenario: Run project Compose services
-- **WHEN** the user selects the Lima context and runs a project’s documented Compose command
+- **WHEN** the user selects the Lima context and runs a project's documented Compose command from its guest-native checkout
 - **THEN** the Compose workload SHALL be created by the Docker Engine in Lima
 - **AND** the project Compose definition SHALL remain owned by the project repository
+- **AND** bind-mount source paths SHALL resolve in the Lima filesystem rather than the macOS filesystem
 
 ### Requirement: Isolated agent synchronization
 
@@ -82,6 +89,16 @@ Lima setup SHALL be opt-in and SHALL not remove, migrate, or alter existing OrbS
 ### Requirement: Credential and runtime-state boundaries
 
 The repository SHALL keep credentials, VM runtime state, Docker volumes, and project environment files outside version control.
+
+#### Scenario: Separate operating-system-specific Codex state
+- **WHEN** Codex runs on both macOS and the Lima guest
+- **THEN** each operating system SHALL use its own `~/.codex` directory
+- **AND** Linux releases, sessions, logs, sockets, and daemon state SHALL not be written into the macOS Codex directory
+
+#### Scenario: Authenticate guest-native Git operations
+- **WHEN** a guest-native project accesses an SSH Git remote
+- **THEN** the development VM SHALL make the macOS SSH agent available to the guest
+- **AND** the Cider provisioning SHALL not copy a host private key into the VM
 
 #### Scenario: Inspect the publishable repository
 - **WHEN** the user stages the Cider repository
