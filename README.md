@@ -22,6 +22,162 @@ symlinks. Other dotfile symlinks remain available through the repository's
 existing generic workflow. Everything is configured and tweaked within
 `~/.cider`.
 
+### Optional Lima Docker environment
+
+Cider can provision Lima as an opt-in Docker Engine environment without
+starting or modifying OrbStack. The checked-in Lima configurations require
+Lima 2.2.0 or newer. For first-time setup, initialize the normal development
+VM, Docker context, and macOS login autostart registration in one command:
+
+```sh
+cd ~/.cider
+./lima_init.sh
+```
+
+`lima_init.sh` is safe to run again: it installs any missing host prerequisites,
+starts the existing `dev` VM when needed, refreshes the `lima-dev` Docker
+context, and keeps autostart enabled.
+
+The `dev` VM mounts only macOS `~/.cider`, using Lima's default guest mount
+location `/Users/blesscat/.cider`. Guest `~/.cider` is a symlink to that mount.
+Guest `~/doc` and `~/.codex` are real directories on the Linux VM disk, so
+project dependencies, Codex releases, sessions, sockets, and other
+platform-specific state are never shared with macOS. The configuration does
+not override `CODEX_HOME`; Codex therefore uses the guest's normal
+`~/.codex`.
+
+Lima forwards the macOS SSH agent into the trusted `dev` VM, so guest-native
+repositories can use GitHub without copying another host private key into the
+VM. Ensure the required key is loaded on macOS, then verify it from the guest:
+
+```sh
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+limactl shell dev -- ssh-add -l
+```
+
+The VM's SSH endpoint is fixed at `127.0.0.1:62180`. Lima dynamically forwards
+guest localhost service ports to the same macOS localhost port, so common
+development and Supabase ports work without listing each one here. Project
+repositories continue to own their Compose definitions.
+
+For a `dev` VM created with the older shared `~/doc` and `~/.codex` layout,
+back up important Docker volumes and run the one-time in-place migration:
+
+```sh
+cd ~/.cider
+./scripts/lima_guest_native_migrate.sh
+```
+
+The migration backs up the live Lima configuration, preserves the VM disk and
+Docker volumes, keeps only the Cider mount, creates the guest-local directories,
+installs Linux Codex into guest `~/.codex`, and refreshes the macOS
+`lima-dev` Docker context. It does not copy macOS projects into the VM; clone or
+copy only the projects and local environment files that the Linux workspace
+needs.
+
+Update the Linux Codex runtime and restart its app-server daemon in one command:
+
+```sh
+cd ~/.cider
+./scripts/lima_codex_update.sh
+```
+
+The updater starts `dev` when needed, runs the official Codex installer inside
+Lima with `CODEX_HOME` unset, and bootstraps Codex's built-in remote-control
+daemon. Linux releases and daemon state remain under the guest's `~/.codex`,
+while the macOS Codex runtime remains unchanged. The remote connection can
+disconnect briefly while the daemon restarts.
+
+Select the named context before using Docker:
+
+```sh
+docker context use lima-dev
+docker info
+```
+
+The macOS Docker CLI can inspect images, containers, networks, and volumes
+through this context. Commands that resolve project bind mounts must run from
+the guest-native checkout, because the Docker daemon interprets source paths in
+the Lima filesystem:
+
+```sh
+limactl shell --workdir /home/blesscat.guest/doc/autoIQ dev -- mise run db:start
+```
+
+Do not run a project Compose or Supabase command from the macOS copy of the
+repository and pass its macOS path to the Lima Docker daemon. Docker named
+volumes, including database data, stay on the Lima virtual disk; do not
+bind-mount a macOS directory as a live database data directory. Manage the VM
+explicitly:
+
+```sh
+./scripts/lima_lifecycle.sh status dev
+./scripts/lima_lifecycle.sh stop dev
+./scripts/lima_lifecycle.sh start dev
+./scripts/lima_lifecycle.sh autostart dev
+```
+
+`lima_lifecycle.sh` accepts an action and an optional instance name
+(`dev` or `agent`). If both are omitted, it shows the status of `dev`:
+
+- `start`: creates the VM from its repository configuration when missing, or starts the existing VM.
+- `stop`: stops the selected VM without deleting it or its data.
+- `status`: shows the selected VM status.
+- `autostart`: registers the selected VM to start automatically when the macOS user logs in.
+- `destroy`: asks for the exact instance name, then deletes the VM and its guest-side Docker volumes.
+
+Use `destroy` only after backing up any important Docker volumes. It does not
+modify macOS files or OrbStack.
+
+Remove the login registration with `limactl autostart disable dev`. The
+selected VM must already exist before enabling autostart.
+
+Destroying a VM deletes its guest-side Docker volumes. Stop the service first,
+then back up an important volume with the Lima Docker context selected:
+
+```sh
+limactl shell dev -- sh -lc '
+  backup="$HOME/lima-volume-backups"
+  install -d -m 0700 "$backup"
+  source="$(docker volume inspect supabase_db_autoIQ --format "{{.Mountpoint}}")"
+  sudo tar --numeric-owner -czf "$backup/supabase_db_autoIQ.tgz" -C "$source" .
+  sudo chown "$USER":"$(id -gn)" "$backup/supabase_db_autoIQ.tgz"
+'
+limactl copy dev:/home/blesscat.guest/lima-volume-backups/supabase_db_autoIQ.tgz ./
+```
+
+Restore into an existing empty volume with:
+
+```sh
+limactl copy ./supabase_db_autoIQ.tgz dev:/home/blesscat.guest/lima-volume-backups/
+limactl shell dev -- sh -lc '
+  source="$(docker volume inspect supabase_db_autoIQ --format "{{.Mountpoint}}")"
+  sudo tar --numeric-owner -xzf "$HOME/lima-volume-backups/supabase_db_autoIQ.tgz" -C "$source"
+'
+```
+
+Only after verifying the backup, explicitly run
+`./scripts/lima_lifecycle.sh destroy dev` and type `dev` when prompted. Create
+the VM again with `./scripts/lima_lifecycle.sh start dev`; project Compose
+commands then recreate the named volumes and services.
+
+For an isolated AI-agent workflow, create the mount-free VM:
+
+```sh
+./scripts/lima_create.sh agent
+cd ~/doc/autoIQ
+limactl shell --sync "$PWD" agent -- codex
+```
+
+`--sync` copies the project into the guest and asks before syncing changes back
+to macOS. It is not continuous synchronization, and it cannot be used with a
+VM that has host mounts. Keep the sync directory limited to a project rather
+than a home directory or large dependency/build tree.
+
+The Lima VM is separate from OrbStack. During migration, keep OrbStack
+available and switch Docker contexts explicitly; this repository does not
+migrate, delete, or overwrite OrbStack data.
+
 Homebrew dependencies belong to `Brewfile`. The generic symlink metadata
 remains in `bootstrap.json`; `macos.sh` does not automatically run the
 symlink runner.
