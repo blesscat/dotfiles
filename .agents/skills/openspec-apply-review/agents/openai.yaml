@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenSpec Apply Review"
+  short_description: "Apply, two-agent review, five-round gate"
+  default_prompt: "Use $openspec-apply-review to apply an OpenSpec change and pass its two-subagent compliance gate."

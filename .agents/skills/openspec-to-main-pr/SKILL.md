@@ -48,11 +48,13 @@ artifacts, selecting a store, or creating a branch—inspect the current reposit
 - Require a completed exploration. If the user is still brainstorming, remain in
   `$openspec-explore` instead of starting implementation.
 - Require the `openspec` CLI and discoverable OpenSpec skills by name:
-  `$openspec-propose`, `$openspec-sync-specs`, and
-  `$openspec-archive-change`, plus preferably `$openspec-apply-review`. If
-  `$openspec-apply-review` is unavailable, use `$openspec-apply-change` followed
-  by an independent read-only compliance review when subagent support is
-  available. If a required capability is unavailable, stop and report it.
+  `$openspec-propose`, `$openspec-apply-review`, `$openspec-sync-specs`, and
+  `$openspec-archive-change`. `$openspec-apply-review` is the required apply
+  gate: it dispatches exactly two read-only, scope-bounded subagents per review
+  round, repeats for at most five rounds, and hands off only when no valid
+  in-scope major, critical, or blocking finding remains. If that skill or
+  subagent support is unavailable, stop and
+  report it; do not silently substitute a self-review or a single reviewer.
 - Resolve those skills by name from the active project or global installation. Do
   not reference `.codex/skills`, `.agents/skills`, or another absolute path.
 - If a named OpenSpec store is in use, run `openspec store list --json`, select the
@@ -65,7 +67,7 @@ artifacts, selecting a store, or creating a branch—inspect the current reposit
   restart exploration unless the requirements remain materially unclear.
 - Run phases in this order:
   1. `$openspec-propose`
-  2. `$openspec-apply-review` (or apply plus independent review fallback)
+  2. `$openspec-apply-review` (apply plus the two-reviewer gate)
   3. `$openspec-sync-specs`
   4. `$openspec-archive-change`
   5. Publish a draft PR targeting `main`
@@ -122,27 +124,38 @@ OpenSpec CLI reports a blocked required artifact.
 
 ## 3. Implement and independently review
 
-Invoke `$openspec-apply-review` for the same change name when available. It must
-run the normal `$openspec-apply-change` flow first and then dispatch a read-only
-compliance reviewer. If the review skill is not available, run the apply skill and
-dispatch the equivalent independent review yourself; do not silently replace the
-independent review with a self-review.
+Invoke `$openspec-apply-review` for the same change name. It must run the normal
+`$openspec-apply-change` flow first and then dispatch exactly two independent,
+read-only, scope-bounded subagents per review round. The initial review is round
+1; after valid fixes, it may repeat with both reviewers, but never more than five
+rounds total. Do not silently replace this gate with a self-review or a single
+reviewer.
 
 Require this phase to:
 
-- read all `contextFiles` returned by
-  `openspec instructions apply --change "<name>" --json`;
+- when a named store was selected, run
+  `openspec instructions apply --change "<name>" --json --store "<store-id>"`
+  and otherwise run `openspec instructions apply --change "<name>" --json`,
+  using the same store/root as apply; read all returned `contextFiles`;
 - implement every pending task and mark completed tasks in the tasks artifact;
 - run the most relevant project tests, checks, or build commands;
 - confirm apply state is `all_done` or that every task is complete;
-- give the reviewer the OpenSpec context files, changed-file scope, completed-task
-  summary, and validation results;
-- keep the reviewer read-only; and
-- fix valid findings in the primary worktree, then rerun targeted checks and the
-  compliance review after any material behavior change.
+- give both reviewers the same complete packet: OpenSpec context files, schema,
+  apply state/progress, completed-task summary, changed-file scope, and
+  validation results;
+- rebuild that packet after each accepted fix before starting another review
+  round;
+- give both reviewers the same scope boundary and exclude pre-existing changes;
+- keep both reviewers read-only; and
+- fix valid in-scope findings in the primary worktree, then rerun targeted
+  checks and both reviewers after any material behavior change.
 
-Do not publish when the reviewer reports a blocking or unresolved compliance issue.
-Capture the reviewer verdict and any residual risk.
+Do not publish when the current/final reviewer pair still has a valid in-scope
+major, critical, or blocking compliance issue, when the fifth review round
+contains any such issue (even if its fix has not yet been re-reviewed), or when
+the current review packet is incomplete. Findings resolved and re-reviewed in a
+later passing pair do not block handoff. Capture both reviewer verdicts, the
+number of rounds, dismissed out-of-scope findings, and any residual risk.
 
 ## 4. Synchronize the main specs
 
