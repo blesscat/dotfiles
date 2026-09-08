@@ -18,6 +18,18 @@ Never merge the pull request or push directly to `main`.
 Before any OpenSpec or repository workflow work—including reading or writing
 artifacts, selecting a store, or creating a branch—inspect the current repository.
 
+Every isolated worktree created or used by this workflow must be located under
+the target repository root's `.worktree/` directory (singular):
+
+```text
+<project-root>/.worktree/<worktree-name>
+```
+
+Resolve `<project-root>` with `git rev-parse --show-toplevel`. Do not use
+`.worktrees/`, a sibling directory, `/tmp`, or an environment-managed path for
+the workflow worktree. A built-in worktree is acceptable only when its resulting
+path satisfies this requirement; otherwise stop and report the blocker.
+
 1. Report the current environment and worktree state:
 
    ```sh
@@ -26,20 +38,39 @@ artifacts, selecting a store, or creating a branch—inspect the current reposit
    git worktree list --porcelain
    ```
 
-2. Work only from a focused, non-`main` branch in a clean worktree. If the
-   current branch is `main` or `git status --porcelain` returns any output,
-   create or use an isolated worktree from the current `HEAD` on a focused branch
-   such as `codex/<description>`.
-3. When running in Codex Desktop, prefer its built-in Worktree when available.
-   Otherwise use the worktree operation supported by the environment. Before
-   continuing, confirm that the current directory and terminal are attached to
-   the isolated worktree.
-4. Run the remaining phases entirely from the isolated worktree. Leave the
+2. Resolve the project root and the required worktree path before creating or
+   reusing an isolated worktree. Read the target project's root `.gitignore` and
+   verify that it ignores `<project-root>/.worktree/`. If no existing rule
+   matches, add the root `.worktree/` rule to that target project's `.gitignore`,
+   preserving all existing content. Verify the result with:
+
+   ```sh
+   git check-ignore -v --no-index <project-root>/.worktree/<worktree-name>
+   ```
+
+   This automatic ignore bootstrap applies only to `.worktree/`; do not change
+   unrelated ignore policy, a nested `.gitignore`, or the skill repository's
+   `.gitignore`. Carry the deliberate target-project `.gitignore` change into
+   the focused feature branch. If that cannot be done while preserving
+   pre-existing user changes and leaving the original worktree untouched, stop
+   and report the exact blocker.
+3. Work only from a focused, non-`main` branch in a clean worktree at the exact
+   path `<project-root>/.worktree/<worktree-name>`. If the current branch is
+   `main`, `git status --porcelain` returns any output, or the current worktree
+   is outside the required path, create or use an isolated worktree from the
+   current `HEAD` on a focused branch such as `codex/<description>`.
+4. When running in Codex Desktop, prefer its built-in Worktree only when it can
+   use the required `<project-root>/.worktree/<worktree-name>` path. Otherwise
+   use the worktree operation supported by the environment. Before continuing,
+   confirm that the current directory and terminal are attached to the isolated
+   worktree.
+5. Run the remaining phases entirely from the isolated worktree. Leave the
    original worktree and any uncommitted changes untouched; do not stash, reset,
    or commit them as part of this workflow.
-5. If the current worktree is already on a focused non-`main` branch and is clean,
-   continue there. If the worktree or branch cannot be created safely, stop and
-   report the exact blocker.
+6. If the current worktree is already on a focused non-`main` branch and is clean,
+   continue there only when its path is the required `<project-root>/.worktree/`
+   location and the ignore check succeeds. If the worktree or branch cannot be
+   created safely, stop and report the exact blocker.
 
 ## Portability and prerequisites
 
@@ -80,7 +111,9 @@ artifacts, selecting a store, or creating a branch—inspect the current reposit
 - Treat the repository's `.gitignore` files as a hard publication boundary. Read
   the root `.gitignore` and any relevant nested ignore files before staging, and
   use `git status --short --ignored` plus `git check-ignore -v --no-index <path>`
-  when evaluating candidate files.
+  when evaluating candidate files. The required `.worktree/` bootstrap in the
+  isolation phase is the only ignore-policy change this workflow may make
+  automatically.
 - Never use `git add -f`, `git add --force`, an equivalent force-add option, or a
   connector tree/blob operation to publish a path matched by `.gitignore`. If a
   required artifact is ignored, keep it local and report it; ask the user before
