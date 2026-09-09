@@ -18,6 +18,7 @@ error() {
 validate_source() {
   local -a skill_dirs=()
   local skill_dir
+  local skill_count=0
 
   if [[ -z "$home_dir" ]]; then
     error 'HOME must be set'
@@ -39,11 +40,21 @@ validate_source() {
   fi
 
   for skill_dir in "${skill_dirs[@]}"; do
+    # OpenSpec stores project metadata here, alongside the actual skills.
+    if [[ "${skill_dir%/}" == "${source_dir%/}/openspec" && ! -f "$skill_dir/SKILL.md" ]]; then
+      continue
+    fi
     if [[ ! -f "$skill_dir/SKILL.md" ]]; then
       error "skill directory is missing SKILL.md: $skill_dir"
       return 1
     fi
+    skill_count=$((skill_count + 1))
   done
+
+  if (( skill_count == 0 )); then
+    error "managed source contains no skill directories: $source_dir"
+    return 1
+  fi
 
   if [[ -e "$source_dir/.skill-lock.json" ]]; then
     error "generated lock state must not be inside the managed source: $source_dir/.skill-lock.json"

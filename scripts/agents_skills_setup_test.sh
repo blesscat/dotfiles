@@ -157,6 +157,34 @@ if [[ -e "$repo_dir/.agents/skills/.skill-lock.json" ]]; then
   failures=$((failures + 1))
 fi
 
+# OpenSpec metadata can coexist with skills without being treated as a skill.
+prepare_case openspec_workspace
+mkdir -p "$case_source/openspec/specs" "$case_source/openspec/changes"
+printf '%s\n' 'schema: spec-driven' > "$case_source/openspec/config.yaml"
+run_setup
+assert_equal 0 "$?" 'OpenSpec workspace alongside skills is accepted'
+assert_regular_file "$case_home/.agents/skills/sample-skill/SKILL.md" \
+  'skill remains discoverable alongside OpenSpec workspace'
+assert_regular_file "$case_source/openspec/config.yaml" \
+  'OpenSpec workspace is preserved'
+
+# Metadata alone is not a valid skill source.
+prepare_case openspec_only
+case_source="$case_dir/metadata-only"
+mkdir -p "$case_source/openspec/specs"
+run_setup
+assert_equal 1 "$?" 'OpenSpec workspace alone is rejected'
+assert_contains "$(<"$case_stderr")" 'contains no skill directories' \
+  'metadata-only source reports missing skills'
+
+# Other directories must still contain a skill definition.
+prepare_case missing_skill_definition
+mkdir -p "$case_source/incomplete-skill"
+run_setup
+assert_equal 1 "$?" 'ordinary directory without SKILL.md is rejected'
+assert_contains "$(<"$case_stderr")" 'skill directory is missing SKILL.md' \
+  'incomplete skill reports validation failure'
+
 # Existing local skills are moved to a recoverable backup, while the adjacent
 # lock file remains byte-for-byte unchanged.
 prepare_case existing_directory
