@@ -1,6 +1,6 @@
 ---
 name: pr-review-followup
-description: "Complete an authorized pull-request remediation loop: inspect Code and Security Review findings, fix them, verify, commit, push, reply, resolve, and keep following the latest review until both are complete with no findings. Use when the user explicitly asks to fix and follow a PR through review; do not use for read-only review."
+description: Fix and follow an explicitly authorized PR review loop until Code and Security Review pass on the latest pushed head.
 ---
 
 # PR Review Follow-up
@@ -20,8 +20,8 @@ are true for the latest pushed head SHA:
 - No actionable inline review thread remains unresolved.
 - Local verification relevant to the changes passes, or every unavailable check
   is reported with its exact command and reason.
-- The pushed branch and local worktree are clean and the PR remains on the
-  intended branch.
+- All changes from this task are committed and pushed to the intended PR branch.
+  Unrelated pre-existing work remains untouched and is reported separately.
 
 "Running", an old review result, a green local test, or a resolved thread alone
 is not completion. If a new review produces a finding, return to the fix loop.
@@ -49,7 +49,8 @@ the user explicitly asks for merging.
 
 ## Review and fix loop
 
-For every actionable finding, in severity order:
+For each batch of findings on the current head, verify and fix valid findings
+in severity order. Then validate the cohesive batch and publish it once:
 
 1. Reproduce or verify the finding against the current diff and surrounding
    code. Check whether it is still valid, outdated, or already covered by a
@@ -61,8 +62,8 @@ For every actionable finding, in severity order:
 3. Run focused checks first, then the repository checks required by local
    instructions. Record exact commands and outcomes. Do not claim a check
    passed without running it.
-4. Inspect the final diff and `git diff --check`. Create a focused commit on
-   the PR branch, then push it. Prefer a new fix commit; do not rewrite shared
+4. Inspect the final diff and `git diff --check`. Create one or more focused
+   commits for the batch on the PR branch, then push once. Prefer a new fix commit; do not rewrite shared
    history unless the user explicitly requests it.
 5. After the push succeeds, reply to each addressed inline thread with the fix
    commit SHA and concise evidence. Resolve the thread only after the reply and

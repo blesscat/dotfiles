@@ -1,336 +1,123 @@
 ---
 name: openspec-to-main-pr
-description: Drive a completed OpenSpec exploration through proposal, implementation, independent compliance review, an explicit delta-spec sync via $openspec-sync-specs, archive, intentional commit and push, and a draft pull request into main. Use from any Git repository when the user explicitly requests the complete OpenSpec-to-PR workflow in one pass.
+description: Complete an explicitly requested OpenSpec-to-PR workflow, from an agreed plan through implementation, dual review, spec sync, archive, and a draft PR to main.
 ---
 
 # OpenSpec to Main PR
 
-Orchestrate the complete delivery workflow after the user has finished an
-`openspec-explore` discussion. Keep the phases ordered, and do not publish until
-the OpenSpec artifacts, implementation, independent review, validation, main-spec
-sync, and archive are complete.
+Finish the authorized delivery workflow in this order:
+`$openspec-propose` → `$openspec-apply-review` → `$openspec-sync-specs` →
+`$openspec-archive-change` → commit, push, and draft PR to `main`.
+Never merge, push directly to main, or resolve PR reviews as part of this skill.
 
-The final operation creates a pull request from the working branch into `main`.
-Never merge the pull request or push directly to `main`.
+## Scope and continuation
 
-## Worktree isolation (must happen first)
+Use the requirements and decisions already established in conversation. Do not
+restart exploration when they are sufficient. If the user is still brainstorming,
+stay in exploration until the intended outcome is clear.
 
-Before any OpenSpec or repository workflow work—including reading or writing
-artifacts, selecting a store, or creating a branch—inspect the current repository.
+The explicit end-to-end request authorizes continuation between these phases.
+A planning skill's standalone handoff ends that phase, not the overall task.
+Within this orchestration, carry the user's existing authorization into the next
+phase without requesting a new message. This does not bypass CLI blocked states,
+validation, filesystem permissions, or a newly required product decision.
 
-Every isolated worktree created or used by this workflow must be located under
-the target repository root's `.worktree/` directory (singular):
+Fix recoverable in-scope implementation and verification failures, then continue.
+Pause only when progress requires missing authority, an external prerequisite,
+an unresolved material requirement, or the review gate reaches its limit.
+User follow-ups steer the task unless they cancel or replace it.
 
-```text
-<project-root>/.worktree/<worktree-name>
-```
+## Initial worktree isolation
 
-Resolve `<project-root>` with `git rev-parse --show-toplevel`. Do not use
-`.worktrees/`, a sibling directory, `/tmp`, or an environment-managed path for
-the workflow worktree. A built-in worktree is acceptable only when its resulting
-path satisfies this requirement; otherwise stop and report the blocker.
+Before writes, inspect `pwd`, `git status --short --branch`, and
+`git worktree list --porcelain`. Record pre-existing changes separately from
+changes created by this run.
 
-1. Report the current environment and worktree state:
+Use a focused non-main branch under the target repository's
+`<project-root>/.worktree/<name>` (singular). Resolve the owning repository root
+before creating a worktree; when already inside a linked worktree, use Git's
+worktree list and common directory to identify its owner instead of nesting
+another .worktree beneath the linked worktree. A built-in worktree is acceptable
+only when it satisfies this location.
 
-   ```sh
-   pwd
-   git status --short --branch
-   git worktree list --porcelain
-   ```
+Verify that the target project's ignore rules cover `.worktree/` with
+`git check-ignore -v --no-index <worktree-path>`. If needed, add only the root
+`.worktree/` ignore rule in the focused checkout and include that deliberate
+change in the feature commit. Do not edit the original checkout to bootstrap it.
+Keep all other ignore policy unchanged.
 
-2. Resolve the project root and the required worktree path before creating or
-   reusing an isolated worktree. Read the target project's root `.gitignore` and
-   verify that it ignores `<project-root>/.worktree/`. If no existing rule
-   matches, add the root `.worktree/` rule to that target project's `.gitignore`,
-   preserving all existing content. Verify the result with:
+At initial entry, reuse a clean focused worktree at that location or create one
+from the intended HEAD. Preserve original uncommitted work without stashing,
+resetting, or committing it. If task inputs exist only in the original dirty
+checkout, inspect them read-only and establish how to carry the authorized work
+forward; never silently omit it. Pause if ownership cannot be separated safely.
 
-   ```sh
-   git check-ignore -v --no-index <project-root>/.worktree/<worktree-name>
-   ```
+After implementation starts, this run's uncommitted changes are expected.
+Do not create another worktree merely because those changes exist. When resuming,
+reuse the established branch and worktree after checking ownership and scope.
 
-   This automatic ignore bootstrap applies only to `.worktree/`; do not change
-   unrelated ignore policy, a nested `.gitignore`, or the skill repository's
-   `.gitignore`. Carry the deliberate target-project `.gitignore` change into
-   the focused feature branch. If that cannot be done while preserving
-   pre-existing user changes and leaving the original worktree untouched, stop
-   and report the exact blocker.
-3. Work only from a focused, non-`main` branch in a clean worktree at the exact
-   path `<project-root>/.worktree/<worktree-name>`. If the current branch is
-   `main`, `git status --porcelain` returns any output, or the current worktree
-   is outside the required path, create or use an isolated worktree from the
-   current `HEAD` on a focused branch such as `codex/<description>`.
-4. When running in Codex Desktop, prefer its built-in Worktree only when it can
-   use the required `<project-root>/.worktree/<worktree-name>` path. Otherwise
-   use the worktree operation supported by the environment. Before continuing,
-   confirm that the current directory and terminal are attached to the isolated
-   worktree.
-5. Run the remaining phases entirely from the isolated worktree. Leave the
-   original worktree and any uncommitted changes untouched; do not stash, reset,
-   or commit them as part of this workflow.
-6. If the current worktree is already on a focused non-`main` branch and is clean,
-   continue there only when its path is the required `<project-root>/.worktree/`
-   location and the ignore check succeeds. If the worktree or branch cannot be
-   created safely, stop and report the exact blocker.
+## OpenSpec phases
 
-## Portability and prerequisites
+Require the openspec CLI and the four named phase skills above, including
+subagent support for the dual-review gate. Resolve skills from the active
+installation. Do not substitute self-review or a single reviewer.
 
-- Run from the current Git repository. Do not assume a repository path, framework,
-  OpenSpec schema, default branch, or project-local skill directory.
-- Require a completed exploration. If the user is still brainstorming, remain in
-  `$openspec-explore` instead of starting implementation.
-- Require the `openspec` CLI and discoverable OpenSpec skills by name:
-  `$openspec-propose`, `$openspec-apply-review`, `$openspec-sync-specs`, and
-  `$openspec-archive-change`. `$openspec-apply-review` is the required apply
-  gate: it dispatches exactly two read-only, scope-bounded subagents per review
-  round, repeats for at most five rounds, and hands off only when no valid
-  in-scope major, critical, or blocking finding remains. If that skill or
-  subagent support is unavailable, stop and
-  report it; do not silently substitute a self-review or a single reviewer.
-- Resolve those skills by name from the active project or global installation. Do
-  not reference `.codex/skills`, `.agents/skills`, or another absolute path.
-- If a named OpenSpec store is in use, run `openspec store list --json`, select the
-  intended store, and pass its `--store` value to every applicable OpenSpec command.
-  Otherwise use the nearest local OpenSpec root.
+Keep the selected change and planning root stable. For a named store, discover
+its id with `openspec store list --json` and retain `--store <id>` on applicable
+commands. Use CLI-returned schema, artifact paths, and context instead of assuming
+repository-local paths.
 
-## Operating rules
+1. **Proposal:** Inspect existing changes and reuse a matching change rather than
+   duplicating it. Apply project context and schema rules through the proposal
+   skill. Verify all prerequisites for apply are satisfied.
+2. **Apply and review:** Use `$openspec-apply-review`. Require completed tasks,
+   relevant verification, and a passing pair of independent read-only reviewers.
+   Preserve its exactly-two-reviewers and maximum-five-rounds contract.
+3. **Sync:** Invoke `$openspec-sync-specs` explicitly. Preserve requirements and
+   scenarios outside the selected delta. Require successful
+   `openspec validate --specs` with the selected-root flags. A confirmed absence
+   of delta specs is a successful no-op.
+4. **Archive:** Invoke `$openspec-archive-change` only after sync succeeds.
+   Verify every delta is reflected in main specs and take the already-synced
+   archive path. If differences remain, return to the separate sync phase.
+   Do not replace that phase with inline archive sync. Preserve .openspec.yaml,
+   verify the dated archive exists and the active change is gone, and do not
+   overwrite an existing archive.
 
-- Treat the completed exploration conversation as the source of intent. Do not
-  restart exploration unless the requirements remain materially unclear.
-- Run phases in this order:
-  1. `$openspec-propose`
-  2. `$openspec-apply-review` (apply plus the two-reviewer gate)
-  3. `$openspec-sync-specs`
-  4. `$openspec-archive-change`
-  5. Publish a draft PR targeting `main`
-- Continue to the next phase automatically after a phase skill hands off
-  successfully. A standalone planning skill may say to stop after creating its
-  artifacts; in this orchestrated workflow, treat that successful handoff as the
-  end of the phase and continue. Stop for actual blockers.
-- Preserve unrelated user changes. Never use `git add -A` when ownership or scope
-  is unclear.
-- Treat the repository's `.gitignore` files as a hard publication boundary. Read
-  the root `.gitignore` and any relevant nested ignore files before staging, and
-  use `git status --short --ignored` plus `git check-ignore -v --no-index <path>`
-  when evaluating candidate files. The required `.worktree/` bootstrap in the
-  isolation phase is the only ignore-policy change this workflow may make
-  automatically.
-- Never use `git add -f`, `git add --force`, an equivalent force-add option, or a
-  connector tree/blob operation to publish a path matched by `.gitignore`. If a
-  required artifact is ignored, keep it local and report it; ask the user before
-  changing ignore policy in a separate, explicit decision.
-- Record the final OpenSpec status, review verdict, changed-file scope, and exact
-  validation results before publishing.
+Let phase skills own their detailed command and artifact procedures. Reuse
+unchanged context and validation evidence; refresh it when state or inputs change.
 
-## 1. Establish the change and preflight
+## Publish
 
-Use the requirement and decisions already established during exploration. Derive
-a concise kebab-case change name only when the conversation does not provide one.
+Verify the current worktree and feature branch still match this run. Inspect the
+complete publishable diff, including untracked files, synchronized specs, and
+any intended commits already on the branch. This run's unstaged changes are
+eligible for staging; unrelated changes remain excluded.
 
-Before writing or implementing anything:
+Resolve origin and verify that main exists. Use an available authenticated Git
+and GitHub publishing path. A connector alternative must preserve the intended
+branch ancestry and complete change, including deletions and binary assets;
+do not rebuild only text patches on a different base. Stop if the available
+capability cannot publish an equivalent result.
 
-1. Run `git status -sb` and identify the current branch.
-2. Select the OpenSpec store if applicable, then run `openspec list --json`.
-3. Read `openspec/config.yaml` or `config.yml` when present. Treat its context and
-   rules as constraints for the artifacts; do not copy them into the artifacts.
-4. If a matching active change exists, inspect its status and artifacts. Do not
-   create a duplicate or overwrite existing work. Continue only when its intent
-   matches the completed exploration.
-5. If there is no usable requirement or change name, stop and ask for the missing
-   description.
+- Apply root and relevant nested .gitignore rules to every candidate path.
+  Never force-add ignored paths or bypass ignore rules through a connector.
+  Ignored archives remain local; publishing them requires a separate explicit
+  decision to change ignore policy.
+- Stage only attributable, non-ignored task changes. Inspect the staged diff
+  and `git diff --cached --check`. Make one or more cohesive commits.
+- Complete required repository checks. Rerun affected checks when subsequent
+  edits invalidate earlier results; otherwise reuse the recorded results.
+- Push the feature branch with tracking. Create a draft PR with base main,
+  describing the final behavior, OpenSpec change, review outcome, verification,
+  and material residual risk.
+- Verify the pushed head, PR URL, source branch, base, and draft status. If a
+  matching PR already exists on a resumed run, update it instead of duplicating it.
 
-## 2. Generate the OpenSpec proposal
+## Completion
 
-Invoke `$openspec-propose` with the change name and the consolidated exploration
-outcome. Let that skill follow the repository's schema and artifact instructions;
-do not invent artifact paths.
-
-Require the proposal phase to:
-
-- create every artifact transitively required for apply, not only `tasks.md`;
-- read dependency artifacts before creating dependent artifacts;
-- honor project context and artifact-specific rules;
-- complete missing artifacts without duplicating or discarding existing work; and
-- verify `openspec status --change "<name>"` before implementation.
-
-Do not continue while the proposal is incomplete, the change is ambiguous, or the
-OpenSpec CLI reports a blocked required artifact.
-
-## 3. Implement and independently review
-
-Invoke `$openspec-apply-review` for the same change name. It must run the normal
-`$openspec-apply-change` flow first and then dispatch exactly two independent,
-read-only, scope-bounded subagents per review round. The initial review is round
-1; after valid fixes, it may repeat with both reviewers, but never more than five
-rounds total. Do not silently replace this gate with a self-review or a single
-reviewer.
-
-Require this phase to:
-
-- when a named store was selected, run
-  `openspec instructions apply --change "<name>" --json --store "<store-id>"`
-  and otherwise run `openspec instructions apply --change "<name>" --json`,
-  using the same store/root as apply; read all returned `contextFiles`;
-- implement every pending task and mark completed tasks in the tasks artifact;
-- run the most relevant project tests, checks, or build commands;
-- confirm apply state is `all_done` or that every task is complete;
-- give both reviewers the same complete packet: OpenSpec context files, schema,
-  apply state/progress, completed-task summary, changed-file scope, and
-  validation results;
-- rebuild that packet after each accepted fix before starting another review
-  round;
-- give both reviewers the same scope boundary and exclude pre-existing changes;
-- keep both reviewers read-only; and
-- fix valid in-scope findings in the primary worktree, then rerun targeted
-  checks and both reviewers after any material behavior change.
-
-Do not publish when the current/final reviewer pair still has a valid in-scope
-major, critical, or blocking compliance issue, when the fifth review round
-contains any such issue (even if its fix has not yet been re-reviewed), or when
-the current review packet is incomplete. Findings resolved and re-reviewed in a
-later passing pair do not block handoff. Capture both reviewer verdicts, the
-number of rounds, dismissed out-of-scope findings, and any residual risk.
-
-## 4. Synchronize the main specs
-
-Enter this phase only after apply, review, and validation are complete or any
-non-blocking limitation is explicitly understood.
-
-Invoke `$openspec-sync-specs` for the same change name. This is a separate required
-phase; do not rely on `$openspec-archive-change` to perform the sync inline.
-
-Require the sync phase to:
-
-- use the selected OpenSpec store/root and `artifactPaths.specs.existingOutputPaths`
-  from the change status, without inferring delta paths from unrelated artifacts;
-- intelligently merge every selected delta requirement and scenario into its
-  corresponding main spec while preserving content not mentioned by the delta;
-- run `openspec validate --specs` with the same selected-root flags; and
-- report the updated capabilities, changes made, validation result, and changed-file
-  scope before handing off to archive.
-
-If no delta specs exist, treat the sync as a successful no-op after the sync skill
-confirms that there is nothing to write, then continue to archive. If sync reports
-an ambiguous change, merge conflict, invalid instructions, write failure, or
-validation failure, stop before archiving and report the exact blocker.
-
-Leave the change active after this phase. Do not archive it yet.
-
-## 5. Archive the synchronized change
-
-Enter this phase only after `$openspec-sync-specs` succeeds or confirms a valid
-no-op.
-
-Invoke `$openspec-archive-change` for the same change name before committing or
-publishing. Because synchronization already happened in the previous phase, the
-archive phase must:
-
-- verify every delta requirement and scenario is represented by the corresponding
-  main spec;
-- reject or report any remaining unsynchronized delta instead of silently performing
-  the sync as a substitute for `$openspec-sync-specs`;
-- provide the completed sync summary to the archive workflow and choose its
-  `Archive now` path only when every delta is already synced; never choose `Sync
-  now` or `Sync anyway` inside archive. If archive reports changes still needed,
-  stop and rerun `$openspec-sync-specs` as the separate phase;
-- validate the synchronized main spec and completed change artifacts;
-- move the complete change directory, including `.openspec.yaml` when present, to
-  the dated archive location; and
-- verify that the active-change path is gone and the archive is complete. The
-  archive's on-disk existence is separate from PR scope: if the archive path is
-  ignored, leave it untracked and local rather than publishing it.
-
-If an unsynchronized delta remains, synchronization conflicts, the archive target
-already exists, or the archive cannot be verified, stop before publishing and report
-the exact blocker.
-
-## 6. Commit, push, and create the PR to `main`
-
-Enter this phase only after apply, review, validation, main-spec synchronization,
-and archive are complete.
-
-Recheck:
-
-- `git status -sb`
-- `git status --short --ignored`
-- `git diff --stat`
-- `git diff --name-only`
-
-Before staging, check every candidate path against the applicable `.gitignore`
-rules. Do not treat an OpenSpec archive as automatically publishable merely
-because the archive phase created it.
-
-Resolve the repository from `origin`. Confirm that the remote has a `main` branch;
-the PR target is always `main`, even if the repository has another default branch.
-
-Use `$yeet` when it is available and can honor the explicit `main` target. Otherwise
-use a write-capable GitHub connector if available. Use the local CLI path only when
-both `gh --version` and `gh auth status` succeed. If none of these publish paths is
-available, stop and report the missing capability.
-
-### Source branch and local CLI path
-
-1. Confirm that the worktree-isolation rule has been satisfied. If the current
-   worktree is still `main` or contains uncommitted changes, stop and establish the
-   isolated worktree before staging.
-2. Keep an existing focused feature branch when its scope is clear; otherwise use
-   the focused branch created by the isolation rule.
-3. Stage only intended, non-ignored files belonging to this OpenSpec change,
-   including synchronized main specs when applicable. Never stage a path matched
-   by `.gitignore`, and never use a force-add option. An ignored OpenSpec archive
-   remains local-only and must not enter the commit or PR. If publishing an
-   ignored artifact appears necessary, stop and ask the user before changing the
-   ignore policy. Group the in-scope files into one or more coherent commits when
-   that makes different features or purposes easier to review. Keep each commit
-   focused, and do not mix unrelated changes; if unrelated changes cannot be
-   separated safely, stop and ask the user to identify the scope.
-4. Rerun relevant checks if implementation or review fixes changed files after the
-   earlier validation.
-5. Create the intentional commit or commits with terse, purpose-specific
-   descriptions. Review `git diff --cached --name-only`,
-   `git diff --cached --check`, and the staged diff before each commit. Confirm
-   that no ignored path was staged and that the complete ordered commit series
-   represents the publishable portion of the OpenSpec change.
-6. Push the current branch with tracking to `origin` after all intended commits
-   are created.
-7. Create a draft PR with base `main`, the pushed source branch, and a body covering
-   what changed, why, user/developer impact, the OpenSpec change name, review
-   verdict, validation commands/results, and residual risk.
-
-### GitHub connector path
-
-When the local CLI is unavailable but the connector can write, perform the
-equivalent remote operation without modifying `main`:
-
-1. Resolve the repository, the `main` commit, and its base tree.
-2. Create a focused source branch from the `main` commit.
-3. Apply the same `.gitignore` boundary to the connector file list; do not create
-   blobs or tree entries for ignored paths. Create blobs and trees only for the
-   remaining changed text files, then create one or more
-   focused commits in logical order when different features or purposes should
-   be separated. Base each later commit on the preceding commit and move the
-   source branch to the latest commit.
-4. Verify the complete remote commit series against `main`.
-5. Create a draft PR with `base: "main"`, the source branch, title, body, and
-   validation details.
-
-Use the connector's actual available actions and schemas; do not invent tool names
-or claim success until the response includes a PR URL or stable identifier.
-
-Never merge the PR, resolve reviews, or update `main` directly.
-
-## Completion report
-
-Report one concise handoff containing:
-
-- OpenSpec change name and final artifact/apply status;
-- main-spec synchronization and archive path/status, including the `.gitignore`
-  decision for whether archive files are publishable;
-- implementation and independent-review verdict;
-- validation commands and results;
-- source branch, commit, and PR URL/number;
-- which archived artifacts remained local-only because `.gitignore` excluded them; and
-- residual risk or follow-up needed before merge.
-
-If the workflow stops, report the last completed phase, the exact blocker, and the
-smallest next action needed to resume. Do not present a partial run as a completed
-PR workflow.
+Report the change, sync/archive status and location, local-only ignored artifacts,
+both reviewer verdicts and rounds used, validation results, branch, commit, and PR
+URL. All publishable work from this task must be committed and pushed.
+If blocked, identify the last completed phase and the concrete prerequisite to
+resume; do not report a partial run as complete.
