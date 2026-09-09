@@ -1,45 +1,27 @@
 ---
 name: tdd-workflow
-description: TDD workflow for feature work and bug fixes.
+description: Use test-first development when explicitly requested or when a behavioral change benefits from a focused regression test.
 ---
 
 # TDD Workflow
 
-## Purpose
-Ensure Codex follows a test-first process when implementing features or fixing bugs.
+For new or corrected behavior that warrants automated regression coverage:
 
-## Core rules
-- Write a failing test first
-- Confirm the test actually fails
-- Write the minimal implementation
-- Confirm the test passes
-- Refactor last
+1. Write a focused test of the observable contract.
+2. Run it and verify it fails for the intended missing behavior.
+3. Implement the complete requested behavior and confirm the test passes.
+4. Refactor if useful, then run affected regression tests and required project checks.
 
-## Applicable scenarios
-- New features
-- Refactoring
-- Behavioral changes
+For behavior-preserving refactors, establish a passing baseline with existing
+tests and rerun them after the change. Add coverage only for a meaningful gap;
+do not invent new failing tests for unchanged behavior.
 
-## Workflow
-1. Write a minimal test
-2. Run it and confirm the failure is correct
-3. Write the smallest amount of code needed to pass
-4. Run the test again and confirm it passes
-5. Run any necessary regression tests
-6. Only clean up the code after everything is green
+Documentation, formatting, simple visual edits, and other low-impact changes do
+not automatically require new tests. Honor an explicit user request for TDD.
 
-## Acceptance checklist
-- [ ] Every new behavior has a test
-- [ ] The test fails before it passes
-- [ ] The scope was not bent just to make the test pass
-- [ ] All tests pass
-- [ ] Refactoring did not break behavior
+Assert behavior rather than implementation shape. Do not reduce requirements to
+make a test pass. Investigate difficult tests for coupling or missing seams
+without assuming that every hard-to-test requirement has a bad design.
 
-## Common mistakes
-- Writing production code before the test
-- Testing implementation details instead of behavior
-- Changing too much at once, making failures hard to attribute
-
-## Reminder to Codex
-If the task is too large, split it first.
-If the test is hard to write, the design is usually too complex.
+Report checks actually run and any verification gaps. Reuse valid results until
+new changes or failures justify rerunning them.
