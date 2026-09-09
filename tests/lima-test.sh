@@ -96,7 +96,10 @@ prepare_case() {
   export FAKE_DOCKER_CONTEXTS="$case_dir/docker.contexts"
   export FAKE_DOCKER_ACTIVE="$case_dir/docker.active"
   export FAKE_BREW_LOG="$case_dir/brew.log"
+  export FAKE_BREW_STATE="$case_dir/brew.state"
   export FAKE_UNAME_SYSTEM=Darwin
+  export FAKE_BREW_DOCKER_COMPLETION=0
+  export FAKE_BREW_DOCKER_LINK_CONFLICT=0
 
   : > "$FAKE_EVENT_LOG"
   : > "$FAKE_LIMA_LOG"
@@ -105,6 +108,7 @@ prepare_case() {
   : > "$FAKE_DOCKER_CONTEXTS"
   : > "$FAKE_DOCKER_ACTIVE"
   : > "$FAKE_BREW_LOG"
+  : > "$FAKE_BREW_STATE"
 }
 
 fake_bin="$tmp_dir/bin"
@@ -211,9 +215,33 @@ printf '%s\n' \
 printf '%s\n' \
   '#!/bin/bash' \
   'set -euo pipefail' \
+  'brew_state="${FAKE_BREW_STATE:?}"' \
   'printf "brew %s\\n" "$*" >> "${FAKE_BREW_LOG:?}"' \
   'printf "brew %s\\n" "$*" >> "${FAKE_EVENT_LOG:?}"' \
-  '[[ "${1:-}" == install ]]' > "$fake_bin/brew"
+  'case "${1:-}" in' \
+  '  list)' \
+  '    [[ "${2:-}" == --formula && "${3:-}" == docker-completion ]]' \
+  '    [[ "${FAKE_BREW_DOCKER_COMPLETION:-0}" == 1 ]]' \
+  '    ;;' \
+  '  unlink)' \
+  '    [[ "${2:-}" == docker-completion ]]' \
+  '    printf "%s\\n" unlinked > "$brew_state"' \
+  '    ;;' \
+  '  install)' \
+  '    if [[ "${FAKE_BREW_DOCKER_LINK_CONFLICT:-0}" == 1 ]] && [[ ! -s "$brew_state" ]]; then' \
+  '      printf "%s\\n" "docker link conflict" >&2' \
+  '      exit 1' \
+  '    fi' \
+  '    ;;' \
+  '  link)' \
+  '    [[ "${2:-}" == docker ]]' \
+  '    printf "%s\\n" linked > "$brew_state"' \
+  '    ;;' \
+  '  *)' \
+  '    printf "Unexpected fake brew command: %s\\n" "$*" >&2' \
+  '    exit 2' \
+  '    ;;' \
+  'esac' > "$fake_bin/brew"
 
 printf '%s\n' \
   '#!/bin/bash' \
@@ -249,6 +277,30 @@ assert_log_empty "$FAKE_LIMA_LOG" \
   'host installation does not start or inspect a VM'
 assert_contains "$install_text" 'No VM was started.' \
   'host installation reports that no VM was started'
+
+prepare_case install-link-conflict
+export FAKE_BREW_DOCKER_COMPLETION=1
+export FAKE_BREW_DOCKER_LINK_CONFLICT=1
+install_output="$case_dir/output"
+run_success "$install_output" "$repo_dir/scripts/lima_install.sh" || true
+assert_log_line "$FAKE_BREW_LOG" 'brew list --formula docker-completion' \
+  'host installation checks for the conflicting completion formula'
+assert_log_line "$FAKE_BREW_LOG" 'brew unlink docker-completion' \
+  'host installation unlinks the conflicting completion formula'
+assert_log_line "$FAKE_BREW_LOG" 'brew install lima docker docker-compose' \
+  'host installation retries package installation after conflict cleanup'
+assert_log_line "$FAKE_BREW_LOG" 'brew link docker' \
+  'host installation links the Docker CLI after package installation'
+assert_event_order "$FAKE_EVENT_LOG" \
+  'brew unlink docker-completion' \
+  'brew install lima docker docker-compose' \
+  'conflict cleanup happens before package installation'
+assert_event_order "$FAKE_EVENT_LOG" \
+  'brew install lima docker docker-compose' \
+  'brew link docker' \
+  'Docker CLI linking happens after package installation'
+assert_contains "$(/bin/cat "$install_output")" 'No VM was started.' \
+  'host installation completes after resolving a Docker link conflict'
 
 prepare_case install-non-macos
 export FAKE_UNAME_SYSTEM=Linux
