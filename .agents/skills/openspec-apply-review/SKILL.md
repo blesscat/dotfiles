@@ -50,8 +50,9 @@ Keep actionable findings within this change; exclude unrelated cleanup,
 speculative improvements, and personal style preferences. Reviewers must not
 edit, stage, commit, install, publish, sync, archive, or trigger external actions.
 
-Require each report to include a verdict, prioritized findings with file:line
-evidence and the affected requirement or contract, minimal remediation,
+Use P0 (blocker), P1 (high), P2 (medium), or P3 (low) in both reports.
+Require each report to include a verdict, P0–P3 findings with file:line evidence
+and the affected requirement or contract, minimal remediation,
 verification gaps, and residual risk. A passing report needs evidence of what
 was inspected, not just a verdict label. Wait for both reports before triage.
 
@@ -66,14 +67,12 @@ or configuration files do not by themselves expand scope when they implement
 already agreed behavior. Ask only when the fix changes intended behavior,
 acceptance criteria, authority, or a material product/design decision.
 
-The initial pair is round 1. After fixing a major, critical, or blocking finding,
-or otherwise materially changing behavior, refresh the packet and obtain another
-pair. Never run more than five rounds. Round 5 must itself pass: a fix after a
-failing fifth round remains unreviewed and cannot pass this invocation.
-Do not start round 6.
+The initial pair is round 1. After any accepted fix or material behavior change,
+rerun affected checks, refresh the packet, and obtain another pair. Stop after
+five rounds; round 5 must pass, and no round 6 may start.
 
-The gate passes only when both current reports contain no valid in-scope major,
-critical, or blocking findings. Report minor findings as residual risk.
+The gate passes only when both current reports contain no valid in-scope P0 or
+P1 findings. Report P2/P3 findings as residual risk.
 Missing subagent capability, incomplete reports, unresolved material ambiguity,
 or a failing fifth round blocks handoff.
 

@@ -13,12 +13,12 @@ For a request to create a PR without review follow-up, use
 1. Run `$openspec-to-main-pr` to completion and capture its PR URL or number.
    It creates a PR ready for review after its OpenSpec, implementation, dual
    review, spec sync, archive, and publishing phases.
-2. After PR creation succeeds, run `$pr-review-followup` for that exact PR and
+2. After PR creation succeeds, run `$pr-review-follow-up` for that exact PR and
    continue until its completion conditions pass for the latest pushed head.
    A pending review, an older review result, or one clean round is not
    completion.
 3. The user's explicit request for this combined workflow authorizes the full
-   follow-up loop defined by `$pr-review-followup`, including fixes, checks,
+   follow-up loop defined by `$pr-review-follow-up`, including fixes, checks,
    commits, pushes, and review-thread replies or resolutions allowed by that
    skill. Keep all follow-up commits on the PR branch. Never merge or push
    directly to `main`.
