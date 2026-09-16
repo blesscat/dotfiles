@@ -1,13 +1,13 @@
 ---
 name: openspec-to-main-pr
-description: Complete an explicitly requested OpenSpec-to-PR workflow, from an agreed plan through implementation, dual review, spec sync, archive, and a draft PR to main.
+description: Complete an explicitly requested OpenSpec-to-PR workflow, from an agreed plan through implementation, dual review, spec sync, archive, and a PR ready for review on main.
 ---
 
 # OpenSpec to Main PR
 
 Finish the authorized delivery workflow in this order:
 `$openspec-propose` → `$openspec-apply-review` → `$openspec-sync-specs` →
-`$openspec-archive-change` → commit, push, and draft PR to `main`.
+`$openspec-archive-change` → commit, push, and PR ready for review on `main`.
 Never merge, push directly to main, or resolve PR reviews as part of this skill.
 
 ## Scope and continuation
@@ -108,11 +108,12 @@ capability cannot publish an equivalent result.
   and `git diff --cached --check`. Make one or more cohesive commits.
 - Complete required repository checks. Rerun affected checks when subsequent
   edits invalidate earlier results; otherwise reuse the recorded results.
-- Push the feature branch with tracking. Create a draft PR with base main,
-  describing the final behavior, OpenSpec change, review outcome, verification,
-  and material residual risk.
-- Verify the pushed head, PR URL, source branch, base, and draft status. If a
-  matching PR already exists on a resumed run, update it instead of duplicating it.
+- Push the feature branch with tracking. Create a PR ready for review against
+  `main`, describing the final behavior, OpenSpec change, review outcome,
+  verification, and material residual risk.
+- Verify the pushed head, PR URL, source branch, base, and confirm the PR is not
+  a draft. If a matching PR already exists on a resumed run, update it instead
+  of duplicating it.
 
 ## Completion
 
