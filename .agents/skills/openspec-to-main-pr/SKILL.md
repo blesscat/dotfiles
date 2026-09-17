@@ -39,8 +39,9 @@ branch matches the intended HEAD and base; continue on it without creating
 another worktree. A clean linked worktree on another task's branch does not
 qualify, because reuse would push that branch's unrelated commits into this
 run's PR. Only a checkout on the main branch, one carrying pre-existing file
-changes, or one whose branch is not owned by this run needs a new focused
-non-main branch under the target repository's
+changes, one whose branch is not owned by this run, or one that is not a linked
+worktree at the prescribed location needs a new focused non-main branch under
+the target repository's
 `<project-root>/.worktree/<name>` (singular). Resolve the owning repository root
 before creating a worktree; when already inside a linked worktree, use Git's
 worktree list and common directory to identify its owner instead of nesting
