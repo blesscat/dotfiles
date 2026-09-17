@@ -47,7 +47,9 @@ worktree list and common directory to identify its owner instead of nesting
 another .worktree beneath the linked worktree. A built-in worktree is acceptable
 only when it satisfies this location.
 
-Verify that the target project's ignore rules cover `.worktree/` with
+Gate this ignore setup on actually creating the focused worktree; when an
+existing checkout is reused, this run creates no nested worktree and skips it
+entirely. Verify that the target project's ignore rules cover `.worktree/` with
 `git check-ignore -v --no-index <worktree-path>`. If needed, add only the root
 `.worktree/` ignore rule in the focused checkout and include that deliberate
 change in the feature commit. Do not edit the original checkout to bootstrap it.
