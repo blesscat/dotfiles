@@ -19,9 +19,13 @@ Use after the user authorizes fixing and following reviews. Review-only requests
    errors or remains pending as blocked.
 4. Verify each finding against the current head, make the smallest complete fix, run relevant project checks, inspect the diff, then commit and push to the PR branch. If no change is needed, do not create an empty commit.
 5. Reply to findings with concise evidence, including the fix SHA after pushing. Resolve a thread only after its fix is pushed or evidence shows it is not actionable. Never merge unless asked.
-6. Repeat until both reviews explicitly pass on the latest pushed head, no
-   actionable thread remains open, and relevant checks pass. If a required check
-   fails or cannot run, report it as a blocker.
+6. Treat a "Complete"/pass status in the review summary only as that review run
+   finishing, not as overall completion. After each review completes, recheck
+   the PR for unanswered comments and open threads, and reply to every one. The
+   flow is done only when both reviews explicitly pass on the latest pushed
+   head, a final sweep confirms no unanswered comments or open threads remain,
+   and relevant checks pass. If a required check fails or cannot run, report it
+   as a blocker.
 
 ## Handoff
 
