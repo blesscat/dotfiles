@@ -20,6 +20,7 @@
     ".config/yazelix/config.toml": "~/.config/yazelix",
     ".config/yazelix/cursors.toml": "~/.config/yazelix",
     ".config/yazelix/helix/config.toml": "~/.config/yazelix/helix",
+    ".config/yazelix/helix/languages.toml": "~/.config/yazelix/helix",
     ".config/yazelix/helix/steel_plugins/README.md": "~/.config/yazelix/helix/steel_plugins",
     ".config/yazelix/helix/themes/": "~/.config/yazelix/helix",
     ".config/kitty/": "~/.config",

@@ -2,6 +2,16 @@
 command = "tailwindcss-language-server"
 args = ["--stdio"]
 
+[language-server.astro-ls]
+command = "astro-ls"
+args = ["--stdio"]
+config = { typescript = { tsdk = "/Users/blesscat/doc/autoIQ/apps/web/node_modules/typescript/lib" } }
+
+[[language]]
+name = "astro"
+roots = ["astro.config.mjs", "tsconfig.json"]
+language-servers = ["astro-ls", "tailwindcss-ls"]
+
 [[language]]
 name = "html"
 language-servers = ["vscode-html-language-server", "tailwindcss-ls"]
