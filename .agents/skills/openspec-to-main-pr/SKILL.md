@@ -33,7 +33,10 @@ Before writes, inspect `pwd`, `git status --short --branch`, and
 `git worktree list --porcelain`. Record pre-existing changes separately from
 changes created by this run.
 
-Use a focused non-main branch under the target repository's
+Reuse the current checkout directly when it is already a linked worktree with
+no pre-existing file changes; continue on it without creating another worktree.
+Only a checkout on the main branch, or one carrying pre-existing file changes,
+needs a new focused non-main branch under the target repository's
 `<project-root>/.worktree/<name>` (singular). Resolve the owning repository root
 before creating a worktree; when already inside a linked worktree, use Git's
 worktree list and common directory to identify its owner instead of nesting
@@ -46,11 +49,12 @@ Verify that the target project's ignore rules cover `.worktree/` with
 change in the feature commit. Do not edit the original checkout to bootstrap it.
 Keep all other ignore policy unchanged.
 
-At initial entry, reuse a clean focused worktree at that location or create one
-from the intended HEAD. Preserve original uncommitted work without stashing,
-resetting, or committing it. If task inputs exist only in the original dirty
-checkout, inspect them read-only and establish how to carry the authorized work
-forward; never silently omit it. Pause if ownership cannot be separated safely.
+At initial entry, reuse the current linked worktree when it is clean as above;
+otherwise create the focused worktree from the intended HEAD. Preserve original
+uncommitted work without stashing, resetting, or committing it. If task inputs
+exist only in the original dirty checkout, inspect them read-only and establish
+how to carry the authorized work forward; never silently omit it. Pause if
+ownership cannot be separated safely.
 
 After implementation starts, this run's uncommitted changes are expected.
 Do not create another worktree merely because those changes exist. When resuming,
