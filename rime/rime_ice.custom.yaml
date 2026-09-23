@@ -1,0 +1,3 @@
+patch:
+  switches/@2/reset: 1
+  traditionalize/opencc_config: s2tw.json
