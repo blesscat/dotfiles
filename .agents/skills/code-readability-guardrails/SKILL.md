@@ -1,6 +1,6 @@
 ---
 name: code-readability-guardrails
-description: Use when writing or reviewing TypeScript, React, or application code where conditional object construction, nested ternaries, or dense expressions could make behavior harder to read.
+description: Use when writing or reviewing TypeScript, React, Astro, or application code where conditional construction, page-specific UI branches, or dense expressions could make behavior harder to read.
 ---
 
 # Code Readability Guardrails
@@ -13,6 +13,7 @@ Prefer explicit control flow when a conditional expression builds objects, array
 - If a conditional branch returns an object, prefer a named helper with early returns.
 - Keep ternaries for short scalar values only.
 - Prefer intermediate variables with domain names over inline dense expressions.
+- When a shared UI component differs mainly in caller-supplied content or actions, pass children or named slots instead of adding many page-specific `if` branches. Keep each page's navigation and actions in its composition; use a condition only for a genuine shared behavior difference.
 
 ## Pattern
 
