@@ -33,19 +33,18 @@ Before writes, inspect `pwd`, `git status --short --branch`, and
 `git worktree list --porcelain`. Record pre-existing changes separately from
 changes created by this run.
 
-Reuse the current checkout directly when it is already a linked worktree with
-no pre-existing file changes, its current branch belongs to this run, and that
-branch matches the intended HEAD and base; continue on it without creating
-another worktree. A clean linked worktree on another task's branch does not
-qualify, because reuse would push that branch's unrelated commits into this
-run's PR. Only a checkout on the main branch, one carrying pre-existing file
-changes, one whose branch is not owned by this run, or one that is not a linked
-worktree at the prescribed location needs a new focused non-main branch under
-the target repository's
-`<project-root>/.worktree/<name>` (singular). Resolve the owning repository root
-before creating a worktree; when already inside a linked worktree, use Git's
-worktree list and common directory to identify its owner instead of nesting
-another .worktree beneath the linked worktree. A built-in worktree is acceptable
+Reuse the current checkout directly when it has no pre-existing file changes
+and its current branch is not `main`. This includes existing linked worktrees
+at other paths and branches created for earlier tasks. Do not create a new
+branch or worktree because of its path, name, ownership, or starting HEAD and
+base. Record existing branch commits, upstream, and any PR so the publishable
+scope can be checked. Only a checkout on `main`, a detached HEAD, or one
+carrying pre-existing file changes needs a new focused non-main branch and
+worktree under the target repository's `<project-root>/.worktree/<name>`
+(singular). Resolve the owning repository root before creating a worktree;
+when already inside a linked worktree, use Git's worktree list and common
+directory to identify its owner instead of nesting another .worktree beneath
+the linked worktree. A built-in worktree used for a new checkout is acceptable
 only when it satisfies this location.
 
 Gate this ignore setup on actually creating the focused worktree; when an
@@ -56,8 +55,8 @@ entirely. Verify that the target project's ignore rules cover `.worktree/` with
 change in the feature commit. Do not edit the original checkout to bootstrap it.
 Keep all other ignore policy unchanged.
 
-At initial entry, reuse the current linked worktree when the reuse conditions
-above hold; otherwise create the focused worktree from the intended HEAD.
+At initial entry, reuse the current checkout when the reuse conditions above
+hold; otherwise create the focused worktree from the intended HEAD.
 Preserve original uncommitted work without stashing, resetting, or committing
 it. If task inputs exist only in the original dirty checkout, inspect them
 read-only and establish how to carry the authorized work forward; never
@@ -65,7 +64,7 @@ silently omit it. Pause if ownership cannot be separated safely.
 
 After implementation starts, this run's uncommitted changes are expected.
 Do not create another worktree merely because those changes exist. When resuming,
-reuse the established branch and worktree after checking ownership and scope.
+reuse the established branch and worktree after checking identity and scope.
 
 ## OpenSpec phases
 
@@ -100,10 +99,12 @@ unchanged context and validation evidence; refresh it when state or inputs chang
 
 ## Publish
 
-Verify the current worktree and feature branch still match this run. Inspect the
-complete publishable diff, including untracked files, synchronized specs, and
-any intended commits already on the branch. This run's unstaged changes are
-eligible for staging; unrelated changes remain excluded.
+Verify the current checkout and selected non-main branch remain in use. Inspect
+the complete publishable diff, including untracked files, synchronized specs,
+and any pre-existing commits on the branch. This run's unstaged changes are
+eligible for staging; unrelated changes remain excluded. If pre-existing
+commits or a PR on the branch would publish unrelated work, pause for a scope
+decision before publishing.
 
 Resolve origin and verify that main exists. Use an available authenticated Git
 and GitHub publishing path. A connector alternative must preserve the intended
