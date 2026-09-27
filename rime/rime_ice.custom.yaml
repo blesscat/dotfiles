@@ -1,3 +1,6 @@
 patch:
   switches/@2/reset: 1
   traditionalize/opencc_config: s2tw.json
+  translator/spelling_hints: 8
+  translator/always_show_comments: true
+  translator/keep_comments: true
