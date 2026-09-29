@@ -1,4 +1,5 @@
 patch:
+  "switches/@0/reset": 1
   translator/spelling_hints: 5
   translator/comment_format:
     - xform ([aeiou])(ng?|r)([1234]) $1$3$2
