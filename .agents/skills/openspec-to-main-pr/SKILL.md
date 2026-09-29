@@ -29,18 +29,26 @@ User follow-ups steer the task unless they cancel or replace it.
 
 ## Initial worktree isolation
 
-Before writes, inspect `pwd`, `git status --short --branch`, and
+Before writes, inspect `pwd`, `git status --short --branch --untracked-files=all`, and
 `git worktree list --porcelain`. Record pre-existing changes separately from
 changes created by this run.
 
+For this isolation decision only, disregard untracked (`??`) entries under the
+checkout-root `.orca/` directory or at the checkout-root `.pnpm-lock.yaml` file.
+Preserve these tooling artifacts without staging or publishing them; do not
+change Git ignore rules for this exception. All other untracked entries and any
+tracked, staged, deleted, or conflicted changes remain pre-existing file
+changes. In particular, `pnpm-lock.yaml` is not covered by this exception.
+
 Reuse the current checkout directly when it has no pre-existing file changes
-and its current branch is not `main`. This includes existing linked worktrees
-at other paths and branches created for earlier tasks. Do not create a new
-branch or worktree because of its path, name, ownership, or starting HEAD and
-base. Record existing branch commits, upstream, and any PR so the publishable
-scope can be checked. Only a checkout on `main`, a detached HEAD, or one
-carrying pre-existing file changes needs a new focused non-main branch and
-worktree under the target repository's `<project-root>/.worktree/<name>`
+after this classification and its current branch is not `main`. This includes
+existing linked worktrees at other paths and branches created for earlier tasks.
+Do not create a new branch or worktree because of its path, name, ownership,
+or starting HEAD and base. Record existing branch commits, upstream, and any
+PR so the publishable scope can be checked. Only a checkout on `main`, a
+detached HEAD, or one carrying meaningful pre-existing file changes needs a
+new focused non-main branch and worktree under the target repository's
+`<project-root>/.worktree/<name>`
 (singular). Resolve the owning repository root before creating a worktree;
 when already inside a linked worktree, use Git's worktree list and common
 directory to identify its owner instead of nesting another .worktree beneath
