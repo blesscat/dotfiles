@@ -19,9 +19,10 @@ For a request to create a PR without review follow-up, use
    completion.
 3. The user's explicit request for this combined workflow authorizes the full
    follow-up loop defined by `$pr-review-follow-up`, including fixes, checks,
-   commits, pushes, and review-thread replies or resolutions allowed by that
-   skill. Keep all follow-up commits on the PR branch. Never merge or push
-   directly to `main`.
+   commits, pushes, review-thread replies or resolutions, and automatic exact
+   review-request comments when that skill finds a stale review with no run for
+   the latest head. Keep all follow-up commits on the PR branch. Never merge or
+   push directly to `main`.
 
 If the first workflow is blocked or produces no PR URL, stop before follow-up
 and report the last completed phase and the specific blocker. If follow-up is
