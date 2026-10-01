@@ -1,5 +1,7 @@
 {
   "symlinks": {
+    "factory/settings.json": "~/.factory",
+    "factory/hooks.json": "~/.factory",
     "bash/.*": "~",
     "zsh/.*": "~",
     "zim/.*": "~",
