@@ -40,3 +40,6 @@ lima/*.local.yaml
 
 # Yazelix upgrade backups
 /symlinks/.config/yazelix/**/*backup*
+
+# Machine-local fish secrets (API keys); never commit
+symlinks/.config/fish/conf.d/secret-*.fish

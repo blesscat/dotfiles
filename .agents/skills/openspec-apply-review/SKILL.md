@@ -30,7 +30,9 @@ contextFiles and capture:
 - change, planning root/store, schema, apply state, and task progress;
 - concrete context paths and acceptance criteria;
 - baseline, current diff, included changes, and excluded pre-existing changes;
-- validation commands and results.
+- validation commands and results;
+- the code-readability-guardrails and testing-guardrails rules, loaded from
+  the active installation.
 
 For later rounds, refresh CLI state and the current diff. Reuse context already
 read only when it remains unchanged; reread changed or newly relevant artifacts.
@@ -44,6 +46,11 @@ Do not substitute a self-review or a single reviewer.
 
 - Reviewer A checks OpenSpec requirements, scenarios, design, and task compliance.
 - Reviewer B checks implementation behavior, integration, regressions, and tests.
+
+Both reviewers check changed code and tests against the
+code-readability-guardrails and testing-guardrails rules included in the
+packet. Violations of these codified rules are actionable in-scope findings,
+not personal style preferences.
 
 Both may inspect directly required dependencies to understand changed behavior.
 Keep actionable findings within this change; exclude unrelated cleanup,
