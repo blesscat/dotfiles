@@ -55,13 +55,21 @@ directory to identify its owner instead of nesting another .worktree beneath
 the linked worktree. A built-in worktree used for a new checkout is acceptable
 only when it satisfies this location.
 
+Before creating the nested worktree, run `git check-ignore -v --no-index
+<worktree-path>` from the owning checkout. If it is not ignored, append only
+`/.worktree/` to the repository-local exclude file resolved by
+`git rev-parse --git-path info/exclude` from that checkout, preserving existing
+content. Recheck that the exclusion is effective before creating the worktree;
+if it cannot be established, report the blocker without nesting it. This local
+Git metadata change leaves the original checkout's tracked files untouched.
+
 Gate this ignore setup on actually creating the focused worktree; when an
 existing checkout is reused, this run creates no nested worktree and skips it
-entirely. Verify that the target project's ignore rules cover `.worktree/` with
-`git check-ignore -v --no-index <worktree-path>`. If needed, add only the root
-`.worktree/` ignore rule in the focused checkout and include that deliberate
-change in the feature commit. Do not edit the original checkout to bootstrap it.
-Keep all other ignore policy unchanged.
+entirely. If the versioned root .gitignore lacks `.worktree/`, add that rule in
+the focused checkout and include it in the feature commit. Keep the local
+exclude while the owning checkout lacks the versioned rule, including when
+delivery pauses before merge. Verify its status has no new untracked
+`.worktree/` entry. Keep all other ignore policy unchanged.
 
 At initial entry, reuse the current checkout when the reuse conditions above
 hold; otherwise create the focused worktree from the intended HEAD.
