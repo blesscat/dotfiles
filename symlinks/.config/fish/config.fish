@@ -33,6 +33,9 @@ starship init fish | source
 zoxide init fish | source
 atuin init fish | source
 
+alias codex-innova='CODEX_HOME="$HOME/.codex-innova" codex'
+alias codex-personal='CODEX_HOME="$HOME/.codex-personal" codex'
+
 # Auto use Node version from .nvmrc
 source ~/.config/fish/load_nvm.fish
 
