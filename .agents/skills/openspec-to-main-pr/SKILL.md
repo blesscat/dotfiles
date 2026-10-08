@@ -33,20 +33,52 @@ Before writes, inspect `pwd`, `git status --short --branch --untracked-files=all
 `git worktree list --porcelain`. Record pre-existing changes separately from
 changes created by this run.
 
+Check for unmerged paths with `git diff --name-only --diff-filter=U` and for
+in-progress Git operations using `git rev-parse --git-path <marker>` to resolve
+`MERGE_HEAD`, `rebase-merge`, `rebase-apply`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`,
+and `sequencer`. An unmerged path or any of these operation markers prevents
+checkout reuse, including when only lockfiles are affected. Preserve the
+original conflict and operation state and use the focused worktree procedure
+below instead.
+
 For this isolation decision only, disregard untracked (`??`) entries under the
-checkout-root `.orca/` directory or at the checkout-root `.pnpm-lock.yaml` file.
-Preserve these tooling artifacts without staging or publishing them; do not
-change Git ignore rules for this exception. All other untracked entries and any
-tracked, staged, deleted, or conflicted changes remain pre-existing file
-changes. In particular, `pnpm-lock.yaml` is not covered by this exception.
+checkout-root `.orca/` directory and pre-existing non-conflicted files whose
+basenames end in `lock.yaml` at any directory depth, whether untracked,
+modified, staged, added, deleted, or renamed. This includes
+`pnpm-lock.yaml`, `.pnpm-lock.yaml`, and `apps/web/pnpm-lock.yaml`. Preserve
+these pre-existing changes without staging or publishing them unless the task
+explicitly includes them; do not change Git ignore rules for this exception.
+All other untracked entries and tracked, staged, deleted, or conflicted changes
+remain pre-existing file changes.
+
+This classification does not make ignored lockfile contents trusted dependency
+inputs. Before dependency setup, project checks, or hooks that execute installed
+tools, establish that their installation used trusted dependency manifests and
+lockfiles from the intended HEAD, plus dependency changes explicitly included
+in this task. Never install from excluded pre-existing lockfile changes or run
+tools whose installation used those changes; a frozen install does not provide
+this provenance.
+
+If existing tooling provenance cannot be established, prepare a disposable,
+credential-free verification copy with trusted HEAD dependency inputs and only
+attributable task changes. Exclude unrelated lockfile changes from that copy, run the
+required checks there, and keep edits and PR commits on the selected branch.
+Preserve the original lockfiles without restoring or swapping their contents.
+If publishing hooks would execute unverified tooling in the original checkout,
+disable those hooks per Git command only after the required checks pass in the
+trusted copy; do not change shared Git config or bypass required verification.
+If trusted verification cannot be established, report the blocker before running
+dependency setup, checks, or those hooks.
 
 Reuse the current checkout directly when it has no pre-existing file changes
-after this classification and its current branch is not `main`. This includes
+after this classification, no unmerged paths or in-progress Git operations,
+and its current branch is not `main`. This includes
 existing linked worktrees at other paths and branches created for earlier tasks.
 Do not create a new branch or worktree because of its path, name, ownership,
 or starting HEAD and base. Record existing branch commits, upstream, and any
 PR so the publishable scope can be checked. Only a checkout on `main`, a
-detached HEAD, or one carrying meaningful pre-existing file changes needs a
+detached HEAD, or one carrying meaningful pre-existing file changes, unmerged
+paths, or in-progress Git operations needs a
 new focused non-main branch and worktree under the target repository's
 `<project-root>/.worktree/<name>`
 (singular). Resolve the owning repository root before creating a worktree;
@@ -132,8 +164,11 @@ capability cannot publish an equivalent result.
   Never force-add ignored paths or bypass ignore rules through a connector.
   Ignored archives remain local; publishing them requires a separate explicit
   decision to change ignore policy.
-- Stage only attributable, non-ignored task changes. Inspect the staged diff
-  and `git diff --cached --check`. Make one or more cohesive commits.
+- Stage only attributable, non-ignored task changes. If unrelated lockfiles
+  are already staged, commit only the explicit task paths (for example,
+  `git commit --only -- <task-paths>`) to preserve their index state while
+  excluding them from the commit. Inspect the publishable staged diff and
+  `git diff --cached --check -- <task-paths>`. Make one or more cohesive commits.
 - Complete required repository checks. Rerun affected checks when subsequent
   edits invalidate earlier results; otherwise reuse the recorded results.
 - Push the feature branch with tracking. Create a PR ready for review against
