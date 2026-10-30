@@ -1,13 +1,13 @@
 ---
 name: openspec-to-main-pr
-description: Complete an explicitly requested OpenSpec-to-PR workflow, from an agreed plan through implementation, dual review, spec sync, archive, and a PR ready for review on main.
+description: Complete an explicitly requested OpenSpec-to-PR workflow, from an agreed plan through implementation, dual review, spec sync, archive, and a draft PR on main.
 ---
 
 # OpenSpec to Main PR
 
 Finish the authorized delivery workflow in this order:
 `$openspec-propose` → `$openspec-apply-review` → `$openspec-sync-specs` →
-`$openspec-archive-change` → commit, push, and PR ready for review on `main`.
+`$openspec-archive-change` → commit, push, and draft PR on `main`.
 Never merge, push directly to main, or resolve PR reviews as part of this skill.
 
 ## Scope and continuation
@@ -171,17 +171,20 @@ capability cannot publish an equivalent result.
   `git diff --cached --check -- <task-paths>`. Make one or more cohesive commits.
 - Complete required repository checks. Rerun affected checks when subsequent
   edits invalidate earlier results; otherwise reuse the recorded results.
-- Push the feature branch with tracking. Create a PR ready for review against
-  `main`, describing the final behavior, OpenSpec change, review outcome,
+- Push the feature branch with tracking. Create a draft PR (`gh pr create --draft`)
+  against `main`, describing the final behavior, OpenSpec change, review outcome,
   verification, and material residual risk.
-- Verify the pushed head, PR URL, source branch, base, and confirm the PR is not
-  a draft. If a matching PR already exists on a resumed run, update it instead
-  of duplicating it.
+- Verify the pushed head, PR URL, source branch, base, and confirm the PR this
+  skill creates is a draft. If a matching PR already exists on a resumed run,
+  update it instead of duplicating it and report its current draft/ready state
+  without changing it.
 
 ## Completion
 
 Report the change, sync/archive status and location, local-only ignored artifacts,
 both reviewer verdicts and rounds used, validation results, branch, commit, and PR
-URL. All publishable work from this task must be committed and pushed.
+URL with its draft/ready state. A PR this skill created is a draft, to be marked
+ready only after Code Review and Security Review pass on its latest head. All
+publishable work from this task must be committed and pushed.
 If blocked, identify the last completed phase and the concrete prerequisite to
 resume; do not report a partial run as complete.

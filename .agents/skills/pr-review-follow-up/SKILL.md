@@ -1,11 +1,11 @@
 ---
 name: pr-review-follow-up
-description: Fix and follow a PR review loop until Code and Security Review pass on the latest pushed head.
+description: Fix and follow a PR review loop until Code and Security Review pass on the latest pushed head, then mark a draft PR ready and wait for the required checks.
 ---
 
 # PR Review Follow-up
 
-Use after the user authorizes fixing and following reviews. Review-only requests do not authorize edits, commits, pushes, or thread changes.
+Use after the user authorizes fixing and following reviews. It works on draft PRs. Do not rely on automatic reviews: request each review by comment unless it is already queued, running, or complete on the current head. Review-only requests do not authorize edits, commits, pushes, or thread changes.
 
 ## Workflow
 
@@ -19,21 +19,20 @@ Use after the user authorizes fixing and following reviews. Review-only requests
    30 seconds for up to 10 minutes; report a run that errors or remains pending
    as blocked.
 4. Before requesting a review for a stale commit, refresh the PR summary once
-   after 30 seconds so an automatic review triggered by the push can register.
-   Treat a queued, pending, or running result for that review type on the
+   after 30 seconds in case a run already registered. Treat a queued, pending, or running result for that review type on the
    current head as already in progress. A Codex `eyes` reaction confirms that
    its matching request comment is running; correlate it to the current head
    using the SHA recorded when this workflow posted the request. A run or
    reaction tied to an older head does not cover the current head. If the
    summary or request state cannot be read or correlated to a SHA, report the
    uncertainty rather than risk a duplicate request.
-5. When a review is still stale and no request or run for the current head
-   exists, automatically add a PR conversation comment with the exact trigger:
+5. After the initial head and every push to a new head, when a review is stale
+   and no request or run for the current head exists, add a PR conversation comment with the exact trigger:
    `@codex review` for Code Review or `@codex security review` for Security
-   Review. Request only the stale review type. After requesting Code Review,
-   recheck both rows and allow one 30-second poll interval for a configured
-   Security Review to start on the current head. Do not request Security Review
-   separately if it started; otherwise request it if it remains stale. Record
+   Review. Request each type that has not started
+   on the current head, both types after every push to a new head, instead of
+   waiting for an automatic review. Skip a type that is already queued, running, or
+   complete on the current head. Record
    each request's review type, head SHA, comment ID, and time. Do not post the
    same trigger again for that review type and SHA. Poll for the
    running state and result as above. If no activity or result appears within
@@ -50,9 +49,20 @@ Use after the user authorizes fixing and following reviews. Review-only requests
    the PR for unanswered comments and open threads, and reply to every one. The
    flow is done only when both reviews explicitly pass on the latest pushed
    head, a final sweep confirms no unanswered comments or open threads remain,
-   and relevant checks pass. If a required check fails or cannot run, report it
-   as a blocker.
+   and relevant checks pass, except required checks the repository defers until a
+   PR is ready; those are required only after step 9. A required check that fails goes
+   through the fix loop (steps 6-8), keeping a draft PR draft and converting a
+   ready PR with `gh pr ready --undo` before pushing. If a
+   required check cannot run or cannot be fixed, report it as a blocker.
+9. When that holds, run `gh pr ready <n>` if the PR is a draft, then wait for the
+   repository's required checks on the latest head (for example `CI result`). If
+   the repository's CI skips draft PRs, full CI runs only once the PR is ready;
+   otherwise drafts may still run CI. Do not request reviews again for the ready
+   transition.
+10. If required checks fail, run `gh pr ready --undo` before pushing fixes so a
+    draft-skipping CI does not rerun on every fix push. Fix, push, re-trigger both
+    reviews for the new head (steps 5-8), then mark ready again. Never merge.
 
 ## Handoff
 
-Report the PR link, final SHA, commits, review outcomes, checks, and any remaining issues.
+Report the PR link, final SHA, draft/ready state, commits, review outcomes, CI result, and any remaining issues.
