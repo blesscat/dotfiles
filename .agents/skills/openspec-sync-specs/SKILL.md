@@ -7,7 +7,7 @@ compatibility: Requires openspec CLI.
 metadata:
   author: openspec
   version: "1.0"
-  generatedBy: "1.13.2"
+  generatedBy: "1.15.0"
 ---
 
 Sync delta specs from a change to main specs.
@@ -42,7 +42,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    When prompting, show changes that have delta specs (under `specs/` directory).
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/openspec-sync-specs <other>`).
+   Always announce: "Using change: <name>" and how to override (e.g., `$openspec-sync-specs (Codex) or /openspec-sync-specs (other agents) <other>`).
 
 2. **Resolve change context**
 
