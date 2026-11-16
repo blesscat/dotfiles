@@ -173,7 +173,9 @@ capability cannot publish an equivalent result.
   edits invalidate earlier results; otherwise reuse the recorded results.
 - Push the feature branch with tracking. Create a draft PR (`gh pr create --draft`)
   against `main`, describing the final behavior, OpenSpec change, review outcome,
-  verification, and material residual risk.
+  verification, and material residual risk. When the change relies on work in
+  another pull request, list each one under a `Depends on` heading with what it
+  supplies and the required merge order.
 - Verify the pushed head, PR URL, source branch, base, and confirm the PR this
   skill creates is a draft. If a matching PR already exists on a resumed run,
   update it instead of duplicating it and report its current draft/ready state
@@ -184,7 +186,8 @@ capability cannot publish an equivalent result.
 Report the change, sync/archive status and location, local-only ignored artifacts,
 both reviewer verdicts and rounds used, validation results, branch, commit, and PR
 URL with its draft/ready state. A PR this skill created is a draft, to be marked
-ready only after Code Review and Security Review pass on its latest head. All
+ready only after the Code and Security Reviews its latest head needs have
+passed, as `$pr-review-follow-up` defines. All
 publishable work from this task must be committed and pushed.
 If blocked, identify the last completed phase and the concrete prerequisite to
 resume; do not report a partial run as complete.
