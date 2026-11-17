@@ -161,14 +161,17 @@ do not rebuild only text patches on a different base. Stop if the available
 capability cannot publish an equivalent result.
 
 - Apply root and relevant nested .gitignore rules to every candidate path.
-  Never force-add ignored paths or bypass ignore rules through a connector.
+  Check candidates with `git status --short --ignored` and
+  `git check-ignore -v --no-index <path>`. Never force-add ignored paths
+  (`git add -f` or `--force`) or bypass ignore rules through a connector.
   Ignored archives remain local; publishing them requires a separate explicit
-  decision to change ignore policy.
+  decision from the user to change ignore policy.
 - Stage only attributable, non-ignored task changes. If unrelated lockfiles
   are already staged, commit only the explicit task paths (for example,
   `git commit --only -- <task-paths>`) to preserve their index state while
   excluding them from the commit. Inspect the publishable staged diff and
-  `git diff --cached --check -- <task-paths>`. Make one or more cohesive commits.
+  `git diff --cached --check -- <task-paths>`, and confirm that no ignored path
+  was staged. Make one or more cohesive commits.
 - Complete required repository checks. Rerun affected checks when subsequent
   edits invalidate earlier results; otherwise reuse the recorded results.
 - Push the feature branch with tracking. Create a draft PR (`gh pr create --draft`)
