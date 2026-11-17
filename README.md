@@ -270,6 +270,37 @@ the Bash templates. Bash environments need a copy or mount of `~/.cider`; set
 `CIDER_HOME` when the repository is available at a different path, such as an
 OrbStack VM mount.
 
+### Herdr customizations
+
+The repository tracks only the Herdr files that were customized. Herdr still
+owns the rest of `~/.config/herdr-app`, including the shipped mods, layouts,
+icons, `keys.json` and `settings.json`. The tracked files are linked through
+`bootstrap.json`:
+
+- `mods/usage-limits/`: the bottom usage bar. It is adapted from
+  nozikov/herdr-usage-limits under the MIT license, and shows remaining quota.
+- `layouts/main-usage-limits.json`: the layout that mounts the usage bar.
+- `programs.json` and `my-icons/`: custom program names and icons, such as
+  MiniMax for `mcode`.
+
+Herdr writes `gpui-kit.d.ts` and `jsconfig.json` into each mod folder. They are
+ignored here.
+
+Herdr's hot reload does not follow symlinks, so editing a tracked mod here does
+not reload it. Run this after editing:
+
+```sh
+~/.cider/scripts/herdr_reload_mods.sh
+```
+
+The Claude Code status line script is tracked at
+`symlinks/.claude/statusline.sh`. `~/.claude/settings.json` is not tracked, so
+on a new machine, point its `statusLine` command at that script:
+
+```json
+"statusLine": { "type": "command", "command": "bash \"$HOME/.claude/statusline.sh\"" }
+```
+
 ### Manage user-level agent skills
 
 The maintained user-level skills are stored in `.agents/skills` and are activated

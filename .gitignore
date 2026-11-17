@@ -47,3 +47,9 @@ lima/*.local.yaml
 
 # Machine-local fish secrets (API keys); never commit
 symlinks/.config/fish/conf.d/secret-*.fish
+
+# Herdr files generated inside tracked mods, and local edit backups
+/symlinks/.config/herdr-app/**/gpui-kit.d.ts
+/symlinks/.config/herdr-app/**/jsconfig.json
+/symlinks/.config/herdr-app/**/*.bak
+/symlinks/.config/herdr-app/**/__pycache__/

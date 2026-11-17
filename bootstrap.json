@@ -31,6 +31,10 @@
     ".config/git/ignore": "~/.config/git",
     ".config/glow/glow.yml": "~/.config/glow",
     ".config/htop/htoprc": "~/.config/htop",
-    ".config/zellij/config.kdl": "~/.config/zellij"
+    ".config/zellij/config.kdl": "~/.config/zellij",
+    ".config/herdr-app/mods/usage-limits/": "~/.config/herdr-app/mods",
+    ".config/herdr-app/my-icons/": "~/.config/herdr-app",
+    ".config/herdr-app/programs.json": "~/.config/herdr-app",
+    ".config/herdr-app/layouts/main-usage-limits.json": "~/.config/herdr-app/layouts"
   }
 }

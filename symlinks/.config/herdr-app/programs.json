@@ -1,0 +1,14 @@
+{
+  "programs": {
+    "mcode": {
+      "name": "MiniMax",
+      "icon": "my-icons/minimax.svg",
+      "tint": false
+    },
+    "zcode": {
+      "name": "ZCode",
+      "icon": "my-icons/zcode.png",
+      "tint": false
+    }
+  }
+}
