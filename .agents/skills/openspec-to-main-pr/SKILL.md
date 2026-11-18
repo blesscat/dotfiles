@@ -161,8 +161,19 @@ do not rebuild only text patches on a different base. Stop if the available
 capability cannot publish an equivalent result.
 
 - Apply root and relevant nested .gitignore rules to every candidate path.
-  Check candidates with `git status --short --ignored` and
-  `git check-ignore -v --no-index <path>`. Never force-add ignored paths
+  Check candidates with `git status --porcelain=v1 --ignored
+  --untracked-files=all -z`. Parse its NUL-delimited status records, including
+  both pathnames in rename or copy records. Classify each path by whether it
+  existed in the owning repository's `HEAD`, not merely whether it is in the
+  current index. Paths in `HEAD` are tracked and must not be rejected by
+  ignore rules. Run `git check-ignore -v --no-index -z --stdin` only for paths
+  absent from `HEAD`, including staged additions and untracked or
+  connector-only filesystem candidates, with raw NUL-delimited pathnames. Do
+  not reject tracked paths or deletions based on current index ignore results.
+  Never recursively publish an untracked embedded repository from its parent
+  status record. Preserve it as a Git gitlink, or inspect its candidate files
+  inside that repository with its own ignore rules before publishing. Never
+  force-add ignored paths
   (`git add -f` or `--force`) or bypass ignore rules through a connector.
   Ignored archives remain local; publishing them requires a separate explicit
   decision from the user to change ignore policy.
@@ -171,7 +182,8 @@ capability cannot publish an equivalent result.
   `git commit --only -- <task-paths>`) to preserve their index state while
   excluding them from the commit. Inspect the publishable staged diff and
   `git diff --cached --check -- <task-paths>`, and confirm that no ignored path
-  was staged. Make one or more cohesive commits.
+  absent from `HEAD` was staged using the same check. Make one or more cohesive
+  commits.
 - Complete required repository checks. Rerun affected checks when subsequent
   edits invalidate earlier results; otherwise reuse the recorded results.
 - Push the feature branch with tracking. Create a draft PR (`gh pr create --draft`)
