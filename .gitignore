@@ -53,3 +53,6 @@ symlinks/.config/fish/conf.d/secret-*.fish
 /symlinks/.config/herdr-app/**/jsconfig.json
 /symlinks/.config/herdr-app/**/*.bak
 /symlinks/.config/herdr-app/**/__pycache__/
+
+# Agent usage page: Python bytecode from local runs
+/agent-usage/**/__pycache__/
