@@ -4,6 +4,17 @@
 # Uses macOS (BSD) `date -r <epoch>`; falls back to GNU `date -d @<epoch>`.
 
 input=$(cat)
+
+# ---- Save rate limits for the agent usage page (~/.cider/agent-usage) -------
+# One file per session; the page merges them and keeps the newest window.
+{
+  read -r sid rl <<< "$(printf '%s' "$input" | jq -rc '[(.session_id // "unknown"), (.rate_limits // null | tojson)] | join(" ")' 2>/dev/null)"
+  if [ -n "$rl" ] && [ "$rl" != "null" ] && [[ "$sid" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    d="$HOME/.cache/agent-usage/claude"; mkdir -p "$d"
+    tmp=$(mktemp "$d/.tmp.XXXXXX") && printf '{"at":%s,"rate_limits":%s}\n' "$(date +%s)" "$rl" > "$tmp" && mv -f "$tmp" "$d/$sid.json"
+  fi
+} 2>/dev/null
+
 j() { printf '%s' "$input" | jq -r "$1" 2>/dev/null; }
 
 fmt_time() { # $1 = epoch, $2 = format

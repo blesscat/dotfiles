@@ -301,6 +301,20 @@ on a new machine, point its `statusLine` command at that script:
 "statusLine": { "type": "command", "command": "bash \"$HOME/.claude/statusline.sh\"" }
 ```
 
+### Agent usage page
+
+`agent-usage/` is a small page that shows the remaining quota of Claude Code,
+Codex, ZCode, MiniMax and Antigravity, for checking from a phone over
+Tailscale. It runs as a systemd user service on Linux and a launchd agent on
+macOS:
+
+```sh
+~/.cider/agent-usage/install.sh
+```
+
+See [agent-usage/README.md](agent-usage/README.md) for settings, HTTPS for
+installing it as an app, and where each number comes from.
+
 ### Manage user-level agent skills
 
 The maintained user-level skills are stored in `.agents/skills` and are activated
