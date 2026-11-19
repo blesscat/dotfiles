@@ -1,6 +1,6 @@
 ---
 name: openspec-to-main-pr-with-follow-up
-description: Run the OpenSpec-to-main PR workflow, then follow reviews until the latest head has passed the Code and Security Reviews it needs.
+description: Run the OpenSpec-to-main PR workflow, then follow reviews until the latest head has passed the Code and Security Reviews it needs and a merge slot is granted.
 ---
 
 # OpenSpec to Main PR with Follow-up
@@ -16,7 +16,8 @@ For a request to create a PR without review follow-up, use
    until follow-up marks it ready.
 2. After PR creation succeeds, run `$pr-review-follow-up` for that exact PR and
    continue until its completion conditions pass for the latest pushed head,
-   including marking the PR ready and waiting for the required checks.
+   including the granted merge slot, marking the PR ready once, and waiting for
+   the required checks.
    A pending review, an older result for a review the latest head needs, or
    one clean round is not completion.
 3. The user's explicit request for this combined workflow authorizes the full

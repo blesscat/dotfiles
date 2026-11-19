@@ -1,11 +1,11 @@
 ---
 name: pr-review-follow-up
-description: Fix and follow a PR review loop until the Code and Security Reviews that the latest pushed head needs have passed, then mark a draft PR ready and wait for the required checks.
+description: Fix and follow a PR review loop until the Code and Security Reviews that the latest pushed head needs have passed, request a merge slot while the PR is still a draft, then mark it ready once and wait for the required checks.
 ---
 
 # PR Review Follow-up
 
-Use after the user authorizes fixing and following reviews. It works on draft PRs. Do not rely on automatic reviews: request each needed review by comment unless it is already queued, running, or complete on the current head. Review-only requests do not authorize edits, commits, pushes, or thread changes.
+Use after the user authorizes fixing and following reviews. It works on draft PRs: the PR stays draft until the merge-queue owner grants a slot, because every push to a ready PR starts a full CI run of about 30 minutes in this repository, so Ready is reserved for a final head. Do not rely on automatic reviews: request each needed review by comment unless it is already queued, running, or complete on the current head. Review-only requests do not authorize edits, commits, pushes, or thread changes.
 
 ## Reviews a head needs
 
@@ -94,23 +94,34 @@ review the head does not need.
 8. Treat a "Complete"/pass status in the review summary only as that review run
    finishing, not as overall completion. After each review completes, recheck
    the PR for unanswered comments and open threads, and reply to every one. The
-   flow is done only when every review the latest pushed head needs has
-   explicitly passed on it, a final sweep confirms no
-   unanswered comments or open threads remain,
-   and relevant checks pass, except required checks the repository defers until a
-   PR is ready; those are required only after step 9. A required check that fails goes
-   through the fix loop (steps 6-8), keeping a draft PR draft and converting a
-   ready PR with `gh pr ready --undo` before pushing. If a
-   required check cannot run or cannot be fixed, report it as a blocker.
-9. When that holds, run `gh pr ready <n>` if the PR is a draft, then wait for the
-   repository's required checks on the latest head (for example `CI result`). If
-   the repository's CI skips draft PRs, full CI runs only once the PR is ready;
-   otherwise drafts may still run CI. Do not request reviews again for the ready
-   transition.
-10. If required checks fail, run `gh pr ready --undo` before pushing fixes so a
-    draft-skipping CI does not rerun on every fix push. Fix, push, request the
-    reviews the new head needs (steps 5-8), then mark ready again. Never merge.
+   review loop is done only when every review the latest pushed head needs has
+   explicitly passed on it, a final sweep confirms no unanswered comments or
+   open threads remain, and the checks the repository's CI runs for the changed
+   areas pass locally, including the database tests and the Docker-related
+   checks when those areas changed. A locally failing check goes through the
+   fix loop (steps 6-8); one that cannot run or cannot be fixed is a blocker.
+9. With every gate except CI passed, request a merge slot from the merge-queue
+   owner (the coordinating hub, or the user when no queue exists) while the PR
+   is still a draft: report the head SHA, each review request's comment ID, and
+   the unresolved-thread count. Marking the PR ready before a slot is granted
+   is out of flow. Only a granted slot, whose answer names the main SHA to
+   take, leads to Ready: update the branch onto that SHA, run the review loop
+   the new head needs (steps 3-8), then run `gh pr ready <n>` once and wait for
+   the repository's required checks on that head (for example `CI result`).
+   Report the CI run ID to the queue owner, who merges. Never push to a ready
+   PR while its CI is running. A denied slot keeps the PR draft: fix the cited
+   gates (steps 3-8) and request one again. Only a conflict-free update onto
+   the named main SHA is covered by the grant; any other push after the slot
+   request (a late finding, a conflict-resolution commit, a post-update fix)
+   or a main that moved past the named SHA voids the slot: redo the affected
+   gates and request a fresh slot before Ready. After `gh pr ready`, do not
+   request reviews again for that transition.
+10. A ready PR's head must stay final. Before pushing again for any reason (a
+    late review finding, a failed check, a main update, a typo), run
+    `gh pr ready --undo` first, push every fix, run the review loop the new
+    head needs (steps 3-8), request a fresh merge slot (step 9), then mark it
+    ready once. Never merge.
 
 ## Handoff
 
-Report the PR link, final SHA, draft/ready state, commits, review outcomes (including any Security Review that was not required, with its evidence), CI result, and any remaining issues.
+Report the PR link, final SHA, draft/ready state, commits, review outcomes (including any Security Review that was not required, with its evidence), merge-slot request and grant, CI run ID and result, and any remaining issues.

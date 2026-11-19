@@ -202,7 +202,7 @@ Report the change, sync/archive status and location, local-only ignored artifact
 both reviewer verdicts and rounds used, validation results, branch, commit, and PR
 URL with its draft/ready state. A PR this skill created is a draft, to be marked
 ready only after the Code and Security Reviews its latest head needs have
-passed, as `$pr-review-follow-up` defines. All
+passed and a merge slot is granted, as `$pr-review-follow-up` defines. All
 publishable work from this task must be committed and pushed.
 If blocked, identify the last completed phase and the concrete prerequisite to
 resume; do not report a partial run as complete.
