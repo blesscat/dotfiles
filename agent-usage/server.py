@@ -6,13 +6,19 @@ Serves a phone-friendly page at / and the same data as JSON at /api/usage.
 Data sources:
   Claude       ~/.cache/agent-usage/claude/<session>.json
                written by ~/.claude/statusline.sh on every status line render
-  Codex        the last "rate_limits" event in ~/.codex/sessions/**/rollout-*.jsonl
+  Codex        `codex app-server` (account/rateLimits/read, the same read Codex's /usage does), every
+               5 minutes, including the usage limit resets; the last "rate_limits" event in
+               ~/.codex/sessions/**/rollout-*.jsonl when that is newer or the app server cannot be used
   ZCode        Z.ai quota API, polled with the key ZCode is signed in with (decrypted in memory by
-               zcode-usage.cjs via the system keyring), or ZAI_API_KEY from ~/.config/agent-usage/keys
+               zcode-usage.cjs via the system keyring), or ZAI_API_KEY from ~/.config/agent-usage/keys.
+               Also the unused Quota Reset Cards, read with ZCode's login
   MiniMax      MiniMax coding plan API, polled with mcode's signed-in OAuth token while it is still
                valid (never refreshed here), or MINIMAX_API_KEY from the same keys file
   Antigravity  ~/.cache/over9k/usage/antigravity.json
                written by ~/.config/herdr-usage/antigravity-capture.py
+
+POST /api/reset uses one Codex usage limit reset or one ZCode reset card, when the page asks
+(after the viewer confirms). It cannot be undone. See handle_reset for the request checks.
 
 Runs on Linux and macOS with Python 3.8 or newer and only the standard library.
 install.sh sets it up as a systemd user service (Linux) or a launchd agent (macOS).
@@ -24,6 +30,8 @@ Settings (environment, all optional; install.sh writes them into the service whe
   AGENT_USAGE_PORT  default 8790
   AGENT_USAGE_NODE  node for zcode-usage.cjs. Default: the newest nvm node, then Homebrew's,
                     then node on PATH (services start with a bare PATH, so nvm's is not on it).
+  AGENT_USAGE_CODEX codex for the app server. Default: codex on PATH, then ~/.local/bin/codex,
+                    then Homebrew's.
 """
 
 from datetime import datetime
@@ -33,13 +41,16 @@ import json
 import os
 from pathlib import Path
 import re
+import select
 import shutil
+import socket
 import subprocess
 import tempfile
 import threading
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 
 HOME = Path.home()
 CACHE_DIR = HOME / '.cache/agent-usage'
@@ -49,6 +60,8 @@ ANTIGRAVITY_FILE = HOME / '.cache/over9k/usage/antigravity.json'
 KEYS_FILE = HOME / '.config/agent-usage/keys'
 ZCODE_HELPER = Path(__file__).with_name('zcode-usage.cjs')
 NODE_FALLBACKS = [Path('/opt/homebrew/bin/node'), Path('/usr/local/bin/node')]
+CODEX_FALLBACKS = [HOME / '.local/bin/codex', Path('/opt/homebrew/bin/codex'), Path('/usr/local/bin/codex')]
+CODEX_TIMEOUT = 45           # seconds for one short-lived `codex app-server` run
 TAILSCALE_FALLBACKS = [Path('/Applications/Tailscale.app/Contents/MacOS/Tailscale'),   # macOS app
                        Path('/opt/homebrew/bin/tailscale'), Path('/usr/local/bin/tailscale'),
                        Path('/usr/bin/tailscale')]
@@ -191,7 +204,8 @@ def window_label(minutes):
     return f'{int(minutes)} 分鐘'
 
 
-def codex(now):
+def codex(now, live=None):
+    """Codex cards. live is Poller.codex_live(): limits read from `codex app-server`, used when newer."""
     files = []
     if CODEX_SESSIONS.is_dir():
         for path in CODEX_SESSIONS.rglob('rollout-*.jsonl'):
@@ -207,7 +221,15 @@ def codex(now):
         for limit_id, (at, limits) in codex_events(path, stat).items():
             if limit_id not in latest or at > latest[limit_id][0]:
                 latest[limit_id] = (at, limits)
+    if live and live.get('limits'):
+        for limit_id, limits in live['limits'].items():
+            if limit_id not in latest or live['at'] > latest[limit_id][0]:
+                latest[limit_id] = (live['at'], limits)
+    resets = codex_resets_view(live, now)
     if not latest:
+        if resets:
+            return [{'name': 'Codex', 'plan': None, 'at': None, 'windows': [], 'resets': resets,
+                     'note': '還沒有額度資料'}]
         return [{'name': 'Codex', 'plan': None, 'at': None, 'windows': [],
                  'note': '還沒有資料：在這台機器跑一次 Codex 就會出現'}]
     agents = []
@@ -226,7 +248,150 @@ def codex(now):
         windows.sort(key=lambda w: w['label'].endswith('天'))
         name = 'Codex' if limit_id == 'codex' else f'Codex（{limits.get("limit_name") or limit_id}）'
         agents.append({'name': name, 'plan': limits.get('plan_type'), 'at': at, 'windows': windows})
+    if resets:
+        agents[0]['resets'] = resets   # resets belong to the account; show them on the main card
     return agents
+
+
+def find_codex():
+    configured = os.environ.get('AGENT_USAGE_CODEX')
+    if configured:
+        return configured
+    found = shutil.which('codex')
+    if found:
+        return found
+    for candidate in CODEX_FALLBACKS:
+        if os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
+def codex_rpc(calls):
+    """Start a short-lived `codex app-server`, send the JSON-RPC calls [(method, params)] in order and
+    return their results. Codex handles its own login and token refresh. Raises ProviderError."""
+    codex_bin = find_codex()
+    if not codex_bin:
+        raise ProviderError('找不到 codex')
+    try:
+        proc = subprocess.Popen([codex_bin, 'app-server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.DEVNULL)
+    except OSError:
+        raise ProviderError('codex 開不起來') from None
+    deadline = time.monotonic() + CODEX_TIMEOUT
+    pending = b''
+
+    def send(message):
+        proc.stdin.write(json.dumps(message).encode() + b'\n')
+        proc.stdin.flush()
+
+    def receive(request_id):
+        # Read raw bytes so select() never waits on data already sitting in a Python buffer.
+        nonlocal pending
+        while True:
+            while b'\n' in pending:
+                line, pending = pending.split(b'\n', 1)
+                try:
+                    message = json.loads(line)
+                except ValueError:
+                    continue
+                # Requests and notifications from the server carry "method"; only replies matter here.
+                if isinstance(message, dict) and message.get('id') == request_id and 'method' not in message:
+                    return message
+            left = deadline - time.monotonic()
+            if left <= 0:
+                raise ProviderError('codex 沒有回應')
+            if not select.select([proc.stdout], [], [], left)[0]:
+                continue
+            chunk = os.read(proc.stdout.fileno(), 65536)
+            if not chunk:
+                raise ProviderError('codex 意外結束')
+            pending += chunk
+
+    try:
+        send({'jsonrpc': '2.0', 'id': 0, 'method': 'initialize',
+              'params': {'clientInfo': {'name': 'agent-usage', 'version': '1.0'}}})
+        receive(0)
+        send({'jsonrpc': '2.0', 'method': 'initialized'})
+        results = []
+        for request_id, (method, params) in enumerate(calls, 1):
+            send({'jsonrpc': '2.0', 'id': request_id, 'method': method, 'params': params})
+            reply = receive(request_id)
+            if 'error' in reply:
+                error = reply['error'] if isinstance(reply['error'], dict) else {}
+                raise ProviderError(str(error.get('message') or 'codex 回報錯誤')[:160])
+            results.append(reply.get('result'))
+        return results
+    except OSError:
+        raise ProviderError('codex 意外結束') from None
+    finally:
+        proc.kill()
+        proc.wait()
+        for stream in (proc.stdin, proc.stdout):
+            try:
+                stream.close()
+            except OSError:
+                pass
+
+
+def codex_live_limits(snapshot):
+    """An app-server RateLimitSnapshot in the shape of a rollout "rate_limits" event."""
+    limits = {'plan_type': snapshot.get('planType'), 'limit_name': snapshot.get('limitName')}
+    for slot in ('primary', 'secondary'):
+        value = snapshot.get(slot)
+        if isinstance(value, dict) and number(value.get('usedPercent')) is not None:
+            limits[slot] = {'used_percent': value['usedPercent'], 'window_minutes': value.get('windowDurationMins'),
+                            'resets_at': value.get('resetsAt')}
+    return limits
+
+
+def fetch_codex_live():
+    """Codex limits and usage limit resets, or None when codex is not installed here."""
+    if not find_codex():
+        return None
+    result = codex_rpc([('account/rateLimits/read', {})])[0]
+    if not isinstance(result, dict):
+        raise ProviderError('codex 的回應看不懂')
+    snapshots = result.get('rateLimitsByLimitId')
+    if not isinstance(snapshots, dict) or not snapshots:
+        single = result.get('rateLimits')
+        snapshots = {(single or {}).get('limitId') or 'codex': single} if isinstance(single, dict) else {}
+    limits = {limit_id: codex_live_limits(snapshot) for limit_id, snapshot in snapshots.items()
+              if isinstance(snapshot, dict)}
+    credits = result.get('rateLimitResetCredits')
+    resets = None
+    if isinstance(credits, dict) and number(credits.get('availableCount')) is not None:
+        expiries = [number(item.get('expiresAt')) for item in credits.get('credits') or []
+                    if isinstance(item, dict) and item.get('status') in (None, 'available')]
+        resets = {'count': int(credits['availableCount']), 'expires': sorted(e for e in expiries if e)}
+    return {'limits': limits, 'resets': resets}
+
+
+def codex_resets_view(live, now):
+    if not live:
+        return None
+    if live.get('error'):
+        return {'title': '重置', 'items': [], 'error': live['error']}
+    resets = live.get('resets')
+    if not resets:
+        return None
+    upcoming = [at for at in resets['expires'] if at > now]
+    return {'title': '重置', 'error': None, 'items': [
+        {'agent': 'codex', 'kind': 'FULL', 'label': '全部額度', 'count': resets['count'],
+         'expires_at': upcoming[0] if upcoming else None}]}
+
+
+CODEX_OUTCOMES = {
+    'reset': (True, '已重置，Codex 的額度補滿了'),
+    'alreadyRedeemed': (True, '這次重置已經完成了'),
+    'nothingToReset': (False, '目前沒有需要重置的額度，沒有用掉'),
+    'noCredit': (False, '沒有可用的重置了'),
+}
+
+
+def use_codex_reset(key):
+    result = codex_rpc([('account/rateLimitResetCredit/consume', {'idempotencyKey': key})])[0]
+    outcome = result.get('outcome') if isinstance(result, dict) else None
+    return CODEX_OUTCOMES.get(outcome, (False, f'codex 回應看不懂（{outcome}）'))
 
 
 # ---- Antigravity ------------------------------------------------------------
@@ -355,13 +520,13 @@ def find_node():
     return shutil.which('node')
 
 
-def zcode_helper():
-    """Run zcode-usage.cjs, which decrypts ZCode's own key in memory and returns only the quota response."""
+def zcode_helper(*args):
+    """Run zcode-usage.cjs, which decrypts ZCode's own secrets in memory and prints only the result."""
     node = find_node()
     if not node:
         raise ProviderError('找不到 node')
     try:
-        done = subprocess.run([str(node), str(ZCODE_HELPER)], capture_output=True, text=True, timeout=60)
+        done = subprocess.run([str(node), str(ZCODE_HELPER), *args], capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         raise ProviderError('查詢逾時') from None
     try:
@@ -370,7 +535,28 @@ def zcode_helper():
         raise ProviderError('查詢程式沒有回應') from None
     if not result.get('ok'):
         raise ProviderError(str(result.get('error') or '查詢失敗')[:120])
-    return result['payload']
+    return result
+
+
+RESET_CARD_KINDS = (('week', 'WEEK', '每週'), ('five_hour', 'FIVE_HOUR', '5 小時'))
+
+
+def zcode_reset_cards():
+    """Expiry times (epoch seconds) of the unused Quota Reset Cards, as {'week': [...], 'five_hour': [...]},
+    or None when ZCode is not signed in to a personal Z.ai plan."""
+    found = zcode_helper('resets').get('resets')
+    if not isinstance(found, dict):
+        return None
+    cards = {}
+    for kind, _type, _label in RESET_CARD_KINDS:
+        expiries = found.get(kind) if isinstance(found.get(kind), list) else []
+        cards[kind] = sorted(value / 1000 for value in map(number, expiries) if value)
+    return cards
+
+
+def use_zcode_reset(kind, key):
+    zcode_helper('use', kind, key)   # raises ProviderError with Z.ai's reason when it is refused
+    return True, '已重置，ZCode 的額度補滿了'
 
 
 def fetch_zai(keys):
@@ -383,7 +569,7 @@ def fetch_zai(keys):
         base = keys.get('ZAI_BASE_URL', 'https://api.z.ai').rstrip('/')
         payload = get_json(f'{base}/api/monitor/usage/quota/limit', {'Authorization': f'Bearer {key}'})
     else:
-        payload = zcode_helper()
+        payload = zcode_helper()['payload']
     if not isinstance(payload, dict):
         raise ProviderError('回應格式看不懂')
     if payload.get('success') is False or payload.get('code') not in (None, 0, 200):
@@ -405,7 +591,27 @@ def fetch_zai(keys):
         raise ProviderError('回應裡沒有額度資料')
     windows.sort(key=lambda w: w.pop('order'))
     level = data.get('level')
-    return {'plan': level.strip() if isinstance(level, str) and level.strip() else None, 'windows': windows}
+    try:
+        reset_cards, reset_cards_error = zcode_reset_cards(), None
+    except ProviderError as failure:
+        reset_cards, reset_cards_error = None, str(failure)
+    return {'plan': level.strip() if isinstance(level, str) and level.strip() else None, 'windows': windows,
+            'reset_cards': reset_cards, 'reset_cards_error': reset_cards_error}
+
+
+def reset_cards_view(ok, now):
+    """The reset card section of the ZCode card on the page, or None when there is nothing to show."""
+    if ok.get('reset_cards_error'):
+        return {'title': '重置卡', 'items': [], 'error': ok['reset_cards_error']}
+    cards = ok.get('reset_cards')
+    if not isinstance(cards, dict):
+        return None
+    items = []
+    for kind, reset_type, label in RESET_CARD_KINDS:
+        left = [at for at in cards.get(kind) or [] if at > now]
+        items.append({'agent': 'zcode', 'kind': reset_type, 'label': label, 'count': len(left),
+                      'expires_at': left[0] if left else None})
+    return {'title': '重置卡', 'items': items, 'error': None}
 
 
 MINIMAX_SKIP = re.compile(r'video|image|speech|music|hailuo|audio', re.I)
@@ -513,7 +719,13 @@ class Poller(threading.Thread):
     def __init__(self):
         super().__init__(daemon=True)
         self.lock = threading.Lock()
+        self.wake = threading.Event()
         self.state = {}
+        self.codex = {'ok': None, 'error': None}
+        try:
+            self.codex['ok'] = json.loads((CACHE_DIR / 'codex-live.json').read_text())
+        except (OSError, ValueError):
+            pass
         for slug, *_ in PROVIDERS:
             try:
                 saved = json.loads((CACHE_DIR / f'{slug}.json').read_text())
@@ -529,7 +741,13 @@ class Poller(threading.Thread):
                 last_signature = signature
                 self.poll()
                 next_poll = time.time() + POLL_SECONDS
-            time.sleep(KEYS_CHECK_SECONDS)
+            if self.wake.wait(KEYS_CHECK_SECONDS):
+                self.wake.clear()
+                next_poll = 0.0
+
+    def poll_soon(self):
+        """Ask everything again now, for example right after a reset."""
+        self.wake.set()
 
     def poll(self):
         keys = read_keys()
@@ -548,6 +766,32 @@ class Poller(threading.Thread):
                 if result is not None:
                     entry['ok'] = {'at': time.time(), **result}
                     save_cache(slug, entry['ok'])
+        self.poll_codex()
+
+    def poll_codex(self):
+        try:
+            result, error = fetch_codex_live(), None
+        except ProviderError as failure:
+            result, error = None, str(failure)
+        except Exception as failure:
+            result, error = None, f'讀取失敗（{type(failure).__name__}）'
+        with self.lock:
+            self.codex['error'] = error
+            if result is not None:
+                self.codex['ok'] = {'at': time.time(), **result}
+                save_cache('codex-live', self.codex['ok'])
+            elif error is None:
+                self.codex['ok'] = None   # codex is not installed here
+
+    def codex_live(self, now):
+        with self.lock:
+            ok, error = self.codex['ok'], self.codex['error']
+        if error:
+            fresh = ok and now - ok.get('at', 0) <= MAX_AGE
+            return {'error': error, **({'at': ok['at'], 'limits': ok['limits']} if fresh else {})}
+        if ok and now - ok.get('at', 0) <= MAX_AGE:
+            return ok
+        return None
 
     def agents(self, now):
         out = []
@@ -560,6 +804,9 @@ class Poller(threading.Thread):
                     agent['plan'], agent['at'] = ok.get('plan'), ok.get('at')
                     agent['windows'] = [window(w['label'], w['remaining'], w.get('resets_at'), now,
                                                w.get('unlimited', False)) for w in ok.get('windows', [])]
+                    resets = reset_cards_view(ok, now)
+                    if resets:
+                        agent['resets'] = resets
                 if not entry['has_key']:
                     agent['note'] = hint
                 elif entry['error']:
@@ -585,7 +832,8 @@ POLLER = Poller()
 
 def usage():
     now = time.time()
-    return {'now': now, 'agents': [claude(now), *codex(now), *POLLER.agents(now), antigravity(now)]}
+    return {'now': now, 'agents': [claude(now), *codex(now, POLLER.codex_live(now)), *POLLER.agents(now),
+                                   antigravity(now)]}
 
 
 # ---- HTTP -------------------------------------------------------------------
@@ -608,6 +856,39 @@ STATIC = {
 }
 
 
+RESET_LOCK = threading.Lock()
+RESET_KEY_RE = re.compile(r'^[A-Za-z0-9-]{8,64}$')
+RESET_BODY_LIMIT = 4096
+# (agent, kind) the page may ask for -> function(key) returning (ok, message)
+RESET_ACTIONS = {
+    ('codex', 'FULL'): use_codex_reset,
+    ('zcode', 'WEEK'): lambda key: use_zcode_reset('WEEK', key),
+    ('zcode', 'FIVE_HOUR'): lambda key: use_zcode_reset('FIVE_HOUR', key),
+}
+
+
+def split_host(value):
+    """'name:port' or '[v6]:port' -> lower-case name without the port."""
+    value = (value or '').strip().lower()
+    if value.startswith('['):
+        return value[1:value.find(']')] if ']' in value else ''
+    return value.rsplit(':', 1)[0] if value.count(':') == 1 else value
+
+
+def trusted_host(name):
+    """Names this page is really reached by. An IP address or a Tailscale name cannot be pointed at
+    this machine by someone else's DNS, which is what a DNS rebinding attack needs."""
+    if not name:
+        return False
+    try:
+        ipaddress.ip_address(name)
+        return True
+    except ValueError:
+        pass
+    machine = socket.gethostname().lower()
+    return name in ('localhost', machine, machine.split('.')[0]) or name.endswith('.ts.net')
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = 'agent-usage'
 
@@ -626,6 +907,65 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(200, content_type, body, cache='no-cache')
         else:
             self.reply(404, 'text/plain; charset=utf-8', b'not found\n')
+
+    def do_POST(self):
+        if self.path.split('?', 1)[0] != '/api/reset':
+            self.reply(404, 'text/plain; charset=utf-8', b'not found\n')
+            return
+        status, message = self.handle_reset()
+        self.reply(status, 'application/json; charset=utf-8',
+                   json.dumps({'ok': status == 200, 'message': message}, ensure_ascii=False).encode())
+
+    def handle_reset(self):
+        """Use one reset, after checks that keep other web pages from doing it:
+        - Host must be an address or name this machine is really reached by (no DNS rebinding).
+        - Origin must be present and one of those too, and Sec-Fetch-Site, when sent, same-origin.
+        - The body must be JSON, so a cross-site page needs a CORS preflight, which this server never
+          answers; a plain HTML form cannot send it.
+        One reset at a time; the page's idempotency key makes a retried request use nothing more."""
+        origin = self.headers.get('Origin')
+        if not trusted_host(split_host(self.headers.get('Host'))):
+            return 403, '不接受這個 Host'
+        if not origin or not trusted_host(split_host(urlsplit(origin).netloc)):
+            return 403, '不接受這個來源'
+        if self.headers.get('Sec-Fetch-Site') not in (None, 'same-origin'):
+            return 403, '不接受跨站請求'
+        if not (self.headers.get('Content-Type') or '').lower().startswith('application/json'):
+            return 415, '要用 JSON'
+        try:
+            length = int(self.headers.get('Content-Length') or 0)
+        except ValueError:
+            length = -1
+        if not 0 < length <= RESET_BODY_LIMIT:
+            return 400, '請求大小不對'
+        try:
+            body = json.loads(self.rfile.read(length))
+        except ValueError:
+            return 400, '請求不是 JSON'
+        if not isinstance(body, dict):
+            return 400, '請求格式不對'
+        action = RESET_ACTIONS.get((body.get('agent'), body.get('kind')))
+        key = body.get('key')
+        if action is None:
+            return 400, '不認得這個重置'
+        if not isinstance(key, str) or not RESET_KEY_RE.match(key):
+            return 400, 'idempotency key 格式不對'
+        if not RESET_LOCK.acquire(blocking=False):
+            return 409, '另一個重置正在進行，稍等一下'
+        try:
+            label = f'{body["agent"]} {body["kind"]}'
+            print(f'agent-usage: reset {label} requested from {self.client_address[0]}', flush=True)
+            try:
+                ok, message = action(key)
+            except ProviderError as failure:
+                ok, message = False, str(failure)
+            except Exception as failure:   # answer the page whatever happens
+                ok, message = False, f'重置失敗（{type(failure).__name__}）'
+            print(f'agent-usage: reset {label}: {"done" if ok else "not used"} ({message})', flush=True)
+        finally:
+            RESET_LOCK.release()
+        POLLER.poll_soon()
+        return (200 if ok else 422), message
 
     def reply(self, status, content_type, body, cache='no-store'):
         self.send_response(status)

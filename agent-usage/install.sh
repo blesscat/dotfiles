@@ -7,7 +7,7 @@
 #   ./install.sh uninstall   stop and remove the service; keeps ~/.config/agent-usage and the caches
 #
 # Optional settings, written into the service when set while running this script:
-#   AGENT_USAGE_HOST, AGENT_USAGE_PORT, AGENT_USAGE_NODE   (see server.py)
+#   AGENT_USAGE_HOST, AGENT_USAGE_PORT, AGENT_USAGE_NODE, AGENT_USAGE_CODEX   (see server.py)
 #   AGENT_USAGE_PYTHON                                      python to run the server with
 # Example: AGENT_USAGE_PORT=8791 ./install.sh
 set -euo pipefail
@@ -21,7 +21,7 @@ readonly unit_file="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/$unit_name"
 readonly label=local.cider.agent-usage
 readonly plist="$HOME/Library/LaunchAgents/$label.plist"
 readonly log_file="$HOME/Library/Logs/agent-usage.log"
-readonly setting_names="AGENT_USAGE_HOST AGENT_USAGE_PORT AGENT_USAGE_NODE"
+readonly setting_names="AGENT_USAGE_HOST AGENT_USAGE_PORT AGENT_USAGE_NODE AGENT_USAGE_CODEX"
 # Paths and settings are written into the unit / plist as they are, so keep them to plain characters.
 readonly safe_value='^[A-Za-z0-9._/@+:-]+$'
 readonly safe_path='^[A-Za-z0-9._/@+ -]+$'
