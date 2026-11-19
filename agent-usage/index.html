@@ -51,6 +51,22 @@
   .bar { height: 8px; border-radius: 99px; background: var(--track); overflow: hidden; margin: 6px 0 5px; }
   .fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
   .reset { color: var(--dim); font-size: 12.5px; }
+  .cards { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 10px; font-size: 13.5px; }
+  .cards-title { font-weight: 600; margin-bottom: 4px; }
+  .cards-error, .cards-expiry { color: var(--dim); font-size: 12.5px; }
+  .cards-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 34px; }
+  .cards-info { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .cards-item .label { min-width: 4.4em; }
+  .cards-count { font-weight: 650; font-variant-numeric: tabular-nums; }
+  .cards-count.none { color: var(--dim); font-weight: 400; }
+  .cards-use {
+    font: inherit; font-size: 13px; font-weight: 600; color: var(--text); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 8px; padding: 5px 14px; cursor: pointer; flex-shrink: 0;
+  }
+  .cards-use:active { transform: translateY(1px); }
+  .cards-use:disabled { color: var(--dim); cursor: default; }
+  .cards-result { font-size: 12.5px; margin: 2px 0 4px; }
+  .cards-result.ok { color: var(--green); } .cards-result.fail { color: var(--red); }
   .green { color: var(--green); } .yellow { color: var(--yellow); } .red { color: var(--red); }
   .bg-green { background: var(--green); } .bg-yellow { background: var(--yellow); } .bg-red { background: var(--red); }
   footer { color: var(--dim); font-size: 12px; text-align: center; margin-top: 18px; }
@@ -63,7 +79,7 @@
     <div id="status">載入中…</div>
   </header>
   <div id="agents"></div>
-  <footer>每 30 秒自動更新 · Claude / Codex / Antigravity 來自這台機器上最近一次使用時的紀錄，ZCode / MiniMax 每 5 分鐘向官方 API 查一次</footer>
+  <footer>每 30 秒自動更新 · Claude / Antigravity 來自這台機器上最近一次使用時的紀錄，Codex / ZCode / MiniMax 每 5 分鐘向官方查一次 · 按「使用」會先確認，用掉的重置不能撤銷</footer>
 </main>
 <script>
 const REFRESH_MS = 30000;
@@ -99,6 +115,88 @@ function resetText(win, now) {
     ? { hour: '2-digit', minute: '2-digit', hour12: false }
     : { weekday: 'short', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
   return `重置：${when.toLocaleString('zh-TW', fmt)}（還有 ${duration(win.resets_at - now)}）`;
+}
+
+// Reset buttons. State lives outside the cards because the list is redrawn every 30 seconds.
+const resetState = {};   // 'agent:kind' -> { busy, message, ok, key }
+
+const RESET_CONFIRM = {
+  'codex:FULL': '要用掉 1 次 Codex 重置嗎？\nCodex 目前的額度會補滿。用掉後不能撤銷。',
+  'zcode:WEEK': '要用掉 1 張 ZCode 每週重置卡嗎？\n每週和 5 小時的額度都會補滿，下次重置時間從現在重新算。用掉後不能撤銷。',
+  'zcode:FIVE_HOUR': '要用掉 1 張 ZCode 5 小時重置卡嗎？\n5 小時的額度會補滿，下次重置時間從現在重新算。用掉後不能撤銷。',
+};
+
+// ZCode calls them reset cards (張); Codex counts resets (次).
+const unit = item => item.agent === 'zcode' ? '張' : '次';
+
+function newKey() {
+  // crypto.randomUUID needs HTTPS; getRandomValues also works over plain http.
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return 'page-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function useReset(item) {
+  const id = `${item.agent}:${item.kind}`;
+  const state = resetState[id] || (resetState[id] = {});
+  if (state.busy) return;
+  const expiry = item.expires_at ? `\n目前有 ${item.count} ${unit(item)}，最早 ${new Date(item.expires_at * 1000).toLocaleDateString('zh-TW')} 到期。` : '';
+  if (!confirm((RESET_CONFIRM[id] || '要用掉 1 次重置嗎？') + expiry)) return;
+  // Keep the key until the server answers, so a retry after a dropped connection uses nothing more.
+  state.key = state.key || newKey();
+  state.busy = true;
+  state.message = '重置中…';
+  state.ok = null;
+  refreshView();
+  try {
+    const response = await fetch('/api/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent: item.agent, kind: item.kind, key: state.key }),
+    });
+    const answer = await response.json().catch(() => ({ ok: false, message: `HTTP ${response.status}` }));
+    state.ok = !!answer.ok;
+    state.message = answer.message || (answer.ok ? '已重置' : '沒有重置');
+    state.key = null;
+  } catch (error) {
+    state.ok = false;
+    state.message = '連不上，沒有收到結果；再按一次會沿用同一個請求，不會多用';
+  }
+  state.busy = false;
+  refreshView();
+  // The server asks every provider again right after a reset; pick up the new numbers.
+  setTimeout(refresh, 5000);
+  setTimeout(refresh, 15000);
+}
+
+function renderResets(resets, now) {
+  const box = el('div', 'cards');
+  box.append(el('div', 'cards-title', resets.title || '重置'));
+  if (resets.error) {
+    box.append(el('div', 'cards-error', `讀取失敗：${resets.error}`));
+    return box;
+  }
+  for (const item of resets.items) {
+    const id = `${item.agent}:${item.kind}`;
+    const state = resetState[id] || {};
+    const row = el('div', 'cards-item');
+    const info = el('div', 'cards-info');
+    info.append(el('span', 'label', item.label), el('span', item.count ? 'cards-count' : 'cards-count none', `${item.count} ${unit(item)}`));
+    if (item.expires_at) {
+      const when = new Date(item.expires_at * 1000).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
+      info.append(el('span', 'cards-expiry', `${item.count > 1 ? '最早 ' : ''}${when} 到期`));
+    }
+    row.append(info);
+    if (item.count > 0 || state.busy) {
+      const button = el('button', 'cards-use', state.busy ? '重置中…' : '使用');
+      button.type = 'button';
+      button.disabled = !!state.busy;
+      button.addEventListener('click', () => useReset(item));
+      row.append(button);
+    }
+    box.append(row);
+    if (state.message && !state.busy) box.append(el('div', state.ok ? 'cards-result ok' : 'cards-result fail', state.message));
+  }
+  return box;
 }
 
 function el(tag, className, text) {
@@ -140,7 +238,16 @@ function renderAgent(agent, now) {
     row.append(top, bar, el('div', 'reset', resetText(win, now)));
     card.append(row);
   }
+  if (agent.resets) card.append(renderResets(agent.resets, now));
   return card;
+}
+
+let lastData = null;
+
+function refreshView() {
+  if (!lastData) return;
+  const list = document.getElementById('agents');
+  list.replaceChildren(...lastData.agents.map(agent => renderAgent(agent, lastData.now)));
 }
 
 async function refresh() {
@@ -149,8 +256,8 @@ async function refresh() {
     const response = await fetch('/api/usage', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    const list = document.getElementById('agents');
-    list.replaceChildren(...data.agents.map(agent => renderAgent(agent, data.now)));
+    lastData = data;
+    refreshView();
     status.className = '';
     status.textContent = new Date(data.now * 1000).toLocaleTimeString('zh-TW', { hour12: false });
   } catch (error) {
