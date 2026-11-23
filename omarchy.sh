@@ -24,11 +24,14 @@ readonly -a packages=(
   fcitx5-rime
   rime-bopomofo
   rime-terra-pinyin
+  herdr-app
 )
 
 # AUR packages.
 readonly -a aur_packages=(
   rime-ice-git
+  blesh-git
+  zen-browser-bin
 )
 
 # "<path under symlinks/>|<destination>"
@@ -36,11 +39,16 @@ readonly -a links=(
   "git/.gitconfig|$HOME/.gitconfig"
   ".config/git/ignore|$HOME/.config/git/ignore"
   "editorconfig/.editorconfig|$HOME/.editorconfig"
+  "blesh/.blerc|$HOME/.blerc"
   ".claude/statusline.sh|$HOME/.claude/statusline.sh"
   "claude/commands|$HOME/.claude/commands"
   ".config/helix/config.toml|$HOME/.config/helix/config.toml"
   ".config/helix/languages.toml|$HOME/.config/helix/languages.toml"
   ".config/lazygit/config.yml|$HOME/.config/lazygit/config.yml"
+  ".config/herdr-app/mods/usage-limits|$HOME/.config/herdr-app/mods/usage-limits"
+  ".config/herdr-app/my-icons|$HOME/.config/herdr-app/my-icons"
+  ".config/herdr-app/programs.json|$HOME/.config/herdr-app/programs.json"
+  ".config/herdr-app/layouts/main-usage-limits.json|$HOME/.config/herdr-app/layouts/main-usage-limits.json"
 )
 
 # Links to things outside the repo: "<absolute source>|<destination>"
@@ -141,6 +149,52 @@ configure_claude_statusline() {
   printf '  updated %s\n' "$settings"
 }
 
+configure_bash() {
+  local bashrc="$HOME/.bashrc"
+  local blesh=/usr/share/blesh/ble.sh
+
+  log 'Enabling ble.sh in ~/.bashrc'
+  if [[ ! -r "$blesh" ]]; then
+    warn "ble.sh not installed ($blesh); skipped"
+    return
+  fi
+  if [[ ! -f "$bashrc" ]]; then
+    warn "$bashrc not found; skipped"
+    return
+  fi
+  if grep -q '# >>> cider ble.sh >>>' "$bashrc"; then
+    printf '  ok      %s\n' "$bashrc"
+    return
+  fi
+
+  cp "$bashrc" "$bashrc.pre-cider.$stamp"
+  # ble.sh must be sourced early with --noattach (after Omarchy's
+  # non-interactive early return) and attached at the very end.
+  awk -v blesh="$blesh" '
+    { print }
+    !done && /^\[\[ \$- != \*i\* \]\] && return/ {
+      print ""
+      print "# >>> cider ble.sh >>>"
+      print "[[ -r " blesh " ]] && source " blesh " --noattach"
+      print "# <<< cider ble.sh <<<"
+      done = 1
+    }
+    END {
+      if (!done) exit 1
+      print ""
+      print "# >>> cider ble-attach >>>"
+      print "[[ ! ${BLE_VERSION-} ]] || ble-attach"
+      print "# <<< cider ble-attach <<<"
+    }
+  ' "$bashrc" > "$bashrc.cider-tmp" || {
+    rm -f "$bashrc.cider-tmp"
+    warn "could not find the interactive-shell guard in $bashrc; skipped"
+    return
+  }
+  mv "$bashrc.cider-tmp" "$bashrc"
+  printf '  updated %s\n' "$bashrc"
+}
+
 restart_fcitx5() {
   if systemctl --user cat omarchy-fcitx5.service >/dev/null 2>&1; then
     systemctl --user start omarchy-fcitx5.service
@@ -223,6 +277,7 @@ setup_rime() {
 install_packages
 link_dotfiles
 configure_claude_statusline
+configure_bash
 setup_rime
 
 log 'Done.'

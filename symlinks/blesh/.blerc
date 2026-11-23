@@ -1,0 +1,21 @@
+# ble.sh settings (linked to ~/.blerc by omarchy.sh).
+# Gives Bash fish-like editing: gray autosuggestions from history, syntax
+# highlighting, and a navigable completion menu. Most of these are ble.sh
+# defaults; they are spelled out here so the intent is visible.
+
+# Gray autosuggestion while typing. Right arrow or Ctrl+F accepts all of it,
+# Alt+F or Ctrl+Right accepts one word.
+bleopt complete_auto_complete=1
+bleopt complete_auto_history=1
+bleopt complete_auto_delay=50
+
+# Color the command line as you type; unknown commands turn red.
+bleopt highlight_syntax=1
+bleopt highlight_filename=1
+
+# Don't print "[ble: exit N]" after failing commands (fish doesn't either).
+bleopt exec_errexit_mark=
+
+# Omarchy sources fzf's key bindings (Ctrl+R, Ctrl+T, Alt+C). Load ble.sh's
+# integration so they keep working under ble.sh.
+ble-import -d integration/fzf-key-bindings

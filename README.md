@@ -236,15 +236,19 @@ link lists are arrays at the top of the script. It runs these steps, and is
 safe to rerun:
 
 1. Installs the listed packages with `omarchy pkg add` and the AUR packages
-   (`rime-ice-git`) with `omarchy pkg aur add`. This prompts for the sudo
-   password. Pass `--skip-packages` to skip this step.
+   (`rime-ice-git`, `blesh-git`, `zen-browser-bin`) with `omarchy pkg aur add`.
+   This prompts for the sudo password. Pass `--skip-packages` to skip this
+   step.
 2. Links the Linux-safe dotfiles: Git config and global ignore,
-   `.editorconfig`, the Claude Code status line script and commands, Helix
-   `config.toml` and `languages.toml`, and lazygit. It also links
-   `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
+   `.editorconfig`, ble.sh's `.blerc`, the Claude Code status line script and
+   commands, Helix `config.toml` and `languages.toml`, lazygit, and the tracked
+   Herdr customizations (see below). It also links `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
    and links `~/.config/helix/themes/mytheme.toml` to the active Omarchy theme
    so the shared Helix config follows Omarchy theme switches.
-3. Sets `statusLine` in `~/.claude/settings.json`.
+3. Sets `statusLine` in `~/.claude/settings.json`, and adds two marked
+   blocks to Omarchy's `~/.bashrc` that load ble.sh (fish-like
+   autosuggestions, syntax highlighting, and completion menu). The rest of
+   Omarchy's `.bashrc` is left alone.
 4. Runs `scripts/rime_setup.sh`, then makes Fcitx5 use `keyboard-us` + Rime.
    Left Shift is removed from Fcitx5's switch keys so Rime receives it, and
    the candidate list is vertical.
@@ -260,6 +264,13 @@ Input method use on Omarchy:
 - Inside Rime, Left Shift toggles Chinese and English. Bopomofo starts in
   English, the same as on macOS.
 - `` Ctrl+` `` or `F4` switches between Bopomofo and Rime Ice Pinyin.
+
+In a UTM VM on Apple silicon, `herdr-app` aborts inside the Venus Vulkan
+driver (`vulkan-virtio`). Install `vulkan-swrast` and start it on the CPU
+driver instead, for example with a `~/.local/share/applications/herdr-app.desktop`
+override whose `Exec` is
+`env VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json herdr-app`. This is
+machine-specific, so `omarchy.sh` does not do it.
 
 Shell startup files, terminal configs, and Neovim are not linked, because
 Omarchy manages its own `.bashrc`, themed terminal configs, and LazyVim setup.
