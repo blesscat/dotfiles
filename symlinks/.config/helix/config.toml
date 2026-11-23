@@ -16,10 +16,10 @@ H = ":buffer-previous"
 "$" = "goto_line_end"
 0 = "goto_line_start"
 G = "goto_file_end"
-C-y = ":sh echo %sh{realpath %{buffer_name}} | pbcopy"
+C-y = ":sh echo %sh{realpath %{buffer_name}} | if command -v pbcopy >/dev/null; then pbcopy; else wl-copy; fi"
 
 [keys.normal.space]
-o = ":sh open ."
+o = ":sh if command -v xdg-open >/dev/null; then xdg-open . >/dev/null 2>&1 & else open .; fi"
 t = [
   ':sh rm -f /tmp/helix-yazi-selected',
   ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/helix-yazi-selected',

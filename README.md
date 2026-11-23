@@ -221,6 +221,49 @@ symlink mappings from `bootstrap.json`. It is intentionally not invoked by
 `macos.sh`, and the notification-specific links are managed by the notification
 installer instead.
 
+### New Omarchy setup flow
+
+On an [Omarchy](https://omarchy.org/) machine (Arch Linux + Hyprland), clone the
+repository and run:
+
+```sh
+cd ~/.cider
+./omarchy.sh
+```
+
+`omarchy.sh` does not use `bootstrap.json` or `symlinks.sh`; its package and
+link lists are arrays at the top of the script. It runs these steps, and is
+safe to rerun:
+
+1. Installs the listed packages with `omarchy pkg add` and the AUR packages
+   (`rime-ice-git`) with `omarchy pkg aur add`. This prompts for the sudo
+   password. Pass `--skip-packages` to skip this step.
+2. Links the Linux-safe dotfiles: Git config and global ignore,
+   `.editorconfig`, the Claude Code status line script and commands, Helix
+   `config.toml` and `languages.toml`, and lazygit. It also links
+   `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
+   and links `~/.config/helix/themes/mytheme.toml` to the active Omarchy theme
+   so the shared Helix config follows Omarchy theme switches.
+3. Sets `statusLine` in `~/.claude/settings.json`.
+4. Runs `scripts/rime_setup.sh`, then makes Fcitx5 use `keyboard-us` + Rime.
+   Left Shift is removed from Fcitx5's switch keys so Rime receives it, and
+   the candidate list is vertical.
+
+An existing file at a link destination is moved to
+`<name>.pre-cider.<timestamp>` first. Links that already point at the
+repository are left alone.
+
+Input method use on Omarchy:
+
+- `Super+I` switches between the English keyboard and Rime. After a reboot,
+  Fcitx5 starts on the English keyboard, so press it once.
+- Inside Rime, Left Shift toggles Chinese and English. Bopomofo starts in
+  English, the same as on macOS.
+- `` Ctrl+` `` or `F4` switches between Bopomofo and Rime Ice Pinyin.
+
+Shell startup files, terminal configs, and Neovim are not linked, because
+Omarchy manages its own `.bashrc`, themed terminal configs, and LazyVim setup.
+
 ### Terminal background shortcuts
 
 After the zsh configuration (`symlinks/zsh/.zshrc`) is linked, these commands change the background of

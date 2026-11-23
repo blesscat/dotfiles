@@ -23,7 +23,6 @@
     ".config/gh/config.yml": "~/.config/gh",
     ".config/git/ignore": "~/.config/git",
     ".config/glow/glow.yml": "~/.config/glow",
-    ".config/htop/htoprc": "~/.config/htop",
     ".config/herdr-app/mods/usage-limits/": "~/.config/herdr-app/mods",
     ".config/herdr-app/my-icons/": "~/.config/herdr-app",
     ".config/herdr-app/programs.json": "~/.config/herdr-app",
