@@ -1,4 +1,4 @@
-// Read ZCode's cached Coding Plan key through its existing OS credential store.
+// Read ZCode's cached Coding Plan key using its current or legacy storage format.
 // No login, key creation, refresh, migration or credential writes.
 const crypto = require('node:crypto')
 const fs = require('node:fs/promises')
@@ -7,6 +7,25 @@ const os = require('node:os')
 const path = require('node:path')
 
 const digest = (value) => crypto.createHash('sha256').update(value).digest()
+
+function openCredential(ivText, tagText, dataText, key) {
+  const iv = Buffer.from(ivText, 'base64url')
+  const tag = Buffer.from(tagText, 'base64url')
+  if (iv.length !== 12 || tag.length !== 16) throw new Error('invalid_credential')
+  const cipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
+  cipher.setAuthTag(tag)
+  return Buffer.concat([cipher.update(Buffer.from(dataText, 'base64url')), cipher.final()])
+    .toString('utf8')
+    .trim()
+}
+
+function decryptLegacyCodingPlanKey(value, root) {
+  const match = /^enc:v1:([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(value)
+  if (!match) throw new Error('invalid_credential')
+  // Match ZCode's built-in legacy fallback for this user's existing cache.
+  const key = digest(`zcode-credential-fallback:${os.platform()}:${root}:${os.userInfo().username}`)
+  return openCredential(match[1], match[2], match[3], key)
+}
 
 async function nativeKeyStore(root, credentialPath) {
   const nativeRequire = createRequire(path.join(root, '.zcode/runtime/current/agent/zcode.cjs'))
@@ -32,14 +51,7 @@ async function decryptCredential(value, root, credentialPath, keyStoreFactory = 
   if (key.length !== 32 || digest(key).toString('hex').slice(0, 24) !== match[1]) {
     throw new Error('credential_unavailable')
   }
-  const iv = Buffer.from(match[2], 'base64url')
-  const tag = Buffer.from(match[3], 'base64url')
-  if (iv.length !== 12 || tag.length !== 16) throw new Error('invalid_credential')
-  const cipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
-  cipher.setAuthTag(tag)
-  return Buffer.concat([cipher.update(Buffer.from(match[4], 'base64url')), cipher.final()])
-    .toString('utf8')
-    .trim()
+  return openCredential(match[2], match[3], match[4], key)
 }
 
 function sanitizeQuota(data) {
@@ -77,7 +89,12 @@ async function getUsage(root = os.homedir(), options = {}) {
     )
     if (!keys.length) return { state: 'quota_credential_unavailable' }
     if (keys.length !== 1) return { state: 'ambiguous_account' }
-    token = await decryptCredential(keys[0][1], root, credentialPath, options.keyStoreFactory)
+    const storedKey = keys[0][1]
+    if (storedKey.startsWith('enc:v1:')) {
+      token = decryptLegacyCodingPlanKey(storedKey, root)
+    } else {
+      token = await decryptCredential(storedKey, root, credentialPath, options.keyStoreFactory)
+    }
     if (!token || token.startsWith('enc:')) return { state: 'quota_credential_unavailable' }
   } catch {
     return { state: 'quota_credential_unavailable' }
