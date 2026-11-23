@@ -10,7 +10,6 @@ readonly bootstrap="$repo_dir/macos.sh"
 readonly setup_fixture="$test_dir/fixtures/bootstrap-setup.sh"
 readonly brew_fixture="$test_dir/fixtures/bootstrap-brew.zsh"
 readonly installer_fixture="$test_dir/fixtures/bootstrap-installer.zsh"
-readonly yazelix_fixture="$test_dir/fixtures/bootstrap-yazelix.zsh"
 readonly tmp_dir="$(/usr/bin/mktemp -d)"
 trap '/bin/rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
@@ -55,12 +54,9 @@ run_bootstrap() {
       HOME="$case_dir/home" \
       PATH="$path_value" \
       CODEX_TEST_BOOTSTRAP_CAPTURE="$case_dir/steps" \
-      CIDER_NIX_SETUP_SCRIPT="$case_dir/forbidden-nix-override" \
-      CIDER_NIX_SYSTEM_ROOT="$case_dir/forbidden-system-root" \
       CIDER_BREW_SETUP_SCRIPT="$setup_fixture" \
       CIDER_BREW_CANDIDATES="$candidates" \
       CIDER_CODEX_NOTIFY_INSTALLER="$installer_fixture" \
-      CIDER_YAZELIX_INSTALLER="$yazelix_fixture" \
       CIDER_SYMLINK_RUNNER="$case_dir/forbidden-symlinks" \
       "$@" \
         /bin/bash "$bootstrap" \
@@ -76,7 +72,6 @@ prepare_case() {
   case_candidate_dir="$case_dir/candidate"
   case_candidate_brew="$case_candidate_dir/brew"
   /bin/mkdir -p "$case_bin" "$case_candidate_dir" "$case_dir/home"
-  /bin/ln -s "$test_dir/fixtures/bootstrap-nix.sh" "$case_bin/nix"
 }
 
 # A brew already on PATH runs setup, the exact Brewfile bundle command, then
@@ -85,20 +80,14 @@ prepare_case() {
 prepare_case path_brew
 /bin/ln -s "$brew_fixture" "$case_bin/brew"
 run_bootstrap "$case_dir" "$case_bin:/usr/bin:/bin" \
-  "$case_dir/missing-apple:$case_dir/missing-intel" \
-  CODEX_TEST_NIX_EXPORT=1
+  "$case_dir/missing-apple:$case_dir/missing-intel"
 path_status=$?
 assert_equal 0 "$path_status" 'bootstrap with brew on PATH succeeds'
 path_stdout="$(/bin/cat "$case_dir/stdout")"
 assert_contains "$path_stdout" \
   'macos bootstrap: running notification installer:' \
   'bootstrap labels notification setup before its output'
-assert_contains "$path_stdout" \
-  'macos bootstrap: running Yazelix installer:' \
-  'bootstrap labels Yazelix setup before its output'
 expected_path_steps="$(/usr/bin/printf '%s\n' \
-  'STEP=nix' \
-  'END' \
   'STEP=setup' \
   'END' \
   'STEP=brew' \
@@ -108,15 +97,12 @@ expected_path_steps="$(/usr/bin/printf '%s\n' \
   'ARG=--no-upgrade' \
   'END' \
   'STEP=installer' \
-  'END' \
-  'STEP=yazelix' \
   'END')"
 assert_equal "$expected_path_steps" "$(/bin/cat "$case_dir/steps")" \
   'bootstrap records setup, bundle, and installer in order'
 
 run_bootstrap "$case_dir" "$case_bin:/usr/bin:/bin" \
-  "$case_dir/missing-apple:$case_dir/missing-intel" \
-  CODEX_TEST_NIX_EXPORT=1
+  "$case_dir/missing-apple:$case_dir/missing-intel"
 path_second_status=$?
 assert_equal 0 "$path_second_status" 'second bootstrap fixture run succeeds'
 assert_equal 2 \
@@ -137,8 +123,6 @@ discovered_status=$?
 assert_equal 0 "$discovered_status" \
   'bootstrap discovers brew after setup'
 expected_discovered_steps="$(/usr/bin/printf '%s\n' \
-  'STEP=nix' \
-  'END' \
   'STEP=setup' \
   'END' \
   'STEP=brew' \
@@ -151,24 +135,9 @@ expected_discovered_steps="$(/usr/bin/printf '%s\n' \
   'ARG=--no-upgrade' \
   'END' \
   'STEP=installer' \
-  'END' \
-  'STEP=yazelix' \
   'END')"
 assert_equal "$expected_discovered_steps" "$(/bin/cat "$case_dir/steps")" \
   'discovered brew applies shellenv before bundle'
-
-# Nix setup is the first executable stage, and an accepted-install failure
-# prevents Homebrew or every later installer from running.
-prepare_case nix_failure
-/bin/ln -s "$brew_fixture" "$case_bin/brew"
-run_bootstrap "$case_dir" "$case_bin:/usr/bin:/bin" \
-  "$case_dir/missing-apple:$case_dir/missing-intel" \
-  CODEX_TEST_NIX_EXIT=31
-nix_failure_status=$?
-assert_equal 1 "$nix_failure_status" \
-  'failed Nix setup propagates its status'
-assert_equal $'STEP=nix\nEND' "$(/bin/cat "$case_dir/steps")" \
-  'failed Nix setup stops before Homebrew'
 
 # An unavailable brew or failed bundle is fatal and never reaches installer.
 prepare_case missing_brew
@@ -182,9 +151,6 @@ fi
 assert_equal 0 \
   "$(/usr/bin/grep -c '^STEP=installer$' "$case_dir/steps")" \
   'missing Homebrew skips installer'
-assert_equal 0 \
-  "$(/usr/bin/grep -c '^STEP=yazelix$' "$case_dir/steps")" \
-  'missing Homebrew skips Yazelix setup'
 
 prepare_case bundle_failure
 /bin/ln -s "$brew_fixture" "$case_bin/brew"
@@ -199,9 +165,6 @@ fi
 assert_equal 0 \
   "$(/usr/bin/grep -c '^STEP=installer$' "$case_dir/steps")" \
   'failed bundle skips installer'
-assert_equal 0 \
-  "$(/usr/bin/grep -c '^STEP=yazelix$' "$case_dir/steps")" \
-  'failed bundle skips Yazelix setup'
 assert_contains "$(/bin/cat "$case_dir/steps")" 'ARG=--no-upgrade' \
   'failed bundle still used the required no-upgrade argv'
 
@@ -213,21 +176,6 @@ run_bootstrap "$case_dir" "$case_bin:/usr/bin:/bin" \
 installer_failure_status=$?
 assert_equal 19 "$installer_failure_status" \
   'failed notification installer propagates its status'
-assert_equal 0 \
-  "$(/usr/bin/grep -c '^STEP=yazelix$' "$case_dir/steps")" \
-  'failed notification installer skips Yazelix setup'
-
-prepare_case yazelix_failure
-/bin/ln -s "$brew_fixture" "$case_bin/brew"
-run_bootstrap "$case_dir" "$case_bin:/usr/bin:/bin" \
-  "$case_dir/missing-apple:$case_dir/missing-intel" \
-  CODEX_TEST_YAZELIX_EXIT=29
-yazelix_failure_status=$?
-assert_equal 29 "$yazelix_failure_status" \
-  'failed Yazelix setup propagates its status'
-assert_equal 1 \
-  "$(/usr/bin/grep -c '^STEP=yazelix$' "$case_dir/steps")" \
-  'bootstrap reaches Yazelix setup after prior steps succeed'
 
 for forbidden in \
   "$tmp_dir"/*/forbidden-symlinks(N); do

@@ -38,10 +38,6 @@ lima/*.local.yaml
 # Archived OpenSpec changes
 /openspec/changes/archive/
 
-# Yazelix upgrade backups
-/symlinks/.config/yazelix/**/*backup*
-/symlinks/.config/yazelix/**/*.bak-*
-
 # Generated OpenSpec shell completion
 /symlinks/.config/fish/completions/openspec.fish
 

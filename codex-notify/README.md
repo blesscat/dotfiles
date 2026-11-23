@@ -27,10 +27,8 @@ All unrelated Codex configuration and hook handlers are preserved.
 
 ## Prerequisites and installation
 
-The supported target is macOS. The full bootstrap first offers a verified,
-default-no Determinate Nix installation when Nix is missing, installs Homebrew
-when needed, runs the Brewfile without bulk upgrades, and invokes this
-installer:
+The supported target is macOS. The full bootstrap installs Homebrew when
+needed, runs the Brewfile without bulk upgrades, and invokes this installer:
 
 ```sh
 cd ~/.cider
@@ -99,10 +97,8 @@ Run the isolated suites from the repository root:
 /bin/zsh codex-notify/tests/codex-notify-test.zsh
 /bin/zsh codex-notify/tests/portable-paths-test.zsh
 /bin/zsh codex-notify/tests/installer-test.zsh
-/bin/zsh codex-notify/tests/nix-setup-test.zsh
 /bin/zsh codex-notify/tests/bootstrap-test.zsh
 /bin/zsh codex-notify/tests/brewfile-test.zsh
-/bin/zsh codex-notify/tests/yazelix-test.zsh
 ```
 
 Verify a live installation with:
