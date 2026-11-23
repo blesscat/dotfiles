@@ -224,7 +224,6 @@ make_sky_available() {
 readonly target_names=(
   codex-notify
   codex-permission-notify
-  codex-notification-route
 )
 
 # Clean install discovers the formula prefix, activates a verified app, and

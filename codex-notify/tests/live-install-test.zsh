@@ -12,7 +12,6 @@ readonly notifier="$app/Contents/MacOS/terminal-notifier"
 readonly -a runtime_names=(
   codex-notify
   codex-permission-notify
-  codex-notification-route
 )
 
 typeset -i failures=0

@@ -38,12 +38,6 @@ lima/*.local.yaml
 # Archived OpenSpec changes
 /openspec/changes/archive/
 
-# Generated OpenSpec shell completion
-/symlinks/.config/fish/completions/openspec.fish
-
-# Machine-local fish secrets (API keys); never commit
-symlinks/.config/fish/conf.d/secret-*.fish
-
 # Herdr files generated inside tracked mods, and local edit backups
 /symlinks/.config/herdr-app/**/gpui-kit.d.ts
 /symlinks/.config/herdr-app/**/jsconfig.json

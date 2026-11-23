@@ -29,6 +29,7 @@ trap '/bin/rm -rf "$tmp_dir"' EXIT HUP INT TERM
   ripgrep \
   fzf \
   node \
+  fnm \
   git \
   lazygit \
   wget \
@@ -37,12 +38,10 @@ trap '/bin/rm -rf "$tmp_dir"' EXIT HUP INT TERM
   mosh \
   unzip \
   yazi \
-  fish \
   starship \
   zoxide \
   atuin \
   pnpm \
-  zellij \
   jq \
   terminal-notifier \
   | /usr/bin/sort > "$tmp_dir/expected-formulas"

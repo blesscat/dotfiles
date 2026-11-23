@@ -11,7 +11,6 @@ readonly terminal_notifier="${CODEX_NOTIFY_TERMINAL_NOTIFIER:-$home_dir/.local/s
 readonly jq_bin="${CODEX_NOTIFY_JQ:-${commands[jq]-}}"
 readonly log_file="${CODEX_NOTIFY_LOG_FILE:-$codex_home/log/codex-notify.log}"
 readonly ghostty_bundle_id="${CODEX_NOTIFY_GHOSTTY_BUNDLE_ID:-com.mitchellh.ghostty}"
-readonly route_helper="${CODEX_NOTIFY_ROUTE_HELPER:-$script_dir/codex-notification-route}"
 readonly tty_path="${CODEX_NOTIFY_TTY:-/dev/tty}"
 readonly default_message_max_chars=160
 readonly default_fallback_message='任務已完成'
@@ -49,10 +48,7 @@ log_failure() {
 }
 
 is_plain_ghostty() {
-  [[ "${TERM_PROGRAM-}" == 'ghostty' \
-    && -z "${ZELLIJ-}" \
-    && -z "${ZELLIJ_SESSION_NAME-}" \
-    && -z "${ZELLIJ_PANE_ID-}" ]]
+  [[ "${TERM_PROGRAM-}" == 'ghostty' ]]
 }
 
 send_ghostty_osc9() {
@@ -129,25 +125,12 @@ if is_plain_ghostty; then
 fi
 
 if (( native_notification_submitted == 0 )); then
-  typeset -a click_args notification_args
-  click_args=(-activate "$ghostty_bundle_id")
-
-  if [[ -x "$route_helper" ]]; then
-    route_command="$("$route_helper" build 2>/dev/null)"
-    route_status=$?
-    if (( route_status == 0 )) && [[ -n "$route_command" ]] \
-        && [[ "$route_command" != *$'\n'* ]]; then
-      click_args=(-execute "$route_command")
-    elif (( route_status != 0 )); then
-      log_failure 'notification-route-build' "$route_status"
-    fi
-  fi
-
+  typeset -a notification_args
   notification_args=(
     -title 'Codex'
     -message "$message"
     -sound 'default'
-    "${click_args[@]}"
+    -activate "$ghostty_bundle_id"
   )
   if [[ -n "$project" ]]; then
     notification_args+=(-subtitle "$project")

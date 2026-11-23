@@ -16,7 +16,7 @@ module. See
 [codex-notify/README.md](codex-notify/README.md) for notification prerequisites,
 deferred activation, verification, backups, and rollback.
 
-The notification installer creates only its three documented runtime
+The notification installer creates only its two documented runtime
 symlinks. Other dotfile symlinks remain available through the repository's
 existing generic workflow. Everything is configured and tweaked within
 `~/.cider`.
@@ -223,7 +223,7 @@ installer instead.
 
 ### Terminal background shortcuts
 
-After the Fish configuration is linked, these commands change the background of
+After the zsh configuration (`symlinks/zsh/.zshrc`) is linked, these commands change the background of
 the current terminal surface without changing the terminal's saved theme:
 
 ```sh
@@ -237,7 +237,7 @@ bg-reset
 ```
 
 The shared command lives at `scripts/terminal-bg` and is also exposed through
-the Bash templates. Bash environments need a copy or mount of `~/.cider`; set
+the zsh and Bash templates. Bash environments need a copy or mount of `~/.cider`; set
 `CIDER_HOME` when the repository is available at a different path, such as an
 OrbStack VM mount.
 

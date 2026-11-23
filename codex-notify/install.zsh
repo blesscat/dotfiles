@@ -24,7 +24,6 @@ readonly sky_client="${CODEX_NOTIFY_SKY_CLIENT:-$codex_home/computer-use/Codex C
 readonly -a runtime_names=(
   codex-notify
   codex-permission-notify
-  codex-notification-route
 )
 
 stage_app=''
@@ -148,7 +147,6 @@ is_managed_target() {
   case "$target" in
     "$install_bin_dir/codex-notify" | \
     "$install_bin_dir/codex-permission-notify" | \
-    "$install_bin_dir/codex-notification-route" | \
     "$app_target" | \
     "$config_target" | \
     "$hooks_target")
@@ -168,9 +166,6 @@ backup_contract_for_target() {
       ;;
     "$install_bin_dir/codex-permission-notify")
       print -- $'link\ttargets/local-bin/codex-permission-notify'
-      ;;
-    "$install_bin_dir/codex-notification-route")
-      print -- $'link\ttargets/local-bin/codex-notification-route'
       ;;
     "$app_target")
       print -- $'app\ttargets/local-share/codex-notify/terminal-notifier.app'

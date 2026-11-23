@@ -3,6 +3,8 @@
 日期：2026-07-14  
 狀態：已核准；純 Ghostty 使用原生通知，Zellij 使用帶預設音效的 Terminal Notifier 精準路由
 
+> 更新（2026-11-23）：Zellij／Yazelix 已不再使用，`codex-notification-route` 與 Zellij pane 精準路由已移除。Terminal Notifier fallback 一律以 `-activate com.mitchellh.ghostty` 回到 Ghostty。下文中與 Zellij 路由相關的段落僅保留作為歷史紀錄。
+
 ## 目標
 
 Codex 完成工作後，透過 macOS Notification Center 顯示包含本回合完成摘要的通知。直接在 Ghostty terminal 執行時，使用綁定來源 terminal 的 Ghostty 原生 OSC 9 通知；在 Yazelix/Zellij 中執行時，使用 Terminal Notifier 並精準切回產生事件的 Ghostty terminal 與 Zellij pane。同一個完成事件也要繼續交給既有的 `SkyComputerUseClient`。互動式 TUI 等待權限核准時，`PermissionRequest` hook 透過同一個 wrapper 套用相同環境分流。

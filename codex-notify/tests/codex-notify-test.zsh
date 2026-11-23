@@ -8,11 +8,7 @@ readonly module_dir="${CODEX_NOTIFY_TEST_MODULE_DIR:-${test_dir:h}}"
 readonly jq_bin="${CODEX_NOTIFY_TEST_JQ:-${commands[jq]-}}"
 readonly wrapper="${CODEX_NOTIFY_TEST_WRAPPER:-$module_dir/bin/codex-notify}"
 readonly permission_adapter="${CODEX_NOTIFY_TEST_PERMISSION_ADAPTER:-$module_dir/bin/codex-permission-notify}"
-readonly route_helper="${CODEX_NOTIFY_TEST_ROUTE_HELPER:-$module_dir/bin/codex-notification-route}"
 readonly recording_notifier="$test_dir/fixtures/recording-notifier.zsh"
-readonly recording_osascript="$test_dir/fixtures/recording-osascript.zsh"
-readonly recording_zellij="$test_dir/fixtures/recording-zellij.zsh"
-readonly recording_open="$test_dir/fixtures/recording-open.zsh"
 
 if [[ ! -x "$jq_bin" ]]; then
   print -u2 'FAIL: jq is missing or not executable'
@@ -29,20 +25,12 @@ if [[ ! -x "$recording_notifier" ]]; then
   exit 1
 fi
 
-for route_fixture in "$recording_osascript" "$recording_zellij" "$recording_open"; do
-  if [[ ! -x "$route_fixture" ]]; then
-    print -u2 "FAIL: route recorder fixture is missing or not executable: $route_fixture"
-    exit 1
-  fi
-done
-
 readonly tmp_dir="$(/usr/bin/mktemp -d)"
 readonly log_file="$tmp_dir/codex-notify.log"
 trap '/bin/rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
-# Keep established cases independent from the caller's live Yazelix state.
-export CODEX_NOTIFY_ROUTE_HELPER="$tmp_dir/disabled-route-helper"
-unset TERM_PROGRAM ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
+# Keep established cases independent from the caller's terminal.
+unset TERM_PROGRAM
 
 typeset -i failures=0
 
@@ -64,17 +52,6 @@ assert_contains() {
 
   if [[ "$haystack" != *"$needle"* ]]; then
     print -u2 "FAIL: $label (missing '$needle')"
-    (( failures += 1 ))
-  fi
-}
-
-assert_not_contains() {
-  local haystack="$1"
-  local needle="$2"
-  local label="$3"
-
-  if [[ "$haystack" == *"$needle"* ]]; then
-    print -u2 "FAIL: $label (unexpected '$needle')"
     (( failures += 1 ))
   fi
 }
@@ -488,7 +465,7 @@ if [[ ! -f "$sync_done_file" ]]; then
   fi
 fi
 
-# PermissionRequest hooks must bypass Yazelix terminal notifications and reuse
+# PermissionRequest hooks must bypass multiplexer terminal notifications and reuse
 # the independent native-only Terminal Notifier path without making a decision.
 if [[ ! -x "$permission_adapter" ]]; then
   print -u2 'FAIL: permission notification adapter is missing or not executable'
@@ -545,7 +522,7 @@ fi
 plain_completion_tty="$tmp_dir/plain-completion.tty"
 plain_completion_args="$tmp_dir/plain-completion.args"
 : > "$plain_completion_tty"
-/usr/bin/env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
+/usr/bin/env \
   TERM_PROGRAM=ghostty \
   CODEX_NOTIFY_TTY="$plain_completion_tty" \
   CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
@@ -574,7 +551,7 @@ plain_permission_message='等待權限核准：open -a Calculator'
   > "$plain_permission_expected"
 /usr/bin/printf '%s' \
   '{"hook_event_name":"PermissionRequest","cwd":"/portable-user/plain-permission","tool_name":"Bash","tool_input":{"command":"open -a Calculator"}}' | \
-  /usr/bin/env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
+  /usr/bin/env \
     TERM_PROGRAM=ghostty \
     CODEX_PERMISSION_NOTIFY_WRAPPER="$wrapper" \
     CODEX_PERMISSION_NOTIFY_JQ="$jq_bin" \
@@ -596,46 +573,9 @@ assert_equal "$(hex_file "$plain_permission_expected")" \
 assert_file_not_contains "$plain_permission_args" '-message' \
   'plain Ghostty permission skips Terminal Notifier after OSC success'
 
-# Any Zellij marker wins over TERM_PROGRAM=ghostty. Incomplete routing metadata
-# must remain on the Terminal Notifier fallback instead of leaking OSC to a tty.
-for marker_case in zellij session pane; do
-  marker_tty="$tmp_dir/$marker_case-marker.tty"
-  marker_args="$tmp_dir/$marker_case-marker.args"
-  : > "$marker_tty"
-
-  case "$marker_case" in
-    zellij) marker_assignment='ZELLIJ=0' ;;
-    session) marker_assignment='ZELLIJ_SESSION_NAME=session-only' ;;
-    pane) marker_assignment='ZELLIJ_PANE_ID=7' ;;
-  esac
-
-  /usr/bin/env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
-    TERM_PROGRAM=ghostty \
-    "$marker_assignment" \
-    CODEX_NOTIFY_TTY="$marker_tty" \
-    CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
-    CODEX_NOTIFY_TERMINAL_NOTIFIER="$recording_notifier" \
-    CODEX_NOTIFY_JQ="$jq_bin" \
-    CODEX_NOTIFY_LOG_FILE="$tmp_dir/$marker_case-marker.log" \
-    CODEX_NOTIFY_CAPTURE_FILE="$marker_args" \
-      "$wrapper" --native-only \
-        '{"last-assistant-message":"zellij marker"}'
-  exit_status=$?
-
-  assert_equal 0 "$exit_status" "$marker_case marker remains non-blocking"
-  assert_equal '' "$(hex_file "$marker_tty")" \
-    "$marker_case marker suppresses Ghostty OSC 9"
-  assert_file_contains "$marker_args" '-message' \
-    "$marker_case marker uses Terminal Notifier"
-  assert_default_sound "$marker_args" \
-    "$marker_case marker uses the macOS default notification sound"
-  assert_file_contains "$marker_args" '-activate' \
-    "$marker_case marker retains Ghostty activation fallback"
-done
-
 unavailable_tty_args="$tmp_dir/unavailable-tty.args"
 unavailable_tty_log="$tmp_dir/unavailable-tty.log"
-/usr/bin/env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
+/usr/bin/env \
   TERM_PROGRAM=ghostty \
   CODEX_NOTIFY_TTY="$tmp_dir/missing-tty-directory/tty" \
   CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
@@ -668,7 +608,7 @@ unsafe_payload="$(
 )"
 : > "$unsafe_tty"
 /usr/bin/printf '\033]9;%s\007' 'safe]9;evilend' > "$unsafe_expected"
-/usr/bin/env -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
+/usr/bin/env \
   TERM_PROGRAM=ghostty \
   CODEX_NOTIFY_TTY="$unsafe_tty" \
   CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
@@ -684,255 +624,6 @@ assert_equal "$(hex_file "$unsafe_expected")" "$(hex_file "$unsafe_tty")" \
   'OSC body removes ESC and BEL while preserving framing'
 assert_file_not_contains "$unsafe_args" '-message' \
   'sanitized plain Ghostty notification skips Terminal Notifier'
-
-# A configured route command replaces the coarse Ghostty activation for both
-# completion and permission notifications.
-completion_route_args="$tmp_dir/completion-route.args"
-CODEX_NOTIFY_ROUTE_HELPER=/bin/echo \
-CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
-CODEX_NOTIFY_TERMINAL_NOTIFIER="$recording_notifier" \
-CODEX_NOTIFY_JQ="$jq_bin" \
-CODEX_NOTIFY_LOG_FILE="$tmp_dir/completion-route.log" \
-CODEX_NOTIFY_CAPTURE_FILE="$completion_route_args" \
-  "$wrapper" --native-only "$payload"
-exit_status=$?
-
-assert_equal 0 "$exit_status" 'routable completion remains non-blocking'
-assert_file_contains "$completion_route_args" '-execute' \
-  'routable completion uses execute'
-assert_default_sound "$completion_route_args" \
-  'routable completion uses the macOS default notification sound'
-assert_equal 'build' "$(argument_after_flag "$completion_route_args" '-execute')" \
-  'routable completion preserves the route command'
-assert_file_not_contains "$completion_route_args" '-activate' \
-  'routable completion omits coarse activation'
-
-permission_route_args="$tmp_dir/permission-route.args"
-permission_route_stdout="$tmp_dir/permission-route.stdout"
-/usr/bin/printf '%s' \
-  '{"hook_event_name":"PermissionRequest","cwd":"/portable-user/permission-route","tool_name":"Bash","tool_input":{"command":"open -a Calculator"}}' | env \
-  CODEX_PERMISSION_NOTIFY_WRAPPER="$wrapper" \
-  CODEX_PERMISSION_NOTIFY_JQ="$jq_bin" \
-  CODEX_NOTIFY_ROUTE_HELPER=/bin/echo \
-  CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
-  CODEX_NOTIFY_TERMINAL_NOTIFIER="$recording_notifier" \
-  CODEX_NOTIFY_JQ="$jq_bin" \
-  CODEX_NOTIFY_LOG_FILE="$tmp_dir/permission-route.log" \
-  CODEX_NOTIFY_CAPTURE_FILE="$permission_route_args" \
-    "$permission_adapter" > "$permission_route_stdout"
-exit_status=$?
-
-assert_equal 0 "$exit_status" 'routable permission remains non-blocking'
-permission_route_output=''
-if [[ -f "$permission_route_stdout" ]]; then
-  permission_route_output="$(<"$permission_route_stdout")"
-fi
-assert_equal '' "$permission_route_output" \
-  'routable permission keeps hook stdout empty'
-assert_file_contains "$permission_route_args" '-execute' \
-  'routable permission uses the shared execute path'
-assert_default_sound "$permission_route_args" \
-  'routable permission uses the macOS default notification sound'
-assert_file_not_contains "$permission_route_args" '-activate' \
-  'routable permission omits coarse activation'
-
-# Empty and failed builders retain the established Ghostty activation fallback.
-for builder_case in empty failed; do
-  builder_args="$tmp_dir/builder-$builder_case.args"
-  if [[ "$builder_case" == empty ]]; then
-    builder_command=/usr/bin/true
-  else
-    builder_command=/usr/bin/false
-  fi
-
-  CODEX_NOTIFY_ROUTE_HELPER="$builder_command" \
-  CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
-  CODEX_NOTIFY_TERMINAL_NOTIFIER="$recording_notifier" \
-  CODEX_NOTIFY_JQ="$jq_bin" \
-  CODEX_NOTIFY_LOG_FILE="$tmp_dir/builder-$builder_case.log" \
-  CODEX_NOTIFY_CAPTURE_FILE="$builder_args" \
-    "$wrapper" --native-only "$payload"
-
-  assert_file_contains "$builder_args" '-activate' \
-    "$builder_case route builder keeps activation fallback"
-  assert_file_not_contains "$builder_args" '-execute' \
-    "$builder_case route builder omits execute"
-done
-
-if [[ ! -x "$route_helper" ]]; then
-  print -u2 'FAIL: exact notification route helper is missing or not executable'
-  (( failures += 1 ))
-else
-  readonly route_session='curious-salamander'
-  readonly route_pane='2'
-  readonly route_terminal_id='04E67EB2-B11F-4C47-94CC-ED1550FA0978'
-  route_build_osascript_args="$tmp_dir/route-build-osascript.args"
-  route_command="$({
-    ZELLIJ_SESSION_NAME="$route_session" \
-    ZELLIJ_PANE_ID="$route_pane" \
-    CODEX_ROUTE_JQ="$jq_bin" \
-    CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
-    CODEX_ROUTE_ZELLIJ_BIN="$recording_zellij" \
-    CODEX_ROUTE_TERMINAL_ID="$route_terminal_id" \
-    CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$route_build_osascript_args" \
-      "$route_helper" build
-  } 2>"$tmp_dir/route-build.stderr")"
-  exit_status=$?
-
-  assert_equal 0 "$exit_status" 'route build exits successfully'
-  assert_contains "$route_command" ' click ' \
-    'route build returns a shell-safe click command'
-  assert_not_contains "$route_command" "$route_session" \
-    'route command hides the raw session name'
-  assert_not_contains "$route_command" "$route_terminal_id" \
-    'route command hides the raw terminal id'
-  assert_equal "$route_session" \
-    "$(argument_after_flag "$route_build_osascript_args" '-')" \
-    'route build asks Ghostty for the matching session title'
-
-  # Nova exposes its packaged Zellij client through YZX_ZELLIJ rather than
-  # adding it to PATH. The route must still be exact in that environment.
-  nova_route_build_osascript_args="$tmp_dir/nova-route-build-osascript.args"
-  nova_route_command="$({
-    /usr/bin/env -u CODEX_ROUTE_ZELLIJ_BIN \
-      PATH=/usr/bin:/bin \
-      YZX_ZELLIJ="$recording_zellij" \
-      ZELLIJ_SESSION_NAME="$route_session" \
-      ZELLIJ_PANE_ID="$route_pane" \
-      CODEX_ROUTE_JQ="$jq_bin" \
-      CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
-      CODEX_ROUTE_TERMINAL_ID="$route_terminal_id" \
-      CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$nova_route_build_osascript_args" \
-        "$route_helper" build
-  } 2>"$tmp_dir/nova-route-build.stderr")"
-  exit_status=$?
-
-  assert_equal 0 "$exit_status" \
-    'Nova route build remains non-blocking without Zellij on PATH'
-  assert_contains "$nova_route_command" ' click ' \
-    'Nova packaged Zellij path builds an exact click route'
-  assert_equal "$route_session" \
-    "$(argument_after_flag "$nova_route_build_osascript_args" '-')" \
-    'Nova route build resolves the originating Ghostty terminal'
-
-  route_zellij_args="$tmp_dir/route-click-zellij.args"
-  route_focus_args="$tmp_dir/route-click-osascript.args"
-  route_open_args="$tmp_dir/route-click-open.args"
-  route_click_stdout="$tmp_dir/route-click.stdout"
-  CODEX_ROUTE_JQ="$jq_bin" \
-  CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
-  CODEX_ROUTE_OPEN="$recording_open" \
-  CODEX_ROUTE_ZELLIJ_BIN="$recording_zellij" \
-  CODEX_ROUTE_ZELLIJ_CAPTURE_FILE="$route_zellij_args" \
-  CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$route_focus_args" \
-  CODEX_ROUTE_OPEN_CAPTURE_FILE="$route_open_args" \
-  CODEX_ROUTE_LOG_FILE="$tmp_dir/route-click.log" \
-    /bin/sh -c "$route_command" > "$route_click_stdout"
-  exit_status=$?
-
-  assert_equal 0 "$exit_status" 'successful route click exits successfully'
-  assert_equal '' "$(<"$route_click_stdout")" \
-    'successful route click keeps stdout empty'
-  assert_equal "$route_session" \
-    "$(argument_after_flag "$route_zellij_args" '--session')" \
-    'route click selects the captured Zellij session'
-  assert_equal "$route_pane" \
-    "$(argument_after_flag "$route_zellij_args" 'focus-pane-id')" \
-    'route click selects the captured Zellij pane'
-  assert_equal "$route_terminal_id" \
-    "$(argument_after_flag "$route_focus_args" '-')" \
-    'route click focuses the captured Ghostty terminal'
-  assert_file_contains "$route_focus_args" "$route_session" \
-    'route click passes the session fallback as AppleScript argv'
-  assert_file_not_contains "$route_open_args" 'com.mitchellh.ghostty' \
-    'successful route click does not use fallback open'
-
-  already_focused_open_args="$tmp_dir/already-focused-open.args"
-  already_focused_osascript_args="$tmp_dir/already-focused-osascript.args"
-  CODEX_ROUTE_JQ="$jq_bin" \
-  CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
-  CODEX_ROUTE_OPEN="$recording_open" \
-  CODEX_ROUTE_ZELLIJ_BIN="$recording_zellij" \
-  CODEX_ROUTE_ZELLIJ_CAPTURE_FILE="$tmp_dir/already-focused-zellij.args" \
-  CODEX_ROUTE_ZELLIJ_EXIT_CODE=2 \
-  CODEX_ROUTE_ZELLIJ_STDERR="Pane Terminal($route_pane) is already focused" \
-  CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$already_focused_osascript_args" \
-  CODEX_ROUTE_OPEN_CAPTURE_FILE="$already_focused_open_args" \
-  CODEX_ROUTE_LOG_FILE="$tmp_dir/already-focused.log" \
-    /bin/sh -c "$route_command" > "$tmp_dir/already-focused.stdout"
-  exit_status=$?
-
-  assert_equal 0 "$exit_status" 'already-focused pane remains non-blocking'
-  assert_file_contains "$already_focused_osascript_args" "$route_terminal_id" \
-    'already-focused pane still focuses the Ghostty terminal'
-  assert_file_not_contains "$already_focused_open_args" 'com.mitchellh.ghostty' \
-    'already-focused pane is treated as a successful route'
-
-  # Without a Zellij context, the real builder emits no command and the wrapper
-  # retains -activate even if the caller itself is running inside Yazelix.
-  no_context_args="$tmp_dir/no-context-route.args"
-  /usr/bin/env -u ZELLIJ_SESSION_NAME -u ZELLIJ_PANE_ID \
-    CODEX_NOTIFY_ROUTE_HELPER="$route_helper" \
-    CODEX_NOTIFY_SKY_CLIENT=/usr/bin/false \
-    CODEX_NOTIFY_TERMINAL_NOTIFIER="$recording_notifier" \
-    CODEX_NOTIFY_JQ="$jq_bin" \
-    CODEX_NOTIFY_LOG_FILE="$tmp_dir/no-context-route.log" \
-    CODEX_NOTIFY_CAPTURE_FILE="$no_context_args" \
-      "$wrapper" --native-only "$payload"
-  assert_file_contains "$no_context_args" '-activate' \
-    'missing Zellij context keeps activation fallback'
-  assert_file_not_contains "$no_context_args" '-execute' \
-    'missing Zellij context does not create a route command'
-
-  # Invalid tokens and stale route components are non-blocking and open Ghostty.
-  invalid_open_args="$tmp_dir/invalid-token-open.args"
-  invalid_stdout="$tmp_dir/invalid-token.stdout"
-  CODEX_ROUTE_JQ="$jq_bin" \
-  CODEX_ROUTE_OPEN="$recording_open" \
-  CODEX_ROUTE_OPEN_CAPTURE_FILE="$invalid_open_args" \
-  CODEX_ROUTE_LOG_FILE="$tmp_dir/invalid-token.log" \
-    "$route_helper" click 'not-base64!' > "$invalid_stdout"
-  exit_status=$?
-  assert_equal 0 "$exit_status" 'invalid token remains non-blocking'
-  assert_equal '' "$(<"$invalid_stdout")" 'invalid token keeps stdout empty'
-  assert_equal 'com.mitchellh.ghostty' \
-    "$(argument_after_flag "$invalid_open_args" '-b')" \
-    'invalid token opens Ghostty fallback'
-
-  zellij_failure_open_args="$tmp_dir/zellij-failure-open.args"
-  CODEX_ROUTE_JQ="$jq_bin" \
-  CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
-  CODEX_ROUTE_OPEN="$recording_open" \
-  CODEX_ROUTE_ZELLIJ_BIN="$recording_zellij" \
-  CODEX_ROUTE_ZELLIJ_CAPTURE_FILE="$tmp_dir/zellij-failure.args" \
-  CODEX_ROUTE_ZELLIJ_EXIT_CODE=1 \
-  CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$tmp_dir/zellij-failure-osascript.args" \
-  CODEX_ROUTE_OPEN_CAPTURE_FILE="$zellij_failure_open_args" \
-  CODEX_ROUTE_LOG_FILE="$tmp_dir/zellij-failure.log" \
-    /bin/sh -c "$route_command" > "$tmp_dir/zellij-failure.stdout"
-  exit_status=$?
-  assert_equal 0 "$exit_status" 'stale Zellij route remains non-blocking'
-  assert_equal 'com.mitchellh.ghostty' \
-    "$(argument_after_flag "$zellij_failure_open_args" '-b')" \
-    'stale Zellij route opens Ghostty fallback'
-
-  osascript_failure_open_args="$tmp_dir/osascript-failure-open.args"
-  CODEX_ROUTE_JQ="$jq_bin" \
-  CODEX_ROUTE_OSASCRIPT="$recording_osascript" \
-  CODEX_ROUTE_OSASCRIPT_EXIT_CODE=1 \
-  CODEX_ROUTE_OPEN="$recording_open" \
-  CODEX_ROUTE_ZELLIJ_BIN="$recording_zellij" \
-  CODEX_ROUTE_ZELLIJ_CAPTURE_FILE="$tmp_dir/osascript-failure-zellij.args" \
-  CODEX_ROUTE_OSASCRIPT_CAPTURE_FILE="$tmp_dir/osascript-failure.args" \
-  CODEX_ROUTE_OPEN_CAPTURE_FILE="$osascript_failure_open_args" \
-  CODEX_ROUTE_LOG_FILE="$tmp_dir/osascript-failure.log" \
-    /bin/sh -c "$route_command" > "$tmp_dir/osascript-failure.stdout"
-  exit_status=$?
-  assert_equal 0 "$exit_status" 'stale Ghostty route remains non-blocking'
-  assert_equal 'com.mitchellh.ghostty' \
-    "$(argument_after_flag "$osascript_failure_open_args" '-b')" \
-    'stale Ghostty route opens Ghostty fallback'
-fi
 
 if (( failures > 0 )); then
   print -u2 "FAIL: $failures assertion(s) failed"

@@ -1,6 +1,6 @@
 # Portable Codex notifications
 
-This module is the maintained source for the three Codex notification runtime
+This module is the maintained source for the two Codex notification runtime
 scripts, their installer, behavior tests, fixtures, and design documentation.
 Generated app bundles and mutable Codex state stay outside Git.
 
@@ -16,7 +16,6 @@ The notification installer separately owns only:
 
 - `~/.local/bin/codex-notify`
 - `~/.local/bin/codex-permission-notify`
-- `~/.local/bin/codex-notification-route`
 - `~/.local/share/codex-notify/terminal-notifier.app`
 - top-level `notify` and `[tui].notifications` in
   `${CODEX_HOME:-$HOME/.codex}/config.toml`
@@ -110,5 +109,5 @@ codex --strict-config doctor --json --summary
 
 The doctor result is acceptable only when
 `checks["config.load"].status` is `ok`. Finish with one plain Ghostty
-completion click and one Zellij completion or permission click, then confirm a
+completion click and one permission click, then confirm a
 permission hook still emits no stdout and never makes an approval decision.
