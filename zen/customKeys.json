@@ -1,0 +1,4 @@
+{
+  "zen-workspace-forward": { "modifiers": "alt,shift", "keycode": "VK_RIGHT" },
+  "zen-workspace-backward": { "modifiers": "alt,shift", "keycode": "VK_LEFT" }
+}

@@ -6,7 +6,11 @@
 #    is moved aside to <name>.pre-cider.<timestamp> first; links that already
 #    point at the repo are left alone, so the script is safe to rerun.
 # 3. Points Claude Code's statusLine at the linked script.
-# 4. Sets up Rime (Bopomofo + Rime Ice Pinyin) through scripts/rime_setup.sh
+# 4. Installs the Tridactyl native messenger so Zen's Tridactyl loads the
+#    linked tridactylrc.
+# 5. Sets Zen's space-switching shortcuts to Alt+Shift+Left/Right from
+#    zen/customKeys.json (Zen must be closed).
+# 6. Sets up Rime (Bopomofo + Rime Ice Pinyin) through scripts/rime_setup.sh
 #    and makes it the active Fcitx5 input method.
 #
 # Usage: ./omarchy.sh [--skip-packages]
@@ -49,6 +53,9 @@ readonly -a links=(
   ".config/herdr-app/my-icons|$HOME/.config/herdr-app/my-icons"
   ".config/herdr-app/programs.json|$HOME/.config/herdr-app/programs.json"
   ".config/herdr-app/layouts/main-usage-limits.json|$HOME/.config/herdr-app/layouts/main-usage-limits.json"
+  ".config/tridactyl/tridactylrc|$HOME/.config/tridactyl/tridactylrc"
+  # Overrides Omarchy's template: tighter Fcitx5 candidate rows.
+  ".config/omarchy/themed/fcitx5-theme.conf.tpl|$HOME/.config/omarchy/themed/fcitx5-theme.conf.tpl"
 )
 
 # Links to things outside the repo: "<absolute source>|<destination>"
@@ -69,7 +76,7 @@ for arg in "$@"; do
   case "$arg" in
     --skip-packages) skip_packages=1 ;;
     -h | --help)
-      sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *) die "unknown option: $arg" ;;
@@ -227,6 +234,35 @@ configure_bash_extras() {
   printf '  updated %s\n' "$bashrc"
 }
 
+# Tridactyl only reads tridactylrc through its native messenger, which is not
+# packaged in the official repos. Use Tridactyl's own installer; it puts
+# native_main in ~/.local/share/tridactyl and the manifest in
+# ~/.mozilla/native-messaging-hosts, which Zen also reads.
+install_tridactyl_native() {
+  local data="${XDG_DATA_HOME:-$HOME/.local/share}/tridactyl/native_main"
+  local manifest="$HOME/.mozilla/native-messaging-hosts/tridactyl.json"
+  local url=https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh
+  local tmp
+
+  log 'Installing the Tridactyl native messenger'
+  if [[ -x "$data" && -f "$manifest" ]]; then
+    printf '  ok      %s\n' "$data"
+    return
+  fi
+  if (( skip_packages )); then
+    warn 'not installed; skipped (--skip-packages)'
+    return
+  fi
+
+  tmp="$(mktemp)"
+  if curl -fsSL "$url" -o "$tmp" && sh "$tmp"; then
+    printf '  installed %s\n' "$data"
+  else
+    warn 'Tridactyl native messenger install failed; tridactylrc will not load'
+  fi
+  rm -f "$tmp"
+}
+
 restart_fcitx5() {
   if systemctl --user cat omarchy-fcitx5.service >/dev/null 2>&1; then
     systemctl --user start omarchy-fcitx5.service
@@ -287,17 +323,74 @@ EOF
     sed -i '/^\[Hotkey\/AltTriggerKeys\]/,/^$/{/^[0-9]\+=/d}' "$config"
   fi
 
-  # Show candidates as a vertical list.
+  # Show candidates as a vertical list, in a larger font than the default
+  # Sans 10. Omarchy's theme switcher leaves these keys alone.
   local classicui="$HOME/.config/fcitx5/conf/classicui.conf"
   mkdir -p "$(dirname "$classicui")"
   touch "$classicui"
-  if grep -q '^Vertical Candidate List=' "$classicui"; then
-    sed -i 's/^Vertical Candidate List=.*/Vertical Candidate List=True/' "$classicui"
-  else
-    printf 'Vertical Candidate List=True\n' >> "$classicui"
-  fi
+  set_ini_key "$classicui" 'Vertical Candidate List' 'True'
+  set_ini_key "$classicui" 'Font' '"Sans 14"'
+  set_ini_key "$classicui" 'MenuFont' '"Sans 13"'
+
+  # Regenerate the theme so the linked fcitx5-theme.conf.tpl override applies.
+  omarchy-theme-refresh >/dev/null 2>&1 || warn 'omarchy-theme-refresh failed; Fcitx5 spacing applies after the next theme switch'
 
   restart_fcitx5
+}
+
+# Set key=value in a section-less ini file, replacing an existing entry.
+set_ini_key() {
+  local file="$1" key="$2" value="$3"
+  if grep -q "^$key=" "$file"; then
+    sed -i "s|^$key=.*|$key=$value|" "$file"
+  else
+    printf '%s=%s\n' "$key" "$value" >> "$file"
+  fi
+}
+
+# Merge zen/customKeys.json into every Zen profile's customKeys.json (Firefox's
+# about:keyboard store). Space switching moves off Ctrl+Alt+Left/Right, which
+# UTM uses to release input capture. Zen reads the file only at startup and
+# rewrites it from memory when a shortcut changes, so Zen must be closed.
+configure_zen() {
+  local keys="$script_dir/zen/customKeys.json"
+  local zen_dir profiles_ini path profile target tmp found=0
+
+  log 'Setting Zen keyboard shortcuts'
+  if pgrep -u "$UID" -x zen-bin >/dev/null; then
+    warn 'Zen is running; close it and rerun to apply the shortcuts'
+    return
+  fi
+
+  for zen_dir in "$HOME/.config/zen" "$HOME/.zen"; do
+    profiles_ini="$zen_dir/profiles.ini"
+    [[ -f "$profiles_ini" ]] || continue
+    while IFS= read -r path; do
+      if [[ "$path" == /* ]]; then
+        profile="$path"
+      else
+        profile="$zen_dir/$path"
+      fi
+      [[ -d "$profile" ]] || continue
+      found=1
+      target="$profile/customKeys.json"
+      tmp="$(mktemp)"
+      if [[ -f "$target" ]]; then
+        jq -s '.[0] * .[1]' "$target" "$keys" > "$tmp"
+      else
+        jq . "$keys" > "$tmp"
+      fi
+      if [[ -f "$target" ]] && cmp -s "$tmp" "$target"; then
+        rm -f "$tmp"
+        printf '  ok      %s\n' "$target"
+      else
+        mv "$tmp" "$target"
+        printf '  updated %s\n' "$target"
+      fi
+    done < <(sed -n 's/^Path=//p' "$profiles_ini")
+  done
+
+  (( found )) || warn 'no Zen profile yet; start Zen once, close it, and rerun'
 }
 
 setup_rime() {
@@ -311,6 +404,8 @@ link_dotfiles
 configure_claude_statusline
 configure_bash
 configure_bash_extras
+install_tridactyl_native
+configure_zen
 setup_rime
 
 log 'Done.'

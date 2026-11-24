@@ -1,0 +1,7 @@
+" Tridactyl config, linked to ~/.config/tridactyl/tridactylrc by omarchy.sh.
+" Tridactyl reads it on startup through its native messenger; run :source to
+" reload after editing.
+
+" Swap J and K: J goes to the next tab, K to the previous one.
+bind J tabnext
+bind K tabprev

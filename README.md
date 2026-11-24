@@ -242,7 +242,8 @@ safe to rerun:
 2. Links the Linux-safe dotfiles: Git config and global ignore,
    `.editorconfig`, ble.sh's `.blerc`, the Claude Code status line script and
    commands, Helix `config.toml` and `languages.toml`, lazygit, and the tracked
-   Herdr customizations (see below). It also links `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
+   Herdr customizations (see below), Tridactyl's `tridactylrc` (J/K
+   swapped so J is the next tab), and the Fcitx5 theme template override. It also links `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
    and links `~/.config/helix/themes/mytheme.toml` to the active Omarchy theme
    so the shared Helix config follows Omarchy theme switches.
 3. Sets `statusLine` in `~/.claude/settings.json`, and adds two marked
@@ -250,9 +251,24 @@ safe to rerun:
    autosuggestions, syntax highlighting, and completion menu) and
    `shell/omarchy.bash`, where personal aliases such as `lg` live. The rest
    of Omarchy's `.bashrc` is left alone.
-4. Runs `scripts/rime_setup.sh`, then makes Fcitx5 use `keyboard-us` + Rime.
-   Left Shift is removed from Fcitx5's switch keys so Rime receives it, and
-   the candidate list is vertical.
+4. Installs the Tridactyl native messenger with Tridactyl's official
+   installer (`native_main` in `~/.local/share/tridactyl`, manifest in
+   `~/.mozilla/native-messaging-hosts`). Without it, Tridactyl in Zen does
+   not read `tridactylrc`. Skipped when already installed or with
+   `--skip-packages`. Run `:native` in Zen to check.
+5. Merges `zen/customKeys.json` into each Zen profile's `customKeys.json`
+   (the `about:keyboard` store), moving "next/previous space" from
+   `Ctrl+Alt+Right/Left` to `Alt+Shift+Right/Left`. In a UTM VM,
+   `Ctrl+Option` releases input capture, so the old keys never reached Zen.
+   Other custom shortcuts are kept. Zen must be closed, because it rewrites
+   the file from memory; the step is skipped with a warning while Zen runs.
+6. Runs `scripts/rime_setup.sh`, then makes Fcitx5 use `keyboard-us` + Rime.
+   Left Shift is removed from Fcitx5's switch keys so Rime receives it. The
+   candidate list is vertical, in `Sans 14` (menus `Sans 13`), set in
+   `~/.config/fcitx5/conf/classicui.conf`. The linked
+   `~/.config/omarchy/themed/fcitx5-theme.conf.tpl` overrides Omarchy's
+   template with tighter candidate rows, and `omarchy-theme-refresh` applies
+   it.
 
 An existing file at a link destination is moved to
 `<name>.pre-cider.<timestamp>` first. Links that already point at the
