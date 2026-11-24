@@ -56,3 +56,7 @@ o.rebind("SUPER + CTRL + RETURN", "hc-tui", "omarchy-launch-terminal /home/bless
 
 -- Toggle the bar's agents panel directly, independent of its position in the bar.
 o.bind("SUPER + ALT + M", "Agents panel", "omarchy-shell omarchy.agents toggle")
+
+-- Replace SUPER+SHIFT+M (was: Spotify) with YouTube Music as a web app;
+-- pressing it again focuses the open window instead of starting another.
+o.rebind("SUPER + SHIFT + M", "Music", { webapp = "https://music.youtube.com/", focus = true })
