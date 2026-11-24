@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# Chromium with a DevTools (CDP) port, so Claude Code can drive the browser.
+#
+# The port listens on 127.0.0.1 only, and the browser uses its own profile in
+# ~/.config/chromium-debug: Chrome ignores the debug port on the default
+# profile, and that profile's logins stay out of reach. Anything running as
+# this user can control the browser while it is open, so close it when done.
+#
+# puppeteer-core lives in ~/.local/share/chromium-cdp, outside the repo, and
+# is installed on first start.
+#
+# Usage:
+#   chromium-cdp [start] [url]   Start the browser (or report it is running)
+#   chromium-cdp status          Show whether the port answers
+#   chromium-cdp stop            Close the debug browser
+#   chromium-cdp node <file>     Run a CommonJS script that can require('puppeteer-core')
+#   chromium-cdp setup           (Re)install puppeteer-core
+
+set -euo pipefail
+
+readonly port=9222
+readonly endpoint="http://127.0.0.1:$port"
+readonly profile="$HOME/.config/chromium-debug"
+readonly lib_dir="$HOME/.local/share/chromium-cdp"
+readonly puppeteer_version=24
+
+die() { printf 'chromium-cdp: %s\n' "$*" >&2; exit 1; }
+
+port_up() { curl -fsS --max-time 1 "$endpoint/json/version" 2>/dev/null; }
+
+setup() {
+  command -v npm >/dev/null 2>&1 || die 'npm is required'
+  mkdir -p "$lib_dir"
+  [[ -f $lib_dir/package.json ]] || printf '{ "private": true }\n' > "$lib_dir/package.json"
+  printf 'Installing puppeteer-core@%s into %s\n' "$puppeteer_version" "$lib_dir"
+  npm install --prefix "$lib_dir" --silent "puppeteer-core@$puppeteer_version"
+}
+
+ensure_lib() { [[ -d $lib_dir/node_modules/puppeteer-core ]] || setup; }
+
+start() {
+  local url="${1:-about:blank}"
+  ensure_lib
+
+  if port_up >/dev/null; then
+    echo "Already running on $endpoint"
+    return
+  fi
+
+  command -v chromium >/dev/null 2>&1 || die 'chromium is not installed'
+  setsid uwsm-app -- chromium \
+    --remote-debugging-port="$port" \
+    --remote-debugging-address=127.0.0.1 \
+    --user-data-dir="$profile" \
+    --no-first-run \
+    "$url" >/dev/null 2>&1 < /dev/null &
+
+  local _
+  for _ in $(seq 1 40); do
+    if port_up >/dev/null; then
+      echo "Running on $endpoint (profile: $profile)"
+      return
+    fi
+    sleep 0.25
+  done
+  die "browser started but $endpoint did not answer"
+}
+
+status() {
+  local info
+  if info="$(port_up)"; then
+    echo "Running on $endpoint"
+    printf '%s\n' "$info" | jq -r '.Browser' 2>/dev/null || true
+  else
+    echo 'Not running'
+    return 1
+  fi
+}
+
+stop() {
+  # Match the profile flag so the user's other Chromium windows are left alone.
+  if pkill -f -- "--user-data-dir=$profile"; then
+    echo 'Stopped'
+  else
+    echo 'Not running'
+  fi
+}
+
+run_node() {
+  [[ $# -ge 1 ]] || die 'usage: chromium-cdp node <file> [args...]'
+  ensure_lib
+  NODE_PATH="$lib_dir/node_modules" CDP_ENDPOINT="$endpoint" exec node "$@"
+}
+
+case "${1:-start}" in
+  start) shift || true; start "$@" ;;
+  status) status ;;
+  stop) stop ;;
+  node) shift; run_node "$@" ;;
+  setup) setup ;;
+  -h | --help) sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ;;
+  http://* | https://* | about:*) start "$1" ;;
+  *) die "unknown command: $1 (see --help)" ;;
+esac
