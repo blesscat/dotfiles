@@ -49,6 +49,8 @@ readonly -a links=(
   ".config/helix/config.toml|$HOME/.config/helix/config.toml"
   ".config/helix/languages.toml|$HOME/.config/helix/languages.toml"
   ".config/lazygit/config.yml|$HOME/.config/lazygit/config.yml"
+  # Herdr keys, also read by hc-tui (Ctrl+1..9 switches spaces).
+  ".config/herdr/config.toml|$HOME/.config/herdr/config.toml"
   ".config/herdr-app/mods/usage-limits|$HOME/.config/herdr-app/mods/usage-limits"
   ".config/herdr-app/my-icons|$HOME/.config/herdr-app/my-icons"
   ".config/herdr-app/programs.json|$HOME/.config/herdr-app/programs.json"
