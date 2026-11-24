@@ -10,7 +10,9 @@
 #    linked tridactylrc.
 # 5. Sets Zen's space-switching shortcuts to Alt+Shift+Left/Right from
 #    zen/customKeys.json (Zen must be closed).
-# 6. Sets up Rime (Bopomofo + Rime Ice Pinyin) through scripts/rime_setup.sh
+# 6. Writes the agents panel's Z.ai and MiniMax keys from the GNOME keyring
+#    through scripts/agent_usage_keys.sh.
+# 7. Sets up Rime (Bopomofo + Rime Ice Pinyin) through scripts/rime_setup.sh
 #    and makes it the active Fcitx5 input method.
 #
 # Usage: ./omarchy.sh [--skip-packages]
@@ -397,6 +399,14 @@ configure_zen() {
   (( found )) || warn 'no Zen profile yet; start Zen once, close it, and rerun'
 }
 
+# Z.ai and MiniMax keys for the Omarchy agents panel live in the GNOME keyring;
+# write the files its collectors read. A key not stored yet is only reported.
+apply_agent_usage_keys() {
+  log 'Writing agent usage keys from the keyring'
+  bash "$script_dir/scripts/agent_usage_keys.sh" apply ||
+    warn 'could not read the keyring; run scripts/agent_usage_keys.sh later'
+}
+
 setup_rime() {
   log 'Setting up Rime (Bopomofo + Rime Ice)'
   bash "$script_dir/scripts/rime_setup.sh"
@@ -410,6 +420,7 @@ configure_bash
 configure_bash_extras
 install_tridactyl_native
 configure_zen
+apply_agent_usage_keys
 setup_rime
 
 log 'Done.'
