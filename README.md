@@ -243,7 +243,10 @@ safe to rerun:
    `.editorconfig`, ble.sh's `.blerc`, the Claude Code status line script and
    commands, Helix `config.toml` and `languages.toml`, lazygit, and the tracked
    Herdr customizations (see below), Tridactyl's `tridactylrc` (J/K
-   swapped so J is the next tab), and the Fcitx5 theme template override. It also links `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
+   swapped so J is the next tab), the Fcitx5 theme template override, and
+   Hyprland's `bindings.lua` (in Zen, `Alt+Shift+H/L` send
+   `Alt+Shift+Left/Right` to switch spaces; other windows get the keys
+   unchanged). It also links `~/.local/bin/hx` to `/usr/bin/helix`, because Arch ships Helix as `helix`,
    and links `~/.config/helix/themes/mytheme.toml` to the active Omarchy theme
    so the shared Helix config follows Omarchy theme switches.
 3. Sets `statusLine` in `~/.claude/settings.json`, and adds two marked

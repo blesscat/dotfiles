@@ -56,6 +56,8 @@ readonly -a links=(
   ".config/tridactyl/tridactylrc|$HOME/.config/tridactyl/tridactylrc"
   # Overrides Omarchy's template: tighter Fcitx5 candidate rows.
   ".config/omarchy/themed/fcitx5-theme.conf.tpl|$HOME/.config/omarchy/themed/fcitx5-theme.conf.tpl"
+  # Personal Hyprland bindings (Alt+Shift+H/L switch Zen spaces).
+  ".config/hypr/bindings.lua|$HOME/.config/hypr/bindings.lua"
 )
 
 # Links to things outside the repo: "<absolute source>|<destination>"
