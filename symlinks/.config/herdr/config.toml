@@ -79,6 +79,9 @@ accent = "blue"
 # A bit wider than the default so workspace and agent names fit
 sidebar_width = 40
 
+# Distinct glyphs per state instead of same-shaped colored dots
+status_indicators = "symbols"
+
 # tmux drew single-line dividers between adjacent panes and no outer frame
 pane_gaps = false
 pane_outer_borders = false
@@ -102,3 +105,12 @@ tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
 # the basename of the pane cwd. This is what Hyprland shows in the group bar,
 # and it resolves on the server so remote sessions name the remote host.
 window_title = "{hostname}: {workspace}"
+
+# Agents panel: a blank row between agents, the state spelled out, the
+# workspace in bold, and what the agent is doing on its second line
+[ui.sidebar.agents]
+row_gap = 1
+rows = [
+  ["state_icon", "state_text", "machine", { token = "workspace", bold = true }, "tab"],
+  ["agent", "terminal_title_stripped"],
+]
