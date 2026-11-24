@@ -76,6 +76,9 @@ switch_workspace = "ctrl+1..9"
 [ui]
 accent = "blue"
 
+# A bit wider than the default so workspace and agent names fit
+sidebar_width = 40
+
 # tmux drew single-line dividers between adjacent panes and no outer frame
 pane_gaps = false
 pane_outer_borders = false
