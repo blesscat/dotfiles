@@ -247,8 +247,9 @@ safe to rerun:
    so the shared Helix config follows Omarchy theme switches.
 3. Sets `statusLine` in `~/.claude/settings.json`, and adds two marked
    blocks to Omarchy's `~/.bashrc` that load ble.sh (fish-like
-   autosuggestions, syntax highlighting, and completion menu). The rest of
-   Omarchy's `.bashrc` is left alone.
+   autosuggestions, syntax highlighting, and completion menu) and
+   `shell/omarchy.bash`, where personal aliases such as `lg` live. The rest
+   of Omarchy's `.bashrc` is left alone.
 4. Runs `scripts/rime_setup.sh`, then makes Fcitx5 use `keyboard-us` + Rime.
    Left Shift is removed from Fcitx5's switch keys so Rime receives it, and
    the candidate list is vertical.

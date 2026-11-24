@@ -195,6 +195,38 @@ configure_bash() {
   printf '  updated %s\n' "$bashrc"
 }
 
+configure_bash_extras() {
+  local bashrc="$HOME/.bashrc"
+  local extras="$script_dir/shell/omarchy.bash"
+
+  log 'Loading cider shell additions from ~/.bashrc'
+  if [[ ! -f "$bashrc" ]]; then
+    warn "$bashrc not found; skipped"
+    return
+  fi
+  if grep -q '# >>> cider shell >>>' "$bashrc"; then
+    printf '  ok      %s\n' "$bashrc"
+    return
+  fi
+
+  cp "$bashrc" "$bashrc.pre-cider.$stamp"
+  # Insert before ble-attach when present, since ble-attach must stay last.
+  awk -v extras="$extras" '
+    function block() {
+      print "# >>> cider shell >>>"
+      print "[[ -r \"" extras "\" ]] && source \"" extras "\""
+      print "# <<< cider shell <<<"
+      print ""
+      done = 1
+    }
+    !done && /^# >>> cider ble-attach >>>/ { block() }
+    { print }
+    END { if (!done) { print ""; block() } }
+  ' "$bashrc" > "$bashrc.cider-tmp"
+  mv "$bashrc.cider-tmp" "$bashrc"
+  printf '  updated %s\n' "$bashrc"
+}
+
 restart_fcitx5() {
   if systemctl --user cat omarchy-fcitx5.service >/dev/null 2>&1; then
     systemctl --user start omarchy-fcitx5.service
@@ -278,6 +310,7 @@ install_packages
 link_dotfiles
 configure_claude_statusline
 configure_bash
+configure_bash_extras
 setup_rime
 
 log 'Done.'
