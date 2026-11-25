@@ -278,6 +278,13 @@ safe to rerun:
      starts LocalSend with `LIBGL_ALWAYS_SOFTWARE=1`. LocalSend is a
      Flutter/GTK3 app; on virgl it cannot create an OpenGL context and shows
      a black window.
+   - Installs `vulkan-swrast` and writes a
+     `~/.local/share/applications/herdr-app.desktop` override that starts
+     `herdr-app` with
+     `VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json` (lavapipe, the
+     CPU Vulkan driver). On Apple silicon, `herdr-app` aborts inside the
+     Venus Vulkan driver (`vulkan-virtio`). With `--skip-packages`, the
+     override is written only if `vulkan-swrast` is already installed.
    - Builds and installs
      [omarchy-spice-guest-tools](https://github.com/riverscn/omarchy-spice-guest-tools)
      (pinned to the 0.1.4 packaging commit, cloned to
@@ -306,13 +313,6 @@ Input method use on Omarchy:
 - Inside Rime, Left Shift toggles Chinese and English. Bopomofo starts in
   English, the same as on macOS.
 - `` Ctrl+` `` or `F4` switches between Bopomofo and Rime Ice Pinyin.
-
-In a UTM VM on Apple silicon, `herdr-app` aborts inside the Venus Vulkan
-driver (`vulkan-virtio`). Install `vulkan-swrast` and start it on the CPU
-driver instead, for example with a `~/.local/share/applications/herdr-app.desktop`
-override whose `Exec` is
-`env VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json herdr-app`. This is
-machine-specific, so `omarchy.sh` does not do it.
 
 Shell startup files, terminal configs, and Neovim are not linked, because
 Omarchy manages its own `.bashrc`, themed terminal configs, and LazyVim setup.

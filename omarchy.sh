@@ -15,7 +15,8 @@
 # 7. Sets up Rime (Bopomofo + Rime Ice Pinyin) through scripts/rime_setup.sh
 #    and makes it the active Fcitx5 input method.
 # 8. In a UTM VM (QEMU with a SPICE channel): starts LocalSend with software
-#    GL, and builds omarchy-spice-guest-tools for Mac<->VM clipboard sharing.
+#    GL and herdr-app with lavapipe (virgl breaks both), and builds
+#    omarchy-spice-guest-tools for Mac<->VM clipboard sharing.
 #
 # Usage: ./omarchy.sh [--skip-packages]
 
@@ -86,7 +87,7 @@ for arg in "$@"; do
   case "$arg" in
     --skip-packages) skip_packages=1 ;;
     -h | --help)
-      sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *) die "unknown option: $arg" ;;
@@ -422,22 +423,29 @@ is_utm_vm() {
   [[ "$(systemd-detect-virt 2>/dev/null)" == qemu && -e /dev/virtio-ports/com.redhat.spice.0 ]]
 }
 
-# LocalSend (Flutter/GTK3) cannot create an OpenGL context on virgl and shows
-# a black window. A launcher override starts it with Mesa's software GL.
-configure_localsend_vm() {
-  local system_entry=/usr/share/applications/localsend.desktop
-  local entry="$HOME/.local/share/applications/localsend.desktop"
+# Copy an app's system launcher to ~/.local/share/applications with
+# "env <vars>" prepended to its Exec lines, so the app menu starts it that way.
+override_launcher_env() {
+  local name="$1" vars="$2"
+  local system_entry="/usr/share/applications/$name.desktop"
+  local entry="$HOME/.local/share/applications/$name.desktop"
   local tmp
 
-  log 'Starting LocalSend with software GL (virgl black window)'
   if [[ ! -f "$system_entry" ]]; then
-    warn "LocalSend is not installed; skipped"
+    warn "$name is not installed; skipped"
     return
   fi
 
   tmp="$(mktemp)"
-  sed 's|^Exec=\(env LIBGL_ALWAYS_SOFTWARE=1 \)\{0,1\}|Exec=env LIBGL_ALWAYS_SOFTWARE=1 |' \
-    "$system_entry" > "$tmp"
+  awk -v prefix="env $vars " '
+    /^Exec=/ {
+      command = substr($0, 6)
+      if (index(command, prefix) == 1) command = substr(command, length(prefix) + 1)
+      print "Exec=" prefix command
+      next
+    }
+    { print }
+  ' "$system_entry" > "$tmp"
   if [[ -f "$entry" ]] && cmp -s "$tmp" "$entry"; then
     rm -f "$tmp"
     printf '  ok      %s\n' "$entry"
@@ -448,6 +456,27 @@ configure_localsend_vm() {
   mv "$tmp" "$entry"
   chmod 644 "$entry"
   printf '  updated %s\n' "$entry"
+}
+
+# virgl's GPU drivers break two apps, so their launchers fall back to the CPU:
+# - LocalSend (Flutter/GTK3) cannot create an OpenGL context and shows a black
+#   window; use Mesa's software GL.
+# - herdr-app aborts inside the Venus Vulkan driver (vulkan-virtio); use
+#   lavapipe from vulkan-swrast.
+readonly lavapipe_icd=/usr/share/vulkan/icd.d/lvp_icd.json
+
+configure_vm_launchers() {
+  log 'Starting LocalSend and herdr-app on CPU rendering (virgl)'
+  override_launcher_env localsend 'LIBGL_ALWAYS_SOFTWARE=1'
+
+  if [[ ! -f "$lavapipe_icd" ]]; then
+    if (( skip_packages )); then
+      warn "vulkan-swrast is not installed (--skip-packages); herdr-app skipped"
+      return
+    fi
+    omarchy pkg add vulkan-swrast
+  fi
+  override_launcher_env herdr-app "VK_DRIVER_FILES=$lavapipe_icd"
 }
 
 # Mac<->VM clipboard (text and images) and display resizing through
@@ -492,7 +521,7 @@ configure_utm_vm() {
   if ! is_utm_vm; then
     return
   fi
-  configure_localsend_vm
+  configure_vm_launchers
   install_spice_guest_tools
 }
 
