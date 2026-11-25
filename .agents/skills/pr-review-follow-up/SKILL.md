@@ -12,14 +12,12 @@ Use after the user authorizes fixing and following reviews. It works on draft PR
 Decide this for the initial head and again after every push. Do not request a
 review the head does not need.
 
-- **Code Review** is needed on every head, including a head that only rebases
-  onto or merges the base branch. Repeat runs on an unchanged diff have found
-  real defects, so an earlier pass does not cover a new head.
-- **Security Review** is needed on every head whose own diff differs from that
-  of the last head that passed Security Review. No file type is exempt:
-  documentation, tests, fonts and images need it too. A head that only rebases
-  onto or merges the base branch, leaving the PR's own diff unchanged, is still
-  covered by the earlier pass.
+- **Code Review** and **Security Review** are each needed on every head whose
+  own diff differs from that of the last head that passed that review. No file
+  type is exempt: documentation, tests, fonts and images need them too. A head
+  that only rebases onto or merges the base branch, leaving the PR's own diff
+  unchanged, is still covered by the earlier passes and needs neither review.
+  Any change to the PR's own diff needs both reviews again.
 
   To check whether the PR's own diff is unchanged, compare what each head's
   diff touches: every file's mode and content ID before and after the PR. Fill
@@ -27,7 +25,9 @@ review the head does not need.
   into a command: it can contain shell syntax. Both fetches run with hooks
   disabled, because a hooks directory in the checkout can come from the PR.
   Every step is chained, so a failed lookup, fetch or diff requests the review.
-  Run it where `origin` is the PR's base repository.
+  Run it where `origin` is the PR's base repository. Run it once for each
+  review type, with the last head that passed that review as the passed head;
+  when both passed on the same head, one run covers both.
 
   ```sh
   if base_ref=$(gh pr view <pr-number> --json baseRefName --jq .baseRefName) &&
@@ -43,14 +43,17 @@ review the head does not need.
     [ "$passed" = "$new" ]; then
     echo 'PR diff unchanged'
   else
-    echo 'PR diff changed or not comparable: request Security Review'
+    echo 'PR diff changed or not comparable: request the review'
   fi
   ```
 
   Only the line `PR diff unchanged` means the earlier pass still covers the new
-  head. Any other outcome, including an error, means the head needs Security
-  Review. When it is not needed, post one PR comment with the new head SHA,
-  "Security Review not required" and the head that passed with the same diff.
+  head. Any other outcome, including an error, means the head needs that
+  review. Record every skipped review in a PR comment that names the new head
+  and the head that passed with the same diff. When both reviews passed on the
+  same head, post one comment: "Code and Security Review not required for head
+  <new-head-sha>: PR diff unchanged from <passed-head-sha>". Otherwise name
+  each skipped review with its own passed head.
 
 ## Workflow
 
@@ -114,7 +117,9 @@ review the head does not need.
    the named main SHA is covered by the grant; any other push after the slot
    request (a late finding, a conflict-resolution commit, a post-update fix)
    or a main that moved past the named SHA voids the slot: redo the affected
-   gates and request a fresh slot before Ready. After `gh pr ready`, do not
+   gates and request a fresh slot before Ready. The one exception is a batch
+   grant: main moving only by merges of the other PRs the grant names in the
+   same batch leaves the slot valid. After `gh pr ready`, do not
    request reviews again for that transition.
 10. A ready PR's head must stay final. Before pushing again for any reason (a
     late review finding, a failed check, a main update, a typo), run
@@ -124,4 +129,4 @@ review the head does not need.
 
 ## Handoff
 
-Report the PR link, final SHA, draft/ready state, commits, review outcomes (including any Security Review that was not required, with its evidence), merge-slot request and grant, CI run ID and result, and any remaining issues.
+Report the PR link, final SHA, draft/ready state, commits, review outcomes (including any Code or Security Review that was not required, with its evidence), merge-slot request and grant, CI run ID and result, and any remaining issues.

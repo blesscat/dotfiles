@@ -92,10 +92,14 @@ confirms in this session.
 - PRs stay draft until the hub grants a slot.
 - Before granting, verify it yourself: [references/merge-gate.md](references/merge-gate.md).
 - The slot names the main SHA. If main moves before Ready, the branch is
-  updated again and gets fresh reviews.
+  updated again and gets the reviews the new head needs: none when the PR's
+  own diff is unchanged.
 - If main moves after Ready, while CI runs or before the merge, the PR goes
   back to draft and repeats update, reviews, slot and Ready. Never merge a head
   whose CI ran on an older main.
+- The exception is a batch merge: independent PRs with no shared files or
+  shared surfaces may merge back-to-back without updating between them. The
+  conditions and the main-delivery watch are in the merge gate reference.
 - Ready once, CI once. Merge with
   `gh pr merge <n> --squash --match-head-commit <sha>`, then watch main's
   delivery to its actual conclusion.
