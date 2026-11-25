@@ -14,9 +14,8 @@
 #    through scripts/agent_usage_keys.sh.
 # 7. Sets up Rime (Bopomofo + Rime Ice Pinyin) through scripts/rime_setup.sh
 #    and makes it the active Fcitx5 input method.
-# 8. In a UTM VM (QEMU with a SPICE channel): starts LocalSend with software
-#    GL and herdr-app with lavapipe (virgl breaks both), and builds
-#    omarchy-spice-guest-tools for Mac<->VM clipboard sharing.
+# 8. In a UTM VM (QEMU with a SPICE channel), runs omarchy-utm.sh for the
+#    VM-only fixes and Mac<->VM clipboard sharing.
 #
 # Usage: ./omarchy.sh [--skip-packages]
 
@@ -87,7 +86,7 @@ for arg in "$@"; do
   case "$arg" in
     --skip-packages) skip_packages=1 ;;
     -h | --help)
-      sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *) die "unknown option: $arg" ;;
@@ -418,111 +417,13 @@ setup_rime() {
   configure_fcitx5
 }
 
-# True in a UTM VM: QEMU with UTM's SPICE agent channel.
-is_utm_vm() {
-  [[ "$(systemd-detect-virt 2>/dev/null)" == qemu && -e /dev/virtio-ports/com.redhat.spice.0 ]]
-}
-
-# Copy an app's system launcher to ~/.local/share/applications with
-# "env <vars>" prepended to its Exec lines, so the app menu starts it that way.
-override_launcher_env() {
-  local name="$1" vars="$2"
-  local system_entry="/usr/share/applications/$name.desktop"
-  local entry="$HOME/.local/share/applications/$name.desktop"
-  local tmp
-
-  if [[ ! -f "$system_entry" ]]; then
-    warn "$name is not installed; skipped"
-    return
-  fi
-
-  tmp="$(mktemp)"
-  awk -v prefix="env $vars " '
-    /^Exec=/ {
-      command = substr($0, 6)
-      if (index(command, prefix) == 1) command = substr(command, length(prefix) + 1)
-      print "Exec=" prefix command
-      next
-    }
-    { print }
-  ' "$system_entry" > "$tmp"
-  if [[ -f "$entry" ]] && cmp -s "$tmp" "$entry"; then
-    rm -f "$tmp"
-    printf '  ok      %s\n' "$entry"
-    return
-  fi
-  mkdir -p "$(dirname "$entry")"
-  [[ -f "$entry" ]] && cp "$entry" "$entry.pre-cider.$stamp"
-  mv "$tmp" "$entry"
-  chmod 644 "$entry"
-  printf '  updated %s\n' "$entry"
-}
-
-# virgl's GPU drivers break two apps, so their launchers fall back to the CPU:
-# - LocalSend (Flutter/GTK3) cannot create an OpenGL context and shows a black
-#   window; use Mesa's software GL.
-# - herdr-app aborts inside the Venus Vulkan driver (vulkan-virtio); use
-#   lavapipe from vulkan-swrast.
-readonly lavapipe_icd=/usr/share/vulkan/icd.d/lvp_icd.json
-
-configure_vm_launchers() {
-  log 'Starting LocalSend and herdr-app on CPU rendering (virgl)'
-  override_launcher_env localsend 'LIBGL_ALWAYS_SOFTWARE=1'
-
-  if [[ ! -f "$lavapipe_icd" ]]; then
-    if (( skip_packages )); then
-      warn "vulkan-swrast is not installed (--skip-packages); herdr-app skipped"
-      return
-    fi
-    omarchy pkg add vulkan-swrast
-  fi
-  override_launcher_env herdr-app "VK_DRIVER_FILES=$lavapipe_icd"
-}
-
-# Mac<->VM clipboard (text and images) and display resizing through
-# omarchy-spice-guest-tools. spice-vdagent alone is X11-only and does not sync
-# reliably with Wayland apps. Built from a pinned release with makepkg; the
-# package's install hook activates it for the current session.
-readonly spice_tools_repo=https://github.com/riverscn/omarchy-spice-guest-tools.git
-# Packaging commit for 0.1.4 (the v0.1.4 tag predates the release PKGBUILD).
-readonly spice_tools_ref=2409fb1
-
-install_spice_guest_tools() {
-  local src="$HOME/src/omarchy-spice-guest-tools"
-
-  log 'Installing omarchy-spice-guest-tools (Mac<->VM clipboard)'
-  if pacman -Q omarchy-spice-guest-tools >/dev/null 2>&1; then
-    printf '  ok      omarchy-spice-guest-tools %s\n' \
-      "$(pacman -Q omarchy-spice-guest-tools | cut -d' ' -f2)"
-  elif (( skip_packages )); then
-    log 'Skipping omarchy-spice-guest-tools (--skip-packages)'
-    return
-  else
-    if [[ -d "$src/.git" ]]; then
-      git -C "$src" fetch --quiet
-    else
-      mkdir -p "$(dirname "$src")"
-      git clone --quiet "$spice_tools_repo" "$src"
-    fi
-    git -C "$src" checkout --quiet "$spice_tools_ref"
-    (cd "$src" && makepkg -si --needed --noconfirm)
-  fi
-
-  # udev starts spice-vdagentd.socket only when the SPICE port appears at boot,
-  # so right after a fresh install the session agent has nothing to talk to.
-  if ! systemctl is-active --quiet spice-vdagentd.socket; then
-    sudo systemctl start spice-vdagentd.socket
-    systemctl --user restart spice-vdagent.service ||
-      warn 'spice-vdagent did not start; reboot, then run spice-guest-tools doctor'
-  fi
-}
-
-configure_utm_vm() {
-  if ! is_utm_vm; then
-    return
-  fi
-  configure_vm_launchers
-  install_spice_guest_tools
+# In a UTM VM (QEMU with UTM's SPICE agent channel), also run omarchy-utm.sh.
+run_utm_setup() {
+  [[ "$(systemd-detect-virt 2>/dev/null)" == qemu && -e /dev/virtio-ports/com.redhat.spice.0 ]] || return 0
+  log 'UTM VM detected; running omarchy-utm.sh'
+  local -a args=()
+  (( skip_packages )) && args+=(--skip-packages)
+  bash "$script_dir/omarchy-utm.sh" "${args[@]}"
 }
 
 install_packages
@@ -534,7 +435,7 @@ install_tridactyl_native
 configure_zen
 apply_agent_usage_keys
 setup_rime
-configure_utm_vm
+run_utm_setup
 
 log 'Done.'
 cat <<'EOF'

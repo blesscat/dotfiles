@@ -273,7 +273,10 @@ safe to rerun:
    template with tighter candidate rows, and `omarchy-theme-refresh` applies
    it.
 7. Only in a UTM VM (QEMU with UTM's SPICE channel,
-   `/dev/virtio-ports/com.redhat.spice.0`):
+   `/dev/virtio-ports/com.redhat.spice.0`), runs `omarchy-utm.sh`, which
+   holds the UTM-only setup. It passes `--skip-packages` through. The script
+   can also be run on its own with `./omarchy-utm.sh`; it exits with an error
+   outside UTM. It:
    - Writes a `~/.local/share/applications/localsend.desktop` override that
      starts LocalSend with `LIBGL_ALWAYS_SOFTWARE=1`. LocalSend is a
      Flutter/GTK3 app; on virgl it cannot create an OpenGL context and shows
