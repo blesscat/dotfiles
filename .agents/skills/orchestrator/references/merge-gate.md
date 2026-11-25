@@ -65,9 +65,10 @@ when all of these hold:
 - **No shared files:** their changed files don't overlap at all. Compare
   `gh pr diff <n> --name-only` for every pair.
 - **No shared surfaces:** none of them touches database migrations, shared
-  contracts, CI workflows or pins, lockfiles or package manifests, and no two
-  touch the same OpenSpec capability or change folder. The project skill names
-  its paths.
+  contracts or shared code packages, CI workflows or pins, lockfiles or package
+  manifests, and no two touch the same OpenSpec capability or change folder.
+  The project skill names its paths; count every shared contract and shared
+  code package, not only the main one.
 - **Each PR is ready on its own head:** green CI on its current head, and its
   required reviews on that head.
 - **Nothing else in between:** only PRs of the batch merge between them.
