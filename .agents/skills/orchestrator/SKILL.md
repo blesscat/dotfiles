@@ -77,7 +77,12 @@ confirms in this session.
 
 - **Behaviour, contract, infrastructure and process changes:** the full
   `openspec-to-main-pr-with-follow-up` flow when the project uses OpenSpec.
-  Record owner decisions behind already-merged PRs as retroactive specs.
+  "Process" here means process enforced by code, CI or infrastructure
+  (workflows, scripts, gates). Record owner decisions behind already-merged
+  PRs as retroactive specs.
+- **Process documents only** (skills, `AGENTS.md` process rules, hub and
+  worker procedures): skip OpenSpec; draft → exact-head Code and Security
+  Review → slot.
 - **Pure design-parity changes:** skip OpenSpec; draft → reviews → slot.
 - **Large or security-sensitive PRs:** a local dual review by two workers on
   different models (any two). The brief lets the worker start exactly those two
