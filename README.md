@@ -272,6 +272,28 @@ safe to rerun:
    `~/.config/omarchy/themed/fcitx5-theme.conf.tpl` overrides Omarchy's
    template with tighter candidate rows, and `omarchy-theme-refresh` applies
    it.
+7. Only in a UTM VM (QEMU with UTM's SPICE channel,
+   `/dev/virtio-ports/com.redhat.spice.0`):
+   - Writes a `~/.local/share/applications/localsend.desktop` override that
+     starts LocalSend with `LIBGL_ALWAYS_SOFTWARE=1`. LocalSend is a
+     Flutter/GTK3 app; on virgl it cannot create an OpenGL context and shows
+     a black window.
+   - Builds and installs
+     [omarchy-spice-guest-tools](https://github.com/riverscn/omarchy-spice-guest-tools)
+     (pinned to the 0.1.4 packaging commit, cloned to
+     `~/src/omarchy-spice-guest-tools`) with `makepkg -si`, which pulls in
+     `spice-vdagent`, `clipnotify` and `xclip`. It shares the clipboard (text
+     and images) between macOS and the VM, and resizes the display to follow
+     the UTM window. It inserts a marked block into
+     `~/.config/hypr/monitors.lua` and backs the file up to
+     `~/.local/state/spice-guest-tools/backups/`. Set `display.enabled =
+     false` in `~/.config/spice-guest-tools/config.toml` to keep a fixed
+     resolution. Clipboard sharing must be on in UTM's Sharing settings.
+     After a fresh install the script starts `spice-vdagentd.socket`, which
+     udev otherwise starts only at boot. Check with
+     `spice-guest-tools doctor`; remove with `spice-guest-tools uninstall`
+     and `sudo pacman -R omarchy-spice-guest-tools`. Skipped with
+     `--skip-packages`.
 
 An existing file at a link destination is moved to
 `<name>.pre-cider.<timestamp>` first. Links that already point at the
