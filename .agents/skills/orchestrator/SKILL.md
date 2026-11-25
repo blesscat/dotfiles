@@ -15,7 +15,8 @@ wins.
   investigation, scripts, tests, runbooks.
 - The hub's own work: reading status (git, gh, tracker, handoff files), writing
   briefs, dispatching, answering worker questions, accepting results, running
-  the merge queue and reporting to the owner.
+  the merge queue, short tracker decision comments (section 10) and reporting
+  to the owner.
 - A multi-PR line gets a supervisor. The hub talks to the supervisor, not to its
   workers.
 - Orchestrators run on Opus or Fable only. Supervisors run on Opus, Fable or
@@ -66,6 +67,10 @@ confirms in this session.
 - No cap on workers. Close each one (`hc kill`) as soon as its result is taken,
   and periodically list and close finished terminals.
 - Each worker gets its own plain git worktree.
+- **Worktree cleanup:** after a PR merges or a task is abandoned, the worker or
+  its supervisor removes its git worktree and the merged local branch. The hub
+  does it when it closes an orphaned worker. Local OpenSpec archives don't need
+  to be kept.
 - If the project keeps a worker evaluation file, log one row per finished task.
 
 ## 5. PR flow by change type
@@ -88,6 +93,9 @@ confirms in this session.
 - Before granting, verify it yourself: [references/merge-gate.md](references/merge-gate.md).
 - The slot names the main SHA. If main moves before Ready, the branch is
   updated again and gets fresh reviews.
+- If main moves after Ready, while CI runs or before the merge, the PR goes
+  back to draft and repeats update, reviews, slot and Ready. Never merge a head
+  whose CI ran on an older main.
 - Ready once, CI once. Merge with
   `gh pr merge <n> --squash --match-head-commit <sha>`, then watch main's
   delivery to its actual conclusion.
@@ -110,6 +118,16 @@ flow, including production: [references/environment-writes.md](references/enviro
   never the values).
 - Evidence and images never go in a repo.
 - Local cleanup deletes only resources owned by this project or this session.
+- **Sensitive data that reached a terminal or file:**
+  1. Tell the worker to stop printing it unmasked. Never quote the value back
+     in any message.
+  2. Have it run a names-only scan of its worktree, handoff folder and temp
+     dirs.
+  3. Delete affected files that the project owns, only after a hub OK that
+     lists the exact paths.
+  4. Report the incident to the owner as a short summary, without the value.
+
+  Terminal scrollback is not a file and needs no action.
 
 ## 9. OpenSpec (when the project uses it)
 
@@ -120,6 +138,11 @@ flow, including production: [references/environment-writes.md](references/enviro
 
 Before writing to a tracker, confirm the project uses it: it appears in the
 project instructions, or it already has tickets for this work.
+
+- The hub may write short decision comments on the relevant existing issue
+  itself.
+- New issues, restructuring and bulk edits go to a worker.
+- Never put sensitive data in a ticket.
 
 ## 11. Communication with the owner
 

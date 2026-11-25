@@ -34,6 +34,18 @@ on that exact head, after `git fetch origin`:
   gates, ask again.
 - Before merging, re-run items 1 and 4–6 on the final head.
 
+## If main moves after Ready
+
+This covers main moving while CI runs, or after CI passes but before the merge.
+
+1. Take the PR back to draft (`gh pr ready <n> --undo`).
+2. Update it onto the new main.
+3. Get the reviews the new head needs, under the project's review rule.
+4. Get a fresh slot naming the new main SHA.
+5. Mark it Ready once again.
+
+Never merge a head whose CI ran on an older main.
+
 ## Merging
 
 - The PR goes Ready once, and CI runs once on the final head.
