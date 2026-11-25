@@ -66,6 +66,9 @@ readonly -a links=(
   ".config/hypr/bindings.lua|$HOME/.config/hypr/bindings.lua"
   # Chromium with a local CDP port so Claude Code can drive the browser.
   ".local/bin/chromium-cdp|$HOME/.local/bin/chromium-cdp"
+  # LINE (Chromium extension) as an app: launcher entry and icon; Super+Shift+L in bindings.lua.
+  ".local/share/applications/LINE.desktop|$HOME/.local/share/applications/LINE.desktop"
+  ".local/share/icons/hicolor/128x128/apps/line.png|$HOME/.local/share/icons/hicolor/128x128/apps/line.png"
 )
 
 # Links to things outside the repo: "<absolute source>|<destination>"

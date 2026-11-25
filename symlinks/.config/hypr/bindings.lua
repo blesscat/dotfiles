@@ -60,3 +60,7 @@ o.bind("SUPER + ALT + A", "Agents panel", "omarchy-shell omarchy.agents toggle")
 -- Replace SUPER+SHIFT+M (was: Spotify) with YouTube Music as a web app;
 -- pressing it again focuses the open window instead of starting another.
 o.rebind("SUPER + SHIFT + M", "Music", { webapp = "https://music.youtube.com/", focus = true })
+
+-- LINE: the official Chromium extension opened as its own app window (LINE has
+-- no Linux client). Pressing it again focuses the open window.
+o.bind("SUPER + SHIFT + L", "LINE", "omarchy-launch-or-focus chrome-ophjlpahpchlmihnnnihgmmeilfjmjjc__index.html-Default 'omarchy-launch-webapp chrome-extension://ophjlpahpchlmihnnnihgmmeilfjmjjc/index.html'")
