@@ -51,7 +51,7 @@ end
 o.bind("ALT + SHIFT + H", "Zen previous space", zen_space_key("LEFT", "H"))
 o.bind("ALT + SHIFT + L", "Zen next space", zen_space_key("RIGHT", "L"))
 
--- Replace SUPER+CTRL+RETURN (was: Herdr) with hc-tui (herdr-core TUI).
+-- Replace SUPER+CTRL+RETURN (was: Herdr) with hc-tui (herdr-core TUI, installed by omarchy.sh).
 o.rebind("SUPER + CTRL + RETURN", "hc-tui", "omarchy-launch-terminal /home/blesscat/.local/bin/hc-tui")
 
 -- Toggle the bar's agents panel directly, independent of its position in the bar.

@@ -7,7 +7,7 @@
 #    point at the repo are left alone, so the script is safe to rerun.
 # 3. Points Claude Code's statusLine at the linked script.
 # 4. Installs the Tridactyl native messenger so Zen's Tridactyl loads the
-#    linked tridactylrc.
+#    linked tridactylrc, and hc-tui (herdr-core TUI) into ~/.local/bin.
 # 5. Sets Zen's space-switching shortcuts to Alt+Shift+Left/Right from
 #    zen/customKeys.json (Zen must be closed).
 # 6. Writes the agents panel's Z.ai and MiniMax keys from the GNOME keyring
@@ -273,6 +273,47 @@ install_tridactyl_native() {
   rm -f "$tmp"
 }
 
+# hc-tui (github.com/followcat/hc-tui), the herdr-core TUI that
+# Super+Ctrl+Return opens, ships no package. Fetch its latest release into
+# ~/.local/bin after checking sha256sums.txt; once there, `hc-tui --upgrade`
+# keeps it current, so an existing binary is left alone.
+install_hc_tui() {
+  local bin="$HOME/.local/bin/hc-tui"
+  local repo=https://github.com/followcat/hc-tui
+  local arch tag tarball tmp
+
+  log 'Installing hc-tui'
+  if [[ -x "$bin" ]]; then
+    printf '  ok      %s\n' "$bin"
+    return
+  fi
+  if (( skip_packages )); then
+    warn 'not installed; skipped (--skip-packages)'
+    return
+  fi
+
+  arch="$(uname -m)"
+  tag="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "$repo/releases/latest")" || tag=
+  tag="${tag##*/}"
+  if [[ "$tag" != v* ]]; then
+    warn 'could not find the latest hc-tui release; Super+Ctrl+Return will not work'
+    return
+  fi
+  tarball="hc-tui-${tag#v}-${arch}-unknown-linux-musl.tar.gz"
+
+  tmp="$(mktemp -d)"
+  if curl -fsSL "$repo/releases/download/$tag/$tarball" -o "$tmp/$tarball" &&
+     curl -fsSL "$repo/releases/download/$tag/sha256sums.txt" -o "$tmp/sha256sums.txt" &&
+     (cd "$tmp" && grep -E " \*?$tarball\$" sha256sums.txt | sha256sum -c --status -) &&
+     tar -xzf "$tmp/$tarball" -C "$tmp" &&
+     install -Dm755 "$tmp/hc-tui" "$bin"; then
+    printf '  installed %s (%s)\n' "$bin" "$tag"
+  else
+    warn 'hc-tui install failed; Super+Ctrl+Return will not work'
+  fi
+  rm -rf "$tmp"
+}
+
 restart_fcitx5() {
   if systemctl --user cat omarchy-fcitx5.service >/dev/null 2>&1; then
     systemctl --user start omarchy-fcitx5.service
@@ -432,6 +473,7 @@ configure_claude_statusline
 configure_bash
 configure_bash_extras
 install_tridactyl_native
+install_hc_tui
 configure_zen
 apply_agent_usage_keys
 setup_rime
