@@ -383,7 +383,7 @@ EOF
   mkdir -p "$(dirname "$classicui")"
   touch "$classicui"
   set_ini_key "$classicui" 'Vertical Candidate List' 'True'
-  set_ini_key "$classicui" 'Font' '"Sans 14"'
+  set_ini_key "$classicui" 'Font' '"Sans 11"'
   set_ini_key "$classicui" 'MenuFont' '"Sans 13"'
 
   # Regenerate the theme so the linked fcitx5-theme.conf.tpl override applies.
