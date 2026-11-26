@@ -11,6 +11,10 @@ Each task gets its own handoff folder with a `brief.md` that covers:
 - **Rules:** the project rules that apply: environments, secrets, PR flow and
   change type, review gate, merge slot. For a PR that needs a local dual
   review, name the two reviewer templates the worker may start.
+- **Screenshots:** take them only as a headless browser page screenshot of the
+  worker's own local or approved URL, checking the page URL before saving.
+  Never use desktop or window capture tools: they can capture the owner's
+  screen, including sign-in pages with live codes.
 - **Stop conditions:** a gate in the brief; anything that blocks or hangs;
   needing to install or download a tool; anything outside scope. On any of
   these, stop and report; don't work around it.
